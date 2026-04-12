@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Hero() {
   return (
@@ -57,12 +58,24 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <button className="px-8 py-4 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-            Explore My Work
-          </button>
-          <button className="px-8 py-4 border-2 border-violet-600 text-violet-600 font-semibold rounded-full hover:bg-violet-600 hover:text-white transition-all duration-300">
-            Get In Touch
-          </button>
+          <Link href="/projects">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              Explore My Work
+            </motion.button>
+          </Link>
+          <Link href="/#contact">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 border-2 border-violet-600 text-violet-600 font-semibold rounded-full hover:bg-violet-600 hover:text-white transition-all duration-300"
+            >
+              Get In Touch
+            </motion.button>
+          </Link>
         </motion.div>
 
         <motion.div

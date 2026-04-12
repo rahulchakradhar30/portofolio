@@ -1,12 +1,74 @@
-"use client";
+﻿"use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Send, Camera, Briefcase, Code } from "lucide-react";
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSubmitStatus({
+          type: "success",
+          message: result.message || "Message sent successfully! I''ll get back to you soon.",
+        });
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        setSubmitStatus({
+          type: "error",
+          message: result.error || "Failed to send message. Please try again.",
+        });
+      }
+    } catch {
+      setSubmitStatus({
+        type: "error",
+        message: "Network error. Please try again later.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <section className="py-24 px-8 bg-gradient-to-br from-violet-50 to-pink-50 relative overflow-hidden">
-      {/* Background decorative elements */}
+    <section className="py-24 px-8 bg-gradient-to-br from-violet-50 to-pink-50 relative overflow-hidden" id="contact">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 right-20 w-32 h-32 bg-green-200 rounded-full blur-xl"></div>
         <div className="absolute bottom-20 left-20 w-40 h-40 bg-violet-200 rounded-full blur-xl"></div>
@@ -115,9 +177,24 @@ export default function Contact() {
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
+            onSubmit={handleSubmit}
             className="bg-white p-8 rounded-3xl shadow-2xl border border-white/50"
           >
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Send a Message</h3>
+
+            {submitStatus && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-4 rounded-xl mb-6 ${
+                  submitStatus.type === "success"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : "bg-red-50 text-red-700 border border-red-200"
+                }`}
+              >
+                {submitStatus.message}
+              </motion.div>
+            )}
 
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
@@ -128,6 +205,9 @@ export default function Contact() {
                   <input
                     type="text"
                     id="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
                     placeholder="John"
                   />
@@ -139,6 +219,9 @@ export default function Contact() {
                   <input
                     type="text"
                     id="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    required
                     className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
                     placeholder="Doe"
                   />
@@ -152,6 +235,9 @@ export default function Contact() {
                 <input
                   type="email"
                   id="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
                   placeholder="john@example.com"
                 />
@@ -164,6 +250,9 @@ export default function Contact() {
                 <input
                   type="text"
                   id="subject"
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200"
                   placeholder="Project Discussion"
                 />
@@ -176,6 +265,9 @@ export default function Contact() {
                 <textarea
                   id="message"
                   rows={5}
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent bg-gray-50 focus:bg-white transition-all duration-200 resize-none"
                   placeholder="Tell me about your project..."
                 ></textarea>
@@ -185,10 +277,11 @@ export default function Contact() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                className="w-full bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-5 h-5 mr-2" />
-                Send Message
+                {isSubmitting ? "Sending..." : "Send Message"}
               </motion.button>
             </div>
           </motion.form>
