@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PEREPOGU RAHUL CHAKRADHAR - Portfolio
 
 A modern, animated portfolio website showcasing AI, technology, content creation, and innovative projects by PEREPOGU RAHUL CHAKRADHAR.
@@ -64,3 +65,6 @@ npm start
 ## License
 
 This project showcases my work and achievements in AI, technology, and content creation.
+=======
+# portofolio
+>>>>>>> 5fa247f59da5ad87c7eea965601f187c5cc85322
