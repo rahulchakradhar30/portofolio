@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { hashPassword } from '@/app/lib/auth';
 import { sendWelcomeEmail } from '@/app/lib/email';
 
@@ -30,16 +30,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get OTP from database
-    const { data: otpRecord, error: otpQueryError } = await supabase
-      .from('email_otps')
-      .select('*')
-      .eq('email', email)
-      .eq('otp_code', otp)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'email_verification');
 
-    if (otpQueryError || !otpRecord) {
+    if (!otpRecord || otpRecord.otp !== otp) {
       return NextResponse.json(
         { error: 'Invalid OTP' },
         { status: 400 }
@@ -47,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if OTP is expired
-    const expiresAt = new Date(otpRecord.expires_at);
+    const expiresAt = otpRecord.expires_at instanceof Date ? new Date(otpRecord.expires_at) : otpRecord.expires_at.toDate();
     if (expiresAt < new Date()) {
       return NextResponse.json(
         { error: 'OTP has expired. Please request a new one.' },
@@ -58,56 +51,32 @@ export async function POST(request: NextRequest) {
     // Create admin user
     const passwordHash = hashPassword(password);
 
-    const { data: newUser, error: createError } = await supabase
-      .from('admin_users')
-      .insert({
-        email,
-        password_hash: passwordHash,
-        name,
-      })
-      .select()
-      .single();
-
-    if (createError) {
-      if (createError.message.includes('duplicate')) {
-        return NextResponse.json(
-          { error: 'Email already registered' },
-          { status: 400 }
-        );
-      }
-      return NextResponse.json(
-        { error: 'Failed to create admin account' },
-        { status: 500 }
-      );
-    }
+    const newUser = await firebaseHelpers.createUser({
+      email,
+      password_hash: passwordHash,
+      name,
+      otp_secret: null,
+      otp_enabled: false,
+    });
 
     // Delete used OTP
-    await supabase
-      .from('email_otps')
-      .delete()
-      .eq('id', otpRecord.id);
+    await firebaseHelpers.deleteOTP(otpRecord.id);
 
     // Send welcome email
     await sendWelcomeEmail(email, name);
 
     // Create default portfolio content if not exists
-    const { data: existingContent } = await supabase
-      .from('portfolio_content')
-      .select('id')
-      .limit(1)
-      .single();
+    const existingContent = await firebaseHelpers.getPortfolioContent();
 
     if (!existingContent) {
-      await supabase
-        .from('portfolio_content')
-        .insert({
-          hero_title: 'PEREPOGU RAHUL CHAKRADHAR',
-          hero_subtitle: 'AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR',
-          hero_tagline: 'CREATE YOUR OWN',
-          about_text: 'Passionate about AI, technology, and content creation.',
-          email: email,
-          location: 'Bengaluru, Karnataka',
-        });
+      await firebaseHelpers.updatePortfolioContent({
+        hero_title: 'PEREPOGU RAHUL CHAKRADHAR',
+        hero_subtitle: 'AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR',
+        hero_tagline: 'CREATE YOUR OWN',
+        about_text: 'Passionate about AI, technology, and content creation.',
+        email: email,
+        location: 'Bengaluru, Karnataka',
+      });
     }
 
     return NextResponse.json(

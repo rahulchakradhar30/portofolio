@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -16,18 +16,7 @@ async function verifyAdminAuth(request: NextRequest) {
 // GET - Get portfolio content
 export async function GET(request: NextRequest) {
   try {
-    const { data: content, error } = await supabase
-      .from('portfolio_content')
-      .select('*')
-      .limit(1)
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      return NextResponse.json(
-        { error: 'Failed to fetch portfolio content' },
-        { status: 500 }
-      );
-    }
+    const content = await firebaseHelpers.getPortfolioContent();
 
     // Return default if not found
     if (!content) {
@@ -66,60 +55,14 @@ export async function PUT(request: NextRequest) {
 
     const { heroTitle, heroSubtitle, heroTagline, aboutText, email, location } = await request.json();
 
-    // Get existing content
-    const { data: existingContent } = await supabase
-      .from('portfolio_content')
-      .select('id')
-      .limit(1)
-      .single();
-
-    let updatedContent;
-    let error;
-
-    if (existingContent) {
-      // Update existing
-      const result = await supabase
-        .from('portfolio_content')
-        .update({
-          hero_title: heroTitle,
-          hero_subtitle: heroSubtitle,
-          hero_tagline: heroTagline,
-          about_text: aboutText,
-          email,
-          location,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existingContent.id)
-        .select()
-        .single();
-
-      updatedContent = result.data;
-      error = result.error;
-    } else {
-      // Create new if doesn't exist
-      const result = await supabase
-        .from('portfolio_content')
-        .insert({
-          hero_title: heroTitle,
-          hero_subtitle: heroSubtitle,
-          hero_tagline: heroTagline,
-          about_text: aboutText,
-          email,
-          location,
-        })
-        .select()
-        .single();
-
-      updatedContent = result.data;
-      error = result.error;
-    }
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to update portfolio content' },
-        { status: 500 }
-      );
-    }
+    const updatedContent = await firebaseHelpers.updatePortfolioContent({
+      hero_title: heroTitle,
+      hero_subtitle: heroSubtitle,
+      hero_tagline: heroTagline,
+      about_text: aboutText,
+      email,
+      location,
+    });
 
     return NextResponse.json(
       { success: true, content: updatedContent },

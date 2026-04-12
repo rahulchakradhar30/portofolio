@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -16,17 +16,7 @@ async function verifyAdminAuth(request: NextRequest) {
 // GET - List all projects
 export async function GET(request: NextRequest) {
   try {
-    const { data: projects, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch projects' },
-        { status: 500 }
-      );
-    }
+    const projects = await firebaseHelpers.getAllProjects();
 
     return NextResponse.json({ projects }, { status: 200 });
   } catch (error) {
@@ -56,28 +46,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: newProject, error } = await supabase
-      .from('projects')
-      .insert({
-        title,
-        description,
-        long_description: longDescription,
-        image_url: imageUrl,
-        tech_stack: techStack || [],
-        github_url: githubUrl,
-        demo_url: demoUrl,
-        category: category || 'Other',
-        featured: featured || false,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to create project' },
-        { status: 500 }
-      );
-    }
+    const newProject = await firebaseHelpers.createProject({
+      title,
+      description,
+      long_description: longDescription,
+      image_url: imageUrl,
+      tech_stack: techStack || [],
+      github_url: githubUrl,
+      demo_url: demoUrl,
+      category: category || 'Other',
+      featured: featured || false,
+    });
 
     return NextResponse.json(
       { success: true, project: newProject },

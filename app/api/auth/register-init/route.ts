@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { generateOTP, getOTPExpiration, checkRateLimit } from '@/app/lib/auth';
 import { sendOTPEmail } from '@/app/lib/email';
 
@@ -23,11 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email already exists
-    const { data: existingUser } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('email', email)
-      .single();
+    const existingUser = await firebaseHelpers.getUserByEmail(email);
 
     if (existingUser) {
       return NextResponse.json(
@@ -41,20 +37,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = getOTPExpiration();
 
     // Store OTP in database
-    const { error: otpError } = await supabase
-      .from('email_otps')
-      .insert({
-        email,
-        otp_code: otp,
-        expires_at: expiresAt.toISOString(),
-      });
-
-    if (otpError) {
-      return NextResponse.json(
-        { error: 'Failed to generate OTP' },
-        { status: 500 }
-      );
-    }
+    await firebaseHelpers.storeOTP(email, otp, expiresAt, 'email_verification');
 
     // Send OTP email
     const emailSent = await sendOTPEmail(email, otp);

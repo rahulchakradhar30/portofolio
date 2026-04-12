@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { hashPassword } from '@/app/lib/auth';
 
 export async function POST(request: NextRequest) {
@@ -21,16 +21,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify OTP exists and is valid
-    const { data: otpRecord, error: otpError } = await supabase
-      .from('email_otps')
-      .select('id, otp, expires_at, type')
-      .eq('email', email)
-      .eq('type', 'password_reset')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
+    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'password_reset');
 
-    if (otpError || !otpRecord) {
+    if (!otpRecord) {
       return NextResponse.json(
         { error: 'No password reset request found' },
         { status: 404 }
@@ -45,7 +38,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if OTP is expired
-    if (new Date(otpRecord.expires_at) < new Date()) {
+    const expiresAt = otpRecord.expires_at instanceof Date ? new Date(otpRecord.expires_at) : otpRecord.expires_at.toDate();
+    if (expiresAt < new Date()) {
       return NextResponse.json(
         { error: 'OTP has expired' },
         { status: 401 }
@@ -56,24 +50,18 @@ export async function POST(request: NextRequest) {
     const passwordHash = hashPassword(newPassword);
 
     // Update admin user password
-    const { error: updateError } = await supabase
-      .from('admin_users')
-      .update({ password_hash: passwordHash })
-      .eq('email', email);
-
-    if (updateError) {
-      console.error('Failed to update password:', updateError);
+    const user = await firebaseHelpers.getUserByEmail(email);
+    if (!user) {
       return NextResponse.json(
-        { error: 'Failed to reset password' },
-        { status: 500 }
+        { error: 'User not found' },
+        { status: 404 }
       );
     }
 
+    await firebaseHelpers.updateUser(user.id, { password_hash: passwordHash });
+
     // Delete the used OTP
-    await supabase
-      .from('email_otps')
-      .delete()
-      .eq('id', otpRecord.id);
+    await firebaseHelpers.deleteOTP(otpRecord.id);
 
     return NextResponse.json(
       {

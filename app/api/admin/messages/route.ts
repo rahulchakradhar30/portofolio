@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -24,23 +24,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
 
-    let query = supabase
-      .from('contact_messages')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (unreadOnly) {
-      query = query.eq('is_read', false);
-    }
-
-    const { data: messages, error } = await query;
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch messages' },
-        { status: 500 }
-      );
-    }
+    const messages = await firebaseHelpers.getAllMessages(unreadOnly);
 
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
@@ -69,19 +53,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const { data: updatedMessage, error } = await supabase
-      .from('contact_messages')
-      .update({ is_read: isRead })
-      .eq('id', messageId)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to update message' },
-        { status: 500 }
-      );
-    }
+    const updatedMessage = await firebaseHelpers.updateMessage(messageId, isRead);
 
     return NextResponse.json(
       { success: true, message: updatedMessage },
@@ -113,17 +85,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase
-      .from('contact_messages')
-      .delete()
-      .eq('id', messageId);
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to delete message' },
-        { status: 500 }
-      );
-    }
+    await firebaseHelpers.deleteMessage(messageId);
 
     return NextResponse.json(
       { success: true, message: 'Message deleted' },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { setupGoogleAuthenticator, verifyJWT, generateSecureString } from '@/app/lib/auth';
 import { send2FASetupEmail } from '@/app/lib/email';
 
@@ -24,13 +24,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin user
-    const { data: adminUser, error: userError } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', payload.adminId)
-      .single();
+    const adminUser = await firebaseHelpers.getUserByEmail(payload.email);
 
-    if (userError || !adminUser) {
+    if (!adminUser) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }

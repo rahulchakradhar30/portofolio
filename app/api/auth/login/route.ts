@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyPassword, generateJWT, checkRateLimit } from '@/app/lib/auth';
+import { cookies } from 'next/headers';
 
 interface LoginRequest {
   email: string;
@@ -28,13 +29,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin user
-    const { data: adminUser, error: userError } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('email', email)
-      .single();
+    const adminUser = await firebaseHelpers.getUserByEmail(email);
 
-    if (userError || !adminUser) {
+    if (!adminUser) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }

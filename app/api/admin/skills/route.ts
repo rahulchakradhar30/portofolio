@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -16,17 +16,7 @@ async function verifyAdminAuth(request: NextRequest) {
 // GET - List all skills
 export async function GET(request: NextRequest) {
   try {
-    const { data: skills, error } = await supabase
-      .from('skills')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to fetch skills' },
-        { status: 500 }
-      );
-    }
+    const skills = await firebaseHelpers.getAllSkills();
 
     return NextResponse.json({ skills }, { status: 200 });
   } catch (error) {
@@ -55,32 +45,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (proficiency < 0 || proficiency > 100) {
+    if (proficiency && (proficiency < 0 || proficiency > 100)) {
       return NextResponse.json(
         { error: 'Proficiency must be between 0 and 100' },
         { status: 400 }
       );
     }
 
-    const { data: newSkill, error } = await supabase
-      .from('skills')
-      .insert({
-        title,
-        description: description || '',
-        proficiency: proficiency || 50,
-        icon_name: iconName || 'Star',
-        color: color || '#7c3aed',
-        bg_color: bgColor || '#ede9fe',
-      })
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to create skill' },
-        { status: 500 }
-      );
-    }
+    const newSkill = await firebaseHelpers.createSkill({
+      title,
+      description: description || '',
+      proficiency: proficiency || 50,
+      icon_name: iconName || 'Star',
+      color: color || '#7c3aed',
+      bg_color: bgColor || '#ede9fe',
+    });
 
     return NextResponse.json(
       { success: true, skill: newSkill },

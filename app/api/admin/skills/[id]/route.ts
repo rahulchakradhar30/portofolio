@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -20,13 +20,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const { data: skill, error } = await supabase
-      .from('skills')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const skill = await firebaseHelpers.getSkillById(id);
 
-    if (error || !skill) {
+    if (!skill) {
       return NextResponse.json(
         { error: 'Skill not found' },
         { status: 404 }
@@ -64,27 +60,14 @@ export async function PUT(
       );
     }
 
-    const { data: updatedSkill, error } = await supabase
-      .from('skills')
-      .update({
-        title,
-        description,
-        proficiency,
-        icon_name: iconName,
-        color,
-        bg_color: bgColor,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to update skill' },
-        { status: 500 }
-      );
-    }
+    const updatedSkill = await firebaseHelpers.updateSkill(id, {
+      title,
+      description,
+      proficiency,
+      icon_name: iconName,
+      color,
+      bg_color: bgColor,
+    });
 
     return NextResponse.json(
       { success: true, skill: updatedSkill },
@@ -111,17 +94,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { error } = await supabase
-      .from('skills')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to delete skill' },
-        { status: 500 }
-      );
-    }
+    await firebaseHelpers.deleteSkill(id);
 
     return NextResponse.json(
       { success: true, message: 'Skill deleted' },

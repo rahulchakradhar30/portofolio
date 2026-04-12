@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -20,13 +20,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const { data: project, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const project = await firebaseHelpers.getProjectById(id);
 
-    if (error || !project) {
+    if (!project) {
       return NextResponse.json(
         { error: 'Project not found' },
         { status: 404 }
@@ -58,30 +54,17 @@ export async function PUT(
     const { title, description, longDescription, imageUrl, techStack, githubUrl, demoUrl, category, featured } =
       await request.json();
 
-    const { data: updatedProject, error } = await supabase
-      .from('projects')
-      .update({
-        title,
-        description,
-        long_description: longDescription,
-        image_url: imageUrl,
-        tech_stack: techStack,
-        github_url: githubUrl,
-        demo_url: demoUrl,
-        category,
-        featured,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to update project' },
-        { status: 500 }
-      );
-    }
+    const updatedProject = await firebaseHelpers.updateProject(id, {
+      title,
+      description,
+      long_description: longDescription,
+      image_url: imageUrl,
+      tech_stack: techStack,
+      github_url: githubUrl,
+      demo_url: demoUrl,
+      category,
+      featured,
+    });
 
     return NextResponse.json(
       { success: true, project: updatedProject },
@@ -108,17 +91,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { error } = await supabase
-      .from('projects')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'Failed to delete project' },
-        { status: 500 }
-      );
-    }
+    await firebaseHelpers.deleteProject(id);
 
     return NextResponse.json(
       { success: true, message: 'Project deleted' },

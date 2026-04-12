@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyTOTPCode, generateJWT } from '@/app/lib/auth';
 import { cookies } from 'next/headers';
 
@@ -22,13 +22,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch admin user
-    const { data: admin, error: fetchError } = await supabase
-      .from('admin_users')
-      .select('id, email, name, otp_secret, otp_enabled')
-      .eq('email', email)
-      .single();
+    const admin = await firebaseHelpers.getUserByEmail(email);
 
-    if (fetchError || !admin) {
+    if (!admin) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }

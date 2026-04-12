@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/app/lib/supabase';
+import { firebaseHelpers } from '@/app/lib/firebase';
 import { generateOTP, getOTPExpiration, checkRateLimit } from '@/app/lib/auth';
 import { sendOTPEmail } from '@/app/lib/email';
 
@@ -23,13 +23,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user exists
-    const { data: user, error: fetchError } = await supabase
-      .from('admin_users')
-      .select('id, email')
-      .eq('email', email)
-      .single();
+    const user = await firebaseHelpers.getUserByEmail(email);
 
-    if (fetchError || !user) {
+    if (!user) {
       // Don't reveal if email exists for security
       return NextResponse.json(
         {
@@ -45,19 +41,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = getOTPExpiration();
 
     // Store reset OTP in email_otps table (mark as password reset)
-    const { error: insertError } = await supabase
-      .from('email_otps')
-      .insert({
-        email,
-        otp,
-        expires_at: expiresAt.toISOString(),
-        type: 'password_reset',
-      });
-
-    if (insertError) {
-      console.error('Failed to store password reset OTP:', insertError);
-      return NextResponse.json(
-        { error: 'Failed to initiate password reset' },
+    await firebaseHelpers.storeOTP(email, otp, expiresAt, 'password_reset');
         { status: 500 }
       );
     }
