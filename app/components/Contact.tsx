@@ -23,7 +23,7 @@ export default function Contact() {
             Get In Touch
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Ready to bring your ideas to life? Let's create something amazing together
+            Ready to bring your ideas to life? Let&apos;s create something amazing together
           </p>
           <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-violet-400 mx-auto mt-6"></div>
         </motion.div>
@@ -36,10 +36,10 @@ export default function Contact() {
             className="space-y-8"
           >
             <div>
-              <h3 className="text-3xl font-bold text-gray-800 mb-6">Let's Connect</h3>
+              <h3 className="text-3xl font-bold text-gray-800 mb-6">Let&apos;s Connect</h3>
               <p className="text-lg text-gray-600 leading-relaxed mb-8">
-                I'm always excited to discuss new opportunities, share ideas, or collaborate on innovative projects.
-                Whether you have a question or just want to say hello, I'd love to hear from you.
+                I&apos;m always excited to discuss new opportunities, share ideas, or collaborate on innovative projects.
+                Whether you have a question or just want to say hello, I&apos;d love to hear from you.
               </p>
             </div>
 

@@ -28,10 +28,10 @@ export default function About() {
             className="space-y-6"
           >
             <p className="text-lg text-gray-600 leading-relaxed">
-              I'm a passionate AI enthusiast, tech learner, content creator, and director who believes in creating innovative solutions for real-world problems. As a quick learner and innovative student, I explore all technologies and love building new solutions that benefit both companies and society.
+              I&apos;m a passionate AI enthusiast, tech learner, content creator, and director who believes in creating innovative solutions for real-world problems. As a quick learner and innovative student, I explore all technologies and love building new solutions that benefit both companies and society.
             </p>
             <p className="text-lg text-gray-600 leading-relaxed">
-              My focus lies in AI, technology, and content creation. I excel in problem-solving and logical reasoning, and I'm comfortable working across various fields - from software to hardware, irrespective of the domain. I prefer partnerships and entrepreneurship over traditional salaried jobs, seeking opportunities where I can generate revenue while doing what I love.
+              My focus lies in AI, technology, and content creation. I excel in problem-solving and logical reasoning, and I&apos;m comfortable working across various fields - from software to hardware, irrespective of the domain. I prefer partnerships and entrepreneurship over traditional salaried jobs, seeking opportunities where I can generate revenue while doing what I love.
             </p>
             <div className="flex flex-wrap gap-4 pt-4">
               <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-medium">AI Enthusiast</span>
@@ -57,16 +57,16 @@ export default function About() {
                     <div className="text-sm text-gray-600">Major Projects</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-pink-600 mb-2">600+</div>
-                    <div className="text-sm text-gray-600">Students Led</div>
+                    <div className="text-3xl font-bold text-pink-600 mb-2">5+</div>
+                    <div className="text-sm text-gray-600">Certifications</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600 mb-2">100+</div>
-                    <div className="text-sm text-gray-600">Projects Organized</div>
+                    <div className="text-3xl font-bold text-green-600 mb-2">2+</div>
+                    <div className="text-sm text-gray-600">Websites Published</div>
                   </div>
                   <div className="text-center">
                     <div className="text-3xl font-bold text-gray-600 mb-2">90%</div>
-                    <div className="text-sm text-gray-600">Cost Reduction</div>
+                    <div className="text-sm text-gray-600">Success Rate</div>
                   </div>
                 </div>
               </div>
