@@ -48,7 +48,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-lg md:text-xl text-violet-600 font-semibold mb-8 max-w-3xl mx-auto leading-relaxed text-center"
         >
-          CREATE YOUR OWN
+          Student at GITAM University, Bengaluru.
         </motion.div>
 
         <motion.div
