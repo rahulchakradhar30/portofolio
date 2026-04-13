@@ -56,10 +56,10 @@ export async function PUT(request: NextRequest) {
     const { heroTitle, heroSubtitle, heroTagline, aboutText, email, location } = await request.json();
 
     const updatedContent = await firebaseHelpers.updatePortfolioContent({
-      hero_title: heroTitle,
-      hero_subtitle: heroSubtitle,
-      hero_tagline: heroTagline,
-      about_text: aboutText,
+      heroTitle,
+      heroSubtitle,
+      heroTagline,
+      aboutText,
       email,
       location,
     });
