@@ -57,11 +57,11 @@ export async function PUT(
     const updatedProject = await firebaseHelpers.updateProject(id, {
       title,
       description,
-      long_description: longDescription,
-      image_url: imageUrl,
-      tech_stack: techStack,
-      github_url: githubUrl,
-      demo_url: demoUrl,
+      longDescription,
+      image: imageUrl,
+      tech: techStack,
+      github: githubUrl,
+      demo: demoUrl,
       category,
       featured,
     });

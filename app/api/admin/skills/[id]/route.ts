@@ -64,9 +64,9 @@ export async function PUT(
       title,
       description,
       proficiency,
-      icon_name: iconName,
+      icon: iconName,
       color,
-      bg_color: bgColor,
+      bgColor: bgColor,
     });
 
     return NextResponse.json(

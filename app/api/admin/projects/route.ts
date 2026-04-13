@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
     const newProject = await firebaseHelpers.createProject({
       title,
       description,
-      long_description: longDescription,
-      image_url: imageUrl,
-      tech_stack: techStack || [],
-      github_url: githubUrl,
-      demo_url: demoUrl,
+      longDescription,
+      image: imageUrl,
+      tech: techStack || [],
+      github: githubUrl,
+      demo: demoUrl,
       category: category || 'Other',
       featured: featured || false,
     });

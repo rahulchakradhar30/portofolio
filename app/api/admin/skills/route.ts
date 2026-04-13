@@ -56,9 +56,9 @@ export async function POST(request: NextRequest) {
       title,
       description: description || '',
       proficiency: proficiency || 50,
-      icon_name: iconName || 'Star',
+      icon: iconName || 'Star',
       color: color || '#7c3aed',
-      bg_color: bgColor || '#ede9fe',
+      bgColor: bgColor || '#ede9fe',
     });
 
     return NextResponse.json(
