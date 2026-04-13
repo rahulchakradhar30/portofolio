@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, query, where, getDocs, addDoc, getDoc, setDoc, updateDoc, deleteDoc, doc, orderBy, serverTimestamp, QueryConstraint } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, addDoc, getDoc, updateDoc, deleteDoc, doc, orderBy, serverTimestamp } from 'firebase/firestore';
+import type { Project, Skill, ContactMessage, PortfolioContent } from './types';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -25,7 +26,7 @@ export const firebaseHelpers = {
     return querySnapshot.empty ? null : { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
   },
 
-  async createUser(userData: any) {
+  async createUser(userData: Record<string, unknown>) {
     const usersRef = collection(db, 'admin_users');
     const docRef = await addDoc(usersRef, {
       ...userData,
@@ -35,7 +36,7 @@ export const firebaseHelpers = {
     return { id: docRef.id, ...userData };
   },
 
-  async updateUser(userId: string, userData: any) {
+  async updateUser(userId: string, userData: Partial<Record<string, unknown>>) {
     const userRef = doc(db, 'admin_users', userId);
     await updateDoc(userRef, {
       ...userData,
@@ -88,7 +89,7 @@ export const firebaseHelpers = {
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
   },
 
-  async createProject(projectData: any) {
+  async createProject(projectData: Omit<Project, 'id'>) {
     const projectsRef = collection(db, 'projects');
     const docRef = await addDoc(projectsRef, {
       ...projectData,
@@ -98,7 +99,7 @@ export const firebaseHelpers = {
     return { id: docRef.id, ...projectData };
   },
 
-  async updateProject(projectId: string, projectData: any) {
+  async updateProject(projectId: string, projectData: Partial<Omit<Project, 'id'>>) {
     const projectRef = doc(db, 'projects', projectId);
     await updateDoc(projectRef, {
       ...projectData,
@@ -126,7 +127,7 @@ export const firebaseHelpers = {
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
   },
 
-  async createSkill(skillData: any) {
+  async createSkill(skillData: Omit<Skill, 'id'>) {
     const skillsRef = collection(db, 'skills');
     const docRef = await addDoc(skillsRef, {
       ...skillData,
@@ -136,7 +137,7 @@ export const firebaseHelpers = {
     return { id: docRef.id, ...skillData };
   },
 
-  async updateSkill(skillId: string, skillData: any) {
+  async updateSkill(skillId: string, skillData: Partial<Omit<Skill, 'id'>>) {
     const skillRef = doc(db, 'skills', skillId);
     await updateDoc(skillRef, {
       ...skillData,
@@ -158,7 +159,7 @@ export const firebaseHelpers = {
     return { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
   },
 
-  async updatePortfolioContent(contentData: any) {
+  async updatePortfolioContent(contentData: Partial<PortfolioContent>) {
     const contentRef = collection(db, 'portfolio_content');
     const querySnapshot = await getDocs(contentRef);
     if (querySnapshot.empty) {
@@ -205,7 +206,7 @@ export const firebaseHelpers = {
     await deleteDoc(messageRef);
   },
 
-  async createMessage(messageData: any) {
+  async createMessage(messageData: Omit<ContactMessage, 'id' | 'createdAt' | 'read' | 'is_read'>) {
     const messagesRef = collection(db, 'contact_messages');
     const docRef = await addDoc(messagesRef, {
       ...messageData,
