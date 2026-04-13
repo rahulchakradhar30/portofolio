@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin user
-    const adminUser = await firebaseHelpers.getUserByEmail(email);
+    const adminUser = await firebaseHelpers.getUserByEmail(email) as any;
 
     if (!adminUser) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    if (!verifyPassword(password, adminUser.password_hash)) {
+    if (!verifyPassword(password, (adminUser as any).password_hash)) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
