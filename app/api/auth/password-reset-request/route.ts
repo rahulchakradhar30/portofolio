@@ -42,9 +42,6 @@ export async function POST(request: NextRequest) {
 
     // Store reset OTP in email_otps table (mark as password reset)
     await firebaseHelpers.storeOTP(email, otp, expiresAt, 'password_reset');
-        { status: 500 }
-      );
-    }
 
     // Send reset OTP via email
     const emailSent = await sendOTPEmail(
