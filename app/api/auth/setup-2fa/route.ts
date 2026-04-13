@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin user
-    const adminUser = await firebaseHelpers.getUserByEmail(payload.email);
+    const adminUser = await firebaseHelpers.getUserByEmail(payload.email) as any;
 
     if (!adminUser) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // If 2FA already enabled, return error
-    if (adminUser.otp_enabled) {
+    if ((adminUser as any).otp_enabled) {
       return NextResponse.json(
         { error: '2FA is already enabled. Disable it first to set up new 2FA.' },
         { status: 400 }
