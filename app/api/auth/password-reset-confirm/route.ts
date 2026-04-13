@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify OTP exists and is valid
-    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'password_reset');
+    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'password_reset') as any;
 
     if (!otpRecord) {
       return NextResponse.json(
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (otpRecord.otp !== otp) {
+    if ((otpRecord as any).otp !== otp) {
       return NextResponse.json(
         { error: 'Invalid OTP' },
         { status: 401 }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if OTP is expired
-    const expiresAt = otpRecord.expires_at instanceof Date ? new Date(otpRecord.expires_at) : otpRecord.expires_at.toDate();
+    const expiresAt = (otpRecord as any).expires_at instanceof Date ? new Date((otpRecord as any).expires_at) : (otpRecord as any).expires_at.toDate();
     if (expiresAt < new Date()) {
       return NextResponse.json(
         { error: 'OTP has expired' },
