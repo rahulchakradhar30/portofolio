@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "setup:firebase": "npx ts-node scripts/setup-firebase.ts",
+    "setup:firebase": "node scripts/setup-firebase-esm.mjs",
     "setup": "npm run setup:firebase && firebase deploy --only firestore:rules"
   },
   "dependencies": {
