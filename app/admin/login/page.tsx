@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
 
+// Authorized admin emails
+const AUTHORIZED_ADMIN_EMAILS = [
+  "rahulchakradharperepogu@gmail.com",
+];
+
 export default function AdminLogin() {
   const router = useRouter();
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -27,15 +30,17 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      // Dynamically import Firebase auth functions
-      const { firebaseLogin, firebaseRegister } = await import("@/app/lib/firebaseAuth");
-      
-      let result;
-      if (isLogin) {
-        result = await firebaseLogin(email, password);
-      } else {
-        result = await firebaseRegister(email, password, name);
+      // Check if email is authorized for admin access
+      if (!AUTHORIZED_ADMIN_EMAILS.includes(email.toLowerCase())) {
+        setError("This email is not authorized for admin access");
+        setLoading(false);
+        return;
       }
+
+      // Dynamically import Firebase auth functions
+      const { firebaseLogin } = await import("@/app/lib/firebaseAuth");
+      
+      const result = await firebaseLogin(email, password);
 
       if (result.success) {
         // Redirect to 2FA setup or dashboard
@@ -62,25 +67,10 @@ export default function AdminLogin() {
           Admin Portal
         </h1>
         <p className="text-center text-gray-600 mb-8">
-          {isLogin ? "Welcome back" : "Create your account"}
+          Authorized Access Only
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                placeholder="Your name"
-                required={!isLogin}
-              />
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -132,27 +122,13 @@ export default function AdminLogin() {
             {loading ? (
               <>
                 <Loader className="w-5 h-5 animate-spin" />
-                {isLogin ? "Signing in..." : "Creating account..."}
+                Signing in...
               </>
             ) : (
-              isLogin ? "Sign In" : "Create Account"
+              "Sign In"
             )}
           </motion.button>
         </form>
-
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <button
-            onClick={() => {
-              setIsLogin(!isLogin);
-              setError("");
-            }}
-            className="w-full text-sm text-violet-600 hover:text-violet-700 font-medium"
-          >
-            {isLogin
-              ? "Don't have an account? Sign up"
-              : "Already have an account? Sign in"}
-          </button>
-        </div>
       </motion.div>
     </div>
   );

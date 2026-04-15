@@ -63,8 +63,31 @@ export default function Setup2FA() {
     }
   };
 
-  const handleSkip = () => {
-    router.push("/admin/dashboard");
+  const handleSkip = async () => {
+    setLoading(true);
+    setError("");
+    
+    try {
+      // Send OTP to email
+      const res = await fetch("/api/admin/auth/send-otp-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        // Redirect to OTP verification page
+        sessionStorage.setItem("pendingOTPVerification", "true");
+        router.push("/admin/verify-otp");
+      } else {
+        setError(data.error || "Failed to send OTP");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -165,10 +188,11 @@ export default function Setup2FA() {
           </form>
 
           <button
+            type="button"
             onClick={handleSkip}
-            className="w-full text-sm text-gray-600 hover:text-gray-700 py-2"
+            className="w-full text-sm text-gray-600 hover:text-gray-700 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Skip for now
+            Skip for now - Verify via Email
           </button>
         </div>
       </motion.div>
