@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Real AI Chat using Groq (Free models - Llama 3.1, Gemma 2)
+// Real AI Chat using Groq (Multiple model fallbacks for stability)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,10 +13,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try Groq API first (real AI models - Llama 3.1 70B Versatile)
+    // Try Groq API first (tries multiple models for reliability)
     if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'gsk_placeholder_get_free_key_from_groq_console') {
       try {
-        console.log('[Chat] Attempting Groq API...');
+        console.log('[Chat] Attempting Groq API with multiple models...');
         const groqResponse = await tryGroqAPI(messages);
         if (groqResponse) {
           console.log('[Chat] Groq API Success');
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Groq API with available models (Llama 2, Llama 3.1, Gemma 2)
+// Groq API with available models (Llama 2, Gemma 2, or latest available)
 async function tryGroqAPI(messages: any[]): Promise<string | null> {
   try {
     // Format messages for Groq
@@ -62,32 +62,46 @@ async function tryGroqAPI(messages: any[]): Promise<string | null> {
       content: msg.content
     }));
 
-    // Use llama-3.1-70b-versatile (most capable free model currently available)
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile', // Updated: Using Llama 3.1 (much more capable)
-        messages: formattedMessages,
-        max_tokens: 500,
-        temperature: 0.7,
-      }),
-    });
+    // Try multiple models in order of preference (in case one is decommissioned)
+    const models = [
+      'llama-3.2-90b-vision-preview', // Latest/most capable
+      'llama-3.1-8b-instant',         // Fast fallback
+      'mixtral-8x7b-32768',           // Another option
+      'llama-2-70b-chat',             // Stable option
+    ];
 
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('[Groq] Error:', error);
-      return null;
+    for (const model of models) {
+      try {
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: formattedMessages,
+            max_tokens: 500,
+            temperature: 0.7,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          if (result.choices && result.choices[0]?.message?.content) {
+            console.log(`[Groq] Success with model: ${model}`);
+            return result.choices[0].message.content.trim();
+          }
+        } else {
+          const error = await response.json();
+          console.log(`[Groq] Model ${model} failed: ${error.error?.message || 'Unknown error'}`);
+        }
+      } catch (e) {
+        console.log(`[Groq] Model ${model} exception: ${String(e).substring(0, 100)}`);
+      }
     }
 
-    const result = await response.json();
-    if (result.choices && result.choices[0]?.message?.content) {
-      return result.choices[0].message.content.trim();
-    }
-
+    console.log('[Groq] All models failed, falling back to HF');
     return null;
   } catch (error) {
     console.error('[Groq] Exception:', error);
