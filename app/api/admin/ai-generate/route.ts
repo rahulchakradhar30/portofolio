@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import OpenAI from 'openai';
 
-// AI-powered content generation using Hugging Face API
+// AI-powered content generation using OpenAI API
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,10 +14,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Use Hugging Face Inference API (free tier available)
-    const huggingFaceToken = process.env.HUGGING_FACE_API_KEY;
-    
-    if (!huggingFaceToken) {
+    // Check if OpenAI API key is set
+    if (!process.env.OPENAI_API_KEY) {
       // Fallback: Generate simple content based on prompt
       const generatedContent = generateFallbackContent(prompt, type);
       return NextResponse.json(
@@ -25,40 +24,52 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call Hugging Face API for better generation
-    const response = await fetch(
-      'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1',
-      {
-        headers: { Authorization: `Bearer ${huggingFaceToken}` },
-        method: 'POST',
-        body: JSON.stringify({
-          inputs: `${type === 'description' ? 'Write a professional project description: ' : 'Write detailed project details: '}${prompt}`,
-          parameters: {
-            max_length: 500,
-            temperature: 0.7,
-          },
-        }),
-      }
-    );
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
-    if (!response.ok) {
-      // Use fallback if API fails
-      const generatedContent = generateFallbackContent(prompt, type);
-      return NextResponse.json(
-        { success: true, content: generatedContent },
-        { status: 200 }
-      );
-    }
+    // Create appropriate prompt based on type
+    const systemPrompt = type === 'description' 
+      ? 'You are an expert technical writer who creates concise, professional project descriptions. Keep responses between 100-200 words and include the most important features and benefits.'
+      : 'You are an expert technical writer who creates detailed project documentation. Provide comprehensive details including overview, features, technical stack, and results. Keep responses between 300-500 words.';
 
-    const result = await response.json();
-    const generatedText = result[0]?.generated_text || generateFallbackContent(prompt, type);
+    const userPrompt = type === 'description'
+      ? `Write a professional project description for: ${prompt}`
+      : `Write detailed project information for: ${prompt}`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt,
+        },
+        {
+          role: 'user',
+          content: userPrompt,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: type === 'description' ? 300 : 800,
+    });
+
+    const generatedText = response.choices[0]?.message?.content || generateFallbackContent(prompt, type);
 
     return NextResponse.json(
       { success: true, content: generatedText },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('[API] AI generation error:', error);
+    
+    // Check if it's an API key issue
+    if (error.status === 401) {
+      return NextResponse.json(
+        { success: false, error: 'OpenAI API key is invalid. Please check your configuration.' },
+        { status: 401 }
+      );
+    }
+
     // Return fallback on any error
     const fallbackContent = generateFallbackContent('project', 'description');
     return NextResponse.json(
