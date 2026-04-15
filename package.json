@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup:firebase": "npx ts-node scripts/setup-firebase.ts",
+    "setup": "npm run setup:firebase && firebase deploy --only firestore:rules"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",
