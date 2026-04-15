@@ -8,6 +8,17 @@ export async function sendOTPEmail(
   type: string = 'Email Verification'
 ): Promise<boolean> {
   try {
+    console.log('=== EMAIL SENDING STARTED ===');
+    console.log('Email:', email);
+    console.log('Type:', type);
+    console.log('OTP:', otp);
+    console.log('API Key present:', !!process.env.RESEND_API_KEY);
+    
+    if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set!');
+      return false;
+    }
+
     const subjectMap: { [key: string]: string } = {
       'Email Verification': 'Portfolio Admin - Email Verification OTP',
       'Password Reset': 'Portfolio Admin - Password Reset OTP',
@@ -60,15 +71,29 @@ export async function sendOTPEmail(
         </div>
       `;
 
-    await resend.emails.send({
+    console.log('Sending via Resend API...');
+    console.log('From:', 'onboarding@resend.dev');
+    console.log('To:', email);
+    console.log('Subject:', subjectMap[type] || subjectMap['Email Verification']);
+
+    const response = await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: email,
       subject: subjectMap[type] || subjectMap['Email Verification'],
       html: emailHtml,
     });
+
+    console.log('Resend response:', response);
+    console.log('=== EMAIL SENDING COMPLETED ===');
     return true;
   } catch (error) {
-    console.error('Failed to send OTP email:', error);
+    console.error('=== EMAIL SENDING FAILED ===');
+    console.error('Error:', error);
+    console.error('Error type:', error instanceof Error ? 'Error Object' : typeof error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     return false;
   }
 }
