@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
-export default function Hero() {
-  const DEFAULT_HERO_DATA = {
-    heroTitle: "PEREPOGU RAHUL CHAKRADHAR",
-    heroSubtitle: "AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR",
-    heroTagline: "CREATE YOUR OWN",
-  };
+const DEFAULT_HERO_DATA = {
+  heroTitle: "PEREPOGU RAHUL CHAKRADHAR",
+  heroSubtitle: "AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR",
+  heroTagline: "CREATE YOUR OWN",
+};
 
+export default function Hero() {
   const [heroData, setHeroData] = useState(DEFAULT_HERO_DATA);
 
   useEffect(() => {

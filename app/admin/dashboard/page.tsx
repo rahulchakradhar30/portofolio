@@ -9,22 +9,20 @@ import type { Project, Skill, ContactMessage, PortfolioContent } from "@/app/lib
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isAuth, setIsAuth] = useState(false);
-  const [adminName, setAdminName] = useState("");
+  const [authState, setAuthState] = useState({ isAuth: false, adminName: "" });
 
   // Check authentication on mount
   useEffect(() => {
     const auth = localStorage.getItem("adminAuth");
     if (auth) {
-      setIsAuth(true);
-      setAdminName(JSON.parse(auth).name);
+      const parsed = JSON.parse(auth);
+      setAuthState({ isAuth: true, adminName: parsed.name });
     }
   }, []);
 
-  if (!isAuth) {
+  if (!authState.isAuth) {
     return <AdminLogin onSuccess={(name) => {
-      setAdminName(name);
-      setIsAuth(true);
+      setAuthState({ isAuth: true, adminName: name });
     }} />;
   }
 
@@ -77,7 +75,7 @@ export default function AdminDashboard() {
         <button
           onClick={() => {
             localStorage.removeItem("adminAuth");
-            setIsAuth(false);
+            setAuthState({ isAuth: false, adminName: "" });
           }}
           className="absolute bottom-4 left-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors"
         >
@@ -101,7 +99,7 @@ export default function AdminDashboard() {
             )}
           </button>
           <div className="flex items-center gap-4">
-            <span className="text-gray-700 font-medium">Welcome, {adminName}!</span>
+            <span className="text-gray-700 font-medium">Welcome, {authState.adminName}!</span>
             <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full"></div>
           </div>
         </div>
