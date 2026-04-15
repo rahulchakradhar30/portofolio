@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3 } from "lucide-react";
-import { firebaseLogout } from "@/app/lib/firebaseAuth";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser } from "@/app/lib/types";
 
@@ -43,9 +42,8 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = async () => {
-    await firebaseLogout();
-    sessionStorage.removeItem("adminToken");
-    router.push("/admin/login");
+    // No-op: login system removed
+    router.push("/");
   }
 
   const adminTabs = [
