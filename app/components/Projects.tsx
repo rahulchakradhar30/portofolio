@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ExternalLink, Code, Eye, Star } from "lucide-react";
+import type { Project } from "@/app/lib/types";
 
 export default function Projects() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -65,10 +67,11 @@ export default function Projects() {
                   {/* Project Image */}
                   <div className="relative h-48 bg-gradient-to-br from-violet-100 to-pink-100 overflow-hidden">
                     {project.image ? (
-                      <img 
+                      <Image 
                         src={project.image} 
                         alt={project.title} 
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-pink-500/20"></div>

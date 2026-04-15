@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3, Award } from "lucide-react";
@@ -315,7 +316,13 @@ function ContentTab() {
               </div>
               {(content as PortfolioContent & { bannerImage?: string })?.bannerImage && (
                 <div className="mt-2">
-                  <img src={(content as PortfolioContent & { bannerImage?: string })?.bannerImage} alt="Banner Preview" className="w-full h-32 object-cover rounded-lg" />
+                  <Image 
+                    src={(content as PortfolioContent & { bannerImage?: string })?.bannerImage || ""} 
+                    alt="Banner Preview" 
+                    width={800}
+                    height={128}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
                 </div>
               )}
             </div>
@@ -538,7 +545,13 @@ function ProjectsTab() {
             </div>
             {formData.imageUrl && (
               <div className="mt-2">
-                <img src={formData.imageUrl} alt="Preview" className="w-32 h-24 object-cover rounded-lg" />
+                <Image 
+                  src={formData.imageUrl} 
+                  alt="Preview" 
+                  width={128}
+                  height={96}
+                  className="w-32 h-24 object-cover rounded-lg"
+                />
                 <p className="text-xs text-gray-500 mt-1">Image uploaded</p>
               </div>
             )}
@@ -981,9 +994,9 @@ function CertificationsTab() {
       description: formData.description,
       linkedinUrl: formData.linkedinUrl,
       featured: formData.featured,
-    };
+    } as Record<string, unknown>;
 
-    const res = await adminAPI.createCertification(newCertification as any);
+    const res = await adminAPI.createCertification(newCertification);
     if (res.success) {
       alert("Certification added successfully!");
       setFormData({ title: "", issuer: "", issuedDate: "", expiryDate: "", credentialId: "", credentialUrl: "", imageUrl: "", description: "", linkedinUrl: "", featured: false });
@@ -1095,7 +1108,13 @@ function CertificationsTab() {
             </div>
             {formData.imageUrl && (
               <div className="mt-2">
-                <img src={formData.imageUrl} alt="Preview" className="w-32 h-24 object-cover rounded-lg" />
+                <Image 
+                  src={formData.imageUrl} 
+                  alt="Preview" 
+                  width={128}
+                  height={96}
+                  className="w-32 h-24 object-cover rounded-lg"
+                />
                 <p className="text-xs text-gray-500 mt-1">✓ Uploaded to Cloudinary</p>
               </div>
             )}
@@ -1130,7 +1149,13 @@ function CertificationsTab() {
             >
               <div className="flex gap-4">
                 {cert.image && (
-                  <img src={cert.image} alt={cert.title} className="w-20 h-20 object-cover rounded-lg" />
+                  <Image 
+                    src={cert.image} 
+                    alt={cert.title} 
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
                 )}
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-800">{cert.title}</h3>
