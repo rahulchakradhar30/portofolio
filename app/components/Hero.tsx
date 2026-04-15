@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 const DEFAULT_HERO_DATA = {
-  heroTitle: "PEREPOGU RAHUL CHAKRADHAR",
+  heroTitle: "RAHUL CHAKRADHAR PEREPOGU",
   heroSubtitle: "AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR",
   heroTagline: "CREATE YOUR OWN",
 };

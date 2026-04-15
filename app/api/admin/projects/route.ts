@@ -39,8 +39,8 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     console.log('[API] Creating new project...');
-    const { title, description, longDescription, imageUrl, techStack, githubUrl, demoUrl, category, featured } =
-      await request.json();
+    const body = await request.json();
+    const { title, description, tech, github, demo, image, category, featured } = body;
 
     if (!title || !description) {
       console.warn('[API] Missing required fields: title or description');
@@ -54,11 +54,10 @@ export async function POST(request: NextRequest) {
     const newProject = await serverFirebaseHelpers.createProject({
       title,
       description,
-      longDescription,
-      image: imageUrl,
-      tech: techStack || [],
-      github: githubUrl,
-      demo: demoUrl,
+      image: image || '',
+      tech: Array.isArray(tech) ? tech : [],
+      github: github || '',
+      demo: demo || '',
       category: category || 'Other',
       featured: featured || false,
     });

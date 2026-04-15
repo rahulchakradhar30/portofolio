@@ -26,7 +26,7 @@ export default function Footer() {
               className="md:col-span-2"
             >
               <h3 className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent mb-4">
-                PEREPOGU RAHUL CHAKRADHAR
+                RAHUL CHAKRADHAR PEREPOGU
               </h3>
               <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
                 Full Stack Developer & Creative Designer passionate about crafting exceptional digital experiences
@@ -60,7 +60,7 @@ export default function Footer() {
                 <motion.a
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
-                  href="mailto:perepogu.rahul@gmail.com"
+                  href="mailto:rahulchakradharperepogu@gmail.com"
                   className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 transition-colors duration-300"
                 >
                   <Mail className="w-5 h-5" />

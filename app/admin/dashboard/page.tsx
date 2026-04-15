@@ -427,11 +427,15 @@ function ProjectsTab() {
       alert("Title and description are required");
       return;
     }
+    if (!formData.imageUrl) {
+      alert("Please upload an image first");
+      return;
+    }
 
     const newProject = {
       title: formData.title,
       description: formData.description,
-      tech: formData.tech.split(",").map((t) => t.trim()),
+      tech: formData.tech.split(",").map((t) => t.trim()).filter((t) => t),
       github: formData.github,
       demo: formData.demo,
       featured: formData.featured,
@@ -439,14 +443,21 @@ function ProjectsTab() {
       image: formData.imageUrl,
     };
 
-    const res = await adminAPI.createProject(newProject);
-    if (res.success) {
-      alert("Project added successfully!");
-      setFormData({ title: "", description: "", tech: "", github: "", demo: "", featured: false, category: "", imageUrl: "" });
-      setShowForm(false);
-      loadProjects();
-    } else {
-      alert("Failed to add project");
+    try {
+      const res = await adminAPI.createProject(newProject);
+      if (res.success) {
+        alert("Project added successfully!");
+        setFormData({ title: "", description: "", tech: "", github: "", demo: "", featured: false, category: "", imageUrl: "" });
+        setShowForm(false);
+        loadProjects();
+      } else {
+        const error = res.error ? ` ${res.error}` : '';
+        alert(`Failed to add project.${error}`);
+        console.error('Project creation failed:', res);
+      }
+    } catch (error) {
+      alert(`Error: ${error instanceof Error ? error.message : 'Failed to add project'}`);
+      console.error('Project creation error:', error);
     }
   };
 
@@ -649,12 +660,21 @@ function SkillsTab() {
       return;
     }
 
-    const res = await adminAPI.createSkill(formData);
-    if (res.success) {
-      alert("Skill added successfully!");
-      setFormData({ title: "", description: "", proficiency: 75 });
-      setShowForm(false);
-      loadSkills();
+    try {
+      const res = await adminAPI.createSkill(formData);
+      if (res.success) {
+        alert("Skill added successfully!");
+        setFormData({ title: "", description: "", proficiency: 75 });
+        setShowForm(false);
+        loadSkills();
+      } else {
+        const error = res.error ? ` ${res.error}` : '';
+        alert(`Failed to add skill.${error}`);
+        console.error('Skill creation failed:', res);
+      }
+    } catch (error) {
+      alert(`Error: ${error instanceof Error ? error.message : 'Failed to add skill'}`);
+      console.error('Skill creation error:', error);
     }
   };
 
