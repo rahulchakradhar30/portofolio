@@ -1,32 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 
+// Helper to add CORS headers
+function addCorsHeaders(response: NextResponse) {
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  return response;
+}
+
+// Handle preflight requests
+export async function OPTIONS() {
+  const response = new NextResponse(null, { status: 200 });
+  return addCorsHeaders(response);
+}
+
 // GET - List all projects
 export async function GET() {
   try {
+    console.log('[API] Fetching all projects...');
     const projects = await serverFirebaseHelpers.getAllProjects();
+    console.log('[API] Successfully fetched', projects.length, 'projects');
 
-    return NextResponse.json({ projects }, { status: 200 });
+    const response = NextResponse.json({ success: true, projects }, { status: 200 });
+    return addCorsHeaders(response);
   } catch (error) {
-    console.error('Fetch projects error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch projects' },
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[API ERROR] Fetch projects failed:', errorMessage);
+    const response = NextResponse.json(
+      { success: false, error: 'Failed to fetch projects', details: errorMessage },
       { status: 500 }
     );
+    return addCorsHeaders(response);
   }
 }
 
 // POST - Create new project
 export async function POST(request: NextRequest) {
   try {
+    console.log('[API] Creating new project...');
     const { title, description, longDescription, imageUrl, techStack, githubUrl, demoUrl, category, featured } =
       await request.json();
 
     if (!title || !description) {
-      return NextResponse.json(
-        { error: 'Title and description are required' },
+      console.warn('[API] Missing required fields: title or description');
+      const response = NextResponse.json(
+        { success: false, error: 'Title and description are required' },
         { status: 400 }
       );
+      return addCorsHeaders(response);
     }
 
     const newProject = await serverFirebaseHelpers.createProject({
@@ -41,15 +63,19 @@ export async function POST(request: NextRequest) {
       featured: featured || false,
     });
 
-    return NextResponse.json(
+    console.log('[API] Project created successfully:', newProject.id);
+    const response = NextResponse.json(
       { success: true, project: newProject },
       { status: 201 }
     );
+    return addCorsHeaders(response);
   } catch (error) {
-    console.error('Create project error:', error);
-    return NextResponse.json(
-      { error: 'Failed to create project' },
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('[API ERROR] Create project failed:', errorMessage);
+    const response = NextResponse.json(
+      { success: false, error: 'Failed to create project', details: errorMessage },
       { status: 500 }
     );
+    return addCorsHeaders(response);
   }
 }

@@ -11,7 +11,7 @@ import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser, Certi
 export default function AdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [adminUser] = useState<AdminUser>({
     id: "local-admin",
     email: "admin@local",
@@ -39,39 +39,50 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile overlay when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+
       {/* Sidebar */}
       <motion.div
-        className={`fixed left-0 top-0 h-screen bg-gray-900 text-white transition-all duration-300 ${
+        className={`fixed left-0 top-0 h-screen bg-gray-900 text-white transition-all duration-300 z-40 ${
           sidebarOpen ? "w-64" : "w-20"
-        }`}
+        } md:w-64`}
         initial={false}
       >
         <div className="p-4 border-b border-gray-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center font-bold">
+            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-lg flex items-center justify-center font-bold text-sm">
               RC
             </div>
-            {sidebarOpen && <span className="font-bold text-lg">Admin</span>}
+            <span className="font-bold text-lg hidden md:inline">Admin</span>
           </div>
         </div>
 
-        <nav className="p-4 space-y-2">
+        <nav className="p-2 md:p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-140px)]">
           {adminTabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <motion.button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-lg transition-colors text-sm md:text-base ${
                   activeTab === tab.id
                     ? "bg-violet-600 text-white"
                     : "text-gray-400 hover:text-white hover:bg-gray-800"
                 }`}
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Icon className="w-5 h-5" />
-                {sidebarOpen && <span>{tab.label}</span>}
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="hidden md:inline">{tab.label}</span>
               </motion.button>
             );
           })}
@@ -79,20 +90,20 @@ export default function AdminDashboard() {
 
         <button
           onClick={handleLogout}
-          className="absolute bottom-4 left-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors"
+          className="absolute bottom-4 left-4 right-4 flex items-center justify-center md:justify-start gap-2 px-3 md:px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors text-sm"
         >
           <LogOut className="w-5 h-5" />
-          {sidebarOpen && <span>Logout</span>}
+          <span className="hidden md:inline">Logout</span>
         </button>
       </motion.div>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-20"}`}>
+      <div className={`transition-all duration-300 ${sidebarOpen ? "md:ml-64" : "md:ml-64"} ml-20`}>
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-40">
+        <div className="bg-white border-b border-gray-200 p-3 md:p-4 flex items-center justify-between sticky top-0 z-30 gap-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 rounded-lg md:hidden"
           >
             {sidebarOpen ? (
               <X className="w-6 h-6" />
@@ -100,17 +111,17 @@ export default function AdminDashboard() {
               <Menu className="w-6 h-6" />
             )}
           </button>
-          <div className="flex items-center gap-4">
-            <div>
-              <p className="text-sm text-gray-600">Logged in as</p>
-              <p className="text-gray-800 font-medium">{adminUser?.email}</p>
+          <div className="flex items-center gap-2 md:gap-4 ml-auto">
+            <div className="text-right text-xs md:text-sm">
+              <p className="text-gray-600 hidden sm:block">Logged in as</p>
+              <p className="text-gray-800 font-medium truncate">{adminUser?.email}</p>
             </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full"></div>
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full flex-shrink-0"></div>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="p-6">
+        <div className="p-3 md:p-6 overflow-x-hidden">
           {activeTab === "overview" && <OverviewTab />}
           {activeTab === "content" && <ContentTab />}
           {activeTab === "projects" && <ProjectsTab />}
@@ -154,9 +165,9 @@ function OverviewTab() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <div className="space-y-4 md:space-y-6">
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Dashboard Overview</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         {[
           { label: "Total Projects", value: stats.projects, color: "from-blue-500 to-blue-600" },
           { label: "Total Skills", value: stats.skills, color: "from-violet-500 to-violet-600" },
@@ -168,10 +179,10 @@ function OverviewTab() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className={`bg-gradient-to-br ${stat.color} text-white p-6 rounded-2xl`}
+            className={`bg-gradient-to-br ${stat.color} text-white p-4 md:p-6 rounded-xl md:rounded-2xl`}
           >
-            <div className="text-4xl font-bold">{loading ? "..." : stat.value}</div>
-            <div className="text-opacity-80">{stat.label}</div>
+            <div className="text-2xl md:text-4xl font-bold">{loading ? "..." : stat.value}</div>
+            <div className="text-opacity-80 text-sm md:text-base">{stat.label}</div>
           </motion.div>
         ))}
       </div>
@@ -1020,50 +1031,50 @@ function CertificationsTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Certifications</h2>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800">Manage Certifications</h2>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-violet-600 text-white rounded-lg flex items-center gap-2"
+          className="w-full sm:w-auto px-3 md:px-4 py-2 md:py-2 bg-violet-600 text-white rounded-lg flex items-center justify-center gap-2 text-sm md:text-base"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4 md:w-5 md:h-5" />
           Add Certification
         </motion.button>
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
+        <div className="bg-white p-3 md:p-6 rounded-lg border border-gray-200 space-y-3 md:space-y-4">
           <input
             type="text"
             placeholder="Certification Title"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
           />
           <input
             type="text"
             placeholder="Issuer Name"
             value={formData.issuer}
             onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
           />
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             <input
               type="date"
               placeholder="Issued Date"
               value={formData.issuedDate}
               onChange={(e) => setFormData({ ...formData, issuedDate: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
             />
             <input
               type="date"
               placeholder="Expiry Date (optional)"
               value={formData.expiryDate}
               onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
             />
           </div>
           <textarea
@@ -1071,7 +1082,7 @@ function CertificationsTab() {
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-3 md:px-4 py-2 border border-gray-300 rounded-lg text-sm md:text-base"
           />
           <input
             type="text"
@@ -1115,11 +1126,11 @@ function CertificationsTab() {
                   height={96}
                   className="w-32 h-24 object-cover rounded-lg"
                 />
-                <p className="text-xs text-gray-500 mt-1">✓ Uploaded to Cloudinary</p>
+                <p className="text-xs md:text-sm text-gray-500 mt-1">✓ Uploaded to Cloudinary</p>
               </div>
             )}
           </div>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm md:text-base">
             <input
               type="checkbox"
               checked={formData.featured}
@@ -1129,16 +1140,16 @@ function CertificationsTab() {
           </label>
           <button
             onClick={handleAddCertification}
-            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
+            className="w-full px-3 md:px-4 py-2 md:py-3 bg-green-600 text-white rounded-lg font-semibold text-sm md:text-base hover:bg-green-700 transition-colors"
           >
             Add Certification
           </button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3 md:gap-4">
         {loading ? (
-          <div className="text-center text-gray-500">Loading...</div>
+          <div className="text-center text-gray-500 col-span-full py-4">Loading...</div>
         ) : (
           certifications.map((cert: Certification) => (
             <motion.div
