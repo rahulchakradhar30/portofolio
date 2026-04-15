@@ -9,16 +9,19 @@ import type { Project, Skill, ContactMessage, PortfolioContent } from "@/app/lib
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [authState, setAuthState] = useState({ isAuth: false, adminName: "" });
-
-  // Check authentication on mount
-  useEffect(() => {
+  const [authState, setAuthState] = useState(() => {
+    if (typeof window === 'undefined') return { isAuth: false, adminName: "" };
     const auth = localStorage.getItem("adminAuth");
     if (auth) {
-      const parsed = JSON.parse(auth);
-      setAuthState({ isAuth: true, adminName: parsed.name });
+      try {
+        const parsed = JSON.parse(auth);
+        return { isAuth: true, adminName: parsed.name };
+      } catch (error) {
+        return { isAuth: false, adminName: "" };
+      }
     }
-  }, []);
+    return { isAuth: false, adminName: "" };
+  });
 
   if (!authState.isAuth) {
     return <AdminLogin onSuccess={(name) => {
