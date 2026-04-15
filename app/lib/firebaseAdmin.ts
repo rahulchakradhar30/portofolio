@@ -2,14 +2,23 @@ import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Initialize firebase admin with service account credentials
+// Track initialization state
+let isInitializing = false;
+
+// Initialize firebase admin with service account credentials (lazy initialization)
 const initializeAdmin = () => {
   if (admin.apps.length > 0) {
     console.log('Firebase Admin already initialized, reusing existing instance');
     return admin.app();
   }
 
+  if (isInitializing) {
+    console.log('Firebase Admin initialization already in progress');
+    return admin.app();
+  }
+
   console.log('Initializing Firebase Admin...');
+  isInitializing = true;
   
   try {
     // Try to load from firebase-credentials.json first
@@ -54,12 +63,13 @@ const initializeAdmin = () => {
   }
 };
 
-// Initialize on module load
-initializeAdmin();
-
 // Lazy getters to avoid initialization issues during build
 export const getAdminAuth = () => {
   try {
+    // Initialize only when actually needed (runtime, not build time)
+    if (admin.apps.length === 0) {
+      initializeAdmin();
+    }
     return admin.auth();
   } catch (error) {
     console.error('Error getting admin auth:', error);
@@ -69,6 +79,10 @@ export const getAdminAuth = () => {
 
 export const getAdminDb = () => {
   try {
+    // Initialize only when actually needed (runtime, not build time)
+    if (admin.apps.length === 0) {
+      initializeAdmin();
+    }
     return admin.firestore();
   } catch (error) {
     console.error('Error getting admin firestore:', error);
