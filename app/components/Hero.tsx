@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function Hero() {
-  const [heroData, setHeroData] = useState({
+  const DEFAULT_HERO_DATA = {
     heroTitle: "PEREPOGU RAHUL CHAKRADHAR",
     heroSubtitle: "AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR",
     heroTagline: "CREATE YOUR OWN",
-  });
+  };
+
+  const [heroData, setHeroData] = useState(DEFAULT_HERO_DATA);
 
   useEffect(() => {
     const fetchHeroData = async () => {
@@ -19,9 +21,9 @@ export default function Hero() {
           const data = await res.json();
           if (data.content) {
             setHeroData({
-              heroTitle: data.content.heroTitle || heroData.heroTitle,
-              heroSubtitle: data.content.heroSubtitle || heroData.heroSubtitle,
-              heroTagline: data.content.heroTagline || heroData.heroTagline,
+              heroTitle: data.content.heroTitle || DEFAULT_HERO_DATA.heroTitle,
+              heroSubtitle: data.content.heroSubtitle || DEFAULT_HERO_DATA.heroSubtitle,
+              heroTagline: data.content.heroTagline || DEFAULT_HERO_DATA.heroTagline,
             });
           }
         }

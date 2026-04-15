@@ -2,30 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Menu, X, LogOut, MessageSquare, Settings } from "lucide-react";
+import { Plus, Edit2, Trash2, Menu, X, LogOut } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
+import type { Project, Skill, ContactMessage, PortfolioContent } from "@/app/lib/types";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
   const [adminName, setAdminName] = useState("");
-  const [isHydrated, setIsHydrated] = useState(false);
 
   // Check authentication on mount
   useEffect(() => {
-    setIsHydrated(true);
     const auth = localStorage.getItem("adminAuth");
     if (auth) {
       setIsAuth(true);
       setAdminName(JSON.parse(auth).name);
     }
   }, []);
-
-  // Prevent rendering until hydrated (client-side only)
-  if (!isHydrated) {
-    return <div className="min-h-screen bg-gray-50" />;
-  }
 
   if (!isAuth) {
     return <AdminLogin onSuccess={(name) => {
@@ -218,7 +212,7 @@ function OverviewTab() {
         ]);
         setStats({
           projects: projectsRes.projects?.length || 0,
-          skills: projectsRes.success ? projectsRes.projects?.length || 0 : 0,
+          skills: skillsRes.skills?.length || 0,
           messages: messagesRes.messages?.length || 0,
         });
       } catch (error) {
@@ -257,7 +251,7 @@ function OverviewTab() {
 }
 
 function ContentTab() {
-  const [content, setContent] = useState<any>(null);
+  const [content, setContent] = useState<PortfolioContent | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -280,9 +274,13 @@ function ContentTab() {
   };
 
   const handleSave = async () => {
+    if (!content) {
+      alert('No content to save');
+      return;
+    }
     setSaving(true);
     try {
-      const res = await adminAPI.updatePortfolioContent(content);
+      const res = await adminAPI.updatePortfolioContent(content as unknown as Record<string, unknown>);
       if (res.success) {
         alert('Content updated successfully!');
         setEditMode(false);
@@ -324,7 +322,7 @@ function ContentTab() {
             <input
               type="text"
               value={content?.heroTitle || ""}
-              onChange={(e) => setContent({ ...content, heroTitle: e.target.value })}
+              onChange={(e) => setContent({ ...(content as PortfolioContent), heroTitle: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
@@ -335,7 +333,7 @@ function ContentTab() {
             <input
               type="text"
               value={content?.heroSubtitle || ""}
-              onChange={(e) => setContent({ ...content, heroSubtitle: e.target.value })}
+              onChange={(e) => setContent({ ...(content as PortfolioContent), heroSubtitle: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
@@ -346,7 +344,7 @@ function ContentTab() {
             <textarea
               rows={4}
               value={content?.aboutText || ""}
-              onChange={(e) => setContent({ ...content, aboutText: e.target.value })}
+              onChange={(e) => setContent({ ...(content as PortfolioContent), aboutText: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600 resize-none"
             />
@@ -357,7 +355,7 @@ function ContentTab() {
             <input
               type="email"
               value={content?.email || ""}
-              onChange={(e) => setContent({ ...content, email: e.target.value })}
+              onChange={(e) => setContent({ ...(content as PortfolioContent), email: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
@@ -368,7 +366,7 @@ function ContentTab() {
             <input
               type="text"
               value={content?.location || ""}
-              onChange={(e) => setContent({ ...content, location: e.target.value })}
+              onChange={(e) => setContent({ ...(content as PortfolioContent), location: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
@@ -392,7 +390,7 @@ function ContentTab() {
 }
 
 function ProjectsTab() {
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -541,7 +539,7 @@ function ProjectsTab() {
         {loading ? (
           <div className="text-center text-gray-500">Loading...</div>
         ) : (
-          projects.map((project: any) => (
+          projects.map((project: Project) => (
             <motion.div
               key={project.id}
               initial={{ opacity: 0, y: 20 }}
@@ -569,7 +567,7 @@ function ProjectsTab() {
 }
 
 function SkillsTab() {
-  const [skills, setSkills] = useState<any[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -676,7 +674,7 @@ function SkillsTab() {
         {loading ? (
           <div className="text-center text-gray-500">Loading...</div>
         ) : (
-          skills.map((skill: any) => (
+          skills.map((skill: Skill) => (
             <motion.div
               key={skill.id}
               initial={{ opacity: 0, y: 20 }}
@@ -706,7 +704,7 @@ function SkillsTab() {
 }
 
 function MessagesTab() {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -744,7 +742,7 @@ function MessagesTab() {
         {loading ? (
           <div className="text-center text-gray-500">Loading...</div>
         ) : (
-          messages.map((message: any) => (
+          messages.map((message: ContactMessage) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}
