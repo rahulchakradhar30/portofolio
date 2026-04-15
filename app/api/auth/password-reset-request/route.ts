@@ -22,11 +22,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('Password reset requested for:', email);
+
     // Check if user exists
     const user = await firebaseHelpers.getUserByEmail(email);
+    console.log('User lookup result:', user ? 'User found' : 'User not found');
 
     if (!user) {
       // Don't reveal if email exists for security
+      console.log('User not found in admin_users, sending generic response');
       return NextResponse.json(
         {
           success: true,
@@ -40,8 +44,12 @@ export async function POST(request: NextRequest) {
     const otp = generateOTP();
     const expiresAt = getOTPExpiration();
 
+    console.log('Generated OTP, storing in database...');
+
     // Store reset OTP in email_otps table (mark as password reset)
     await firebaseHelpers.storeOTP(email, otp, expiresAt, 'password_reset');
+
+    console.log('OTP stored, sending email...');
 
     // Send reset OTP via email
     const emailSent = await sendOTPEmail(
@@ -58,6 +66,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('Email sent successfully');
+
     return NextResponse.json(
       {
         success: true,
@@ -68,6 +78,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Password reset request error:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
     return NextResponse.json(
       { error: 'Failed to process password reset request' },
       { status: 500 }

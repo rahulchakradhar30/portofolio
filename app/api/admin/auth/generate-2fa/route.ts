@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const userEmail = request.headers.get("X-User-Email") || "admin@portfolio.com";
+    const userEmail = request.headers.get("X-User-Email") || "rahulchakradharperepogu@gmail.com";
 
     // Generate TOTP secret
     const secret = speakeasy.generateSecret({

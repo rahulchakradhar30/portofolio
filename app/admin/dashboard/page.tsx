@@ -850,7 +850,7 @@ function SettingsTab() {
             </label>
             <input
               type="email"
-              defaultValue="admin@portfolio.com"
+              defaultValue="rahulchakradharperepogu@gmail.com"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               disabled
             />
