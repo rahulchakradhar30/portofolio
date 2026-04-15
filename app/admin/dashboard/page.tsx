@@ -9,15 +9,22 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
   const [adminName, setAdminName] = useState("");
+  const [isHydrated, setIsHydrated] = useState(false);
 
   // Check authentication on mount
   useEffect(() => {
+    setIsHydrated(true);
     const auth = localStorage.getItem("adminAuth");
     if (auth) {
       setIsAuth(true);
       setAdminName(JSON.parse(auth).name);
     }
   }, []);
+
+  // Prevent rendering until hydrated (client-side only)
+  if (!isHydrated) {
+    return <div className="min-h-screen bg-gray-50" />;
+  }
 
   if (!isAuth) {
     return <AdminLogin onSuccess={(name) => {
