@@ -1,17 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
-import { verifyJWT } from '@/app/lib/auth';
-
-// Helper to verify admin token
-async function verifyAdminAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  return verifyJWT(token);
-}
 
 // GET - Get single skill
 export async function GET(
@@ -46,11 +34,6 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const payload = await verifyAdminAuth(request);
-    if (!payload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { title, description, proficiency, iconName, color, bgColor } = await request.json();
 
     if (proficiency && (proficiency < 0 || proficiency > 100)) {
@@ -89,11 +72,6 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const payload = await verifyAdminAuth(request);
-    if (!payload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     await serverFirebaseHelpers.deleteSkill(id);
 
     return NextResponse.json(

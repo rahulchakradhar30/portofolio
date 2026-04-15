@@ -12,37 +12,26 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [adminUser] = useState<AdminUser>({
+    id: "local-admin",
+    email: "admin@local",
+    name: "Admin",
+    password_hash: "",
+    role: "admin",
+    status: "active",
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("/api/admin/auth/me", { method: "GET" });
-        if (res.ok) {
-          const data = await res.json();
-          setAdminUser(data.user);
-          setIsHydrated(true);
-        } else {
-          router.push("/admin/login");
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-        router.push("/admin/login");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    setIsHydrated(true);
+    setLoading(false);
+  }, []);
 
   if (!isHydrated || loading) {
     return <div className="min-h-screen bg-gray-50" />;
   }
 
   const handleLogout = async () => {
-    // No-op: login system removed
     router.push("/");
   }
 

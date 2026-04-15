@@ -1,26 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
-import { verifyJWT } from '@/app/lib/auth';
-
-// Helper to verify admin token
-async function verifyAdminAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return null;
-  }
-
-  const token = authHeader.substring(7);
-  return verifyJWT(token);
-}
 
 // GET - List all contact messages
 export async function GET(request: NextRequest) {
   try {
-    const payload = await verifyAdminAuth(request);
-    if (!payload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
 
@@ -39,11 +22,6 @@ export async function GET(request: NextRequest) {
 // PUT - Mark message as read
 export async function PUT(request: NextRequest) {
   try {
-    const payload = await verifyAdminAuth(request);
-    if (!payload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { messageId, isRead } = await request.json();
 
     if (!messageId) {
@@ -71,11 +49,6 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete message
 export async function DELETE(request: NextRequest) {
   try {
-    const payload = await verifyAdminAuth(request);
-    if (!payload) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { messageId } = await request.json();
 
     if (!messageId) {
