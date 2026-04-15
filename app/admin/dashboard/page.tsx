@@ -11,7 +11,6 @@ export default function AdminDashboard() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isHydrated, setIsHydrated] = useState(false);
   const [adminUser] = useState<AdminUser>({
     id: "local-admin",
     email: "admin@local",
@@ -20,16 +19,6 @@ export default function AdminDashboard() {
     role: "admin",
     status: "active",
   });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setIsHydrated(true);
-    setLoading(false);
-  }, []);
-
-  if (!isHydrated || loading) {
-    return <div className="min-h-screen bg-gray-50" />;
-  }
 
   const handleLogout = async () => {
     router.push("/");
