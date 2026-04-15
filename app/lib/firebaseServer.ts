@@ -32,13 +32,14 @@ const serverFirebaseHelpers = {
       const db = getAdminDb();
       const usersRef = db.collection('admin_users');
       const now = new Date();
+      const createdAtStr = now.toISOString ? now.toISOString() : now;
       const docRef = await usersRef.add({
         ...userData,
-        created_at: now.toISOString ? now.toISOString() : now,
-        updated_at: now.toISOString ? now.toISOString() : now,
+        created_at: createdAtStr,
+        updated_at: createdAtStr,
       });
       console.log('Server: User created with ID:', docRef.id);
-      return { id: docRef.id, ...userData, created_at: now, updated_at: now };
+      return { id: docRef.id, ...userData, created_at: createdAtStr, updated_at: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating user:', error);
       console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
@@ -52,12 +53,13 @@ const serverFirebaseHelpers = {
       const db = getAdminDb();
       const userRef = db.collection('admin_users').doc(userId);
       const now = new Date();
+      const updatedAtStr = now.toISOString ? now.toISOString() : now;
       await userRef.update({
         ...userData,
-        updated_at: now.toISOString ? now.toISOString() : now,
+        updated_at: updatedAtStr,
       });
       console.log('Server: User updated');
-      return { id: userId, ...userData, updated_at: now };
+      return { id: userId, ...userData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating user:', error);
       console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
@@ -210,13 +212,14 @@ const serverFirebaseHelpers = {
       console.log('Server: Creating project:', projectData.title);
       const db = getAdminDb();
       const now = new Date();
+      const createdAtStr = now.toISOString ? now.toISOString() : now;
       const docRef = await db.collection('projects').add({
         ...projectData,
-        created_at: now.toISOString ? now.toISOString() : now,
-        updated_at: now.toISOString ? now.toISOString() : now,
+        created_at: createdAtStr,
+        updated_at: createdAtStr,
       });
       console.log('Server: Project created with ID:', docRef.id);
-      return { id: docRef.id, ...projectData, created_at: now, updated_at: now };
+      return { id: docRef.id, ...projectData, created_at: createdAtStr, updated_at: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating project:', error);
       console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
@@ -228,12 +231,14 @@ const serverFirebaseHelpers = {
     try {
       console.log('Server: Updating project:', projectId);
       const db = getAdminDb();
+      const now = new Date();
+      const updatedAtStr = now.toISOString ? now.toISOString() : now;
       await db.collection('projects').doc(projectId).update({
         ...projectData,
-        updated_at: new Date(),
+        updated_at: updatedAtStr,
       });
       console.log('Server: Project updated');
-      return { id: projectId, ...projectData };
+      return { id: projectId, ...projectData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating project:', error);
       throw error;
