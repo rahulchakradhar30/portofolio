@@ -61,7 +61,7 @@ export async function sendOTPEmail(
       `;
 
     await resend.emails.send({
-      from: 'noreply@yourdomain.com',
+      from: 'onboarding@resend.dev',
       to: email,
       subject: subjectMap[type] || subjectMap['Email Verification'],
       html: emailHtml,
@@ -76,7 +76,7 @@ export async function sendOTPEmail(
 export async function sendWelcomeEmail(email: string, name: string): Promise<boolean> {
   try {
     await resend.emails.send({
-      from: 'noreply@yourdomain.com',
+      from: 'onboarding@resend.dev',
       to: email,
       subject: 'Welcome to Portfolio Admin Dashboard',
       html: `
