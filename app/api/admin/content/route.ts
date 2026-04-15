@@ -36,12 +36,13 @@ export async function GET() {
 // PUT - Update portfolio content
 export async function PUT(request: NextRequest) {
   try {
-    const { heroTitle, heroSubtitle, heroTagline, aboutText, email, location } = await request.json();
+    const { heroTitle, heroSubtitle, heroTagline, bannerImage, aboutText, email, location } = await request.json();
 
     const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({
       heroTitle,
       heroSubtitle,
       heroTagline,
+      bannerImage,
       aboutText,
       email,
       location,

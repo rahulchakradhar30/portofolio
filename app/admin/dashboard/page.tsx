@@ -181,6 +181,7 @@ function ContentTab() {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     loadContent();
@@ -218,6 +219,35 @@ function ContentTab() {
       alert('Error saving content');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !content) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setContent({ ...content, bannerImage: data.imageUrl });
+        alert('Banner image uploaded successfully!');
+      } else {
+        alert('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -264,6 +294,38 @@ function ContentTab() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Hero Tagline</label>
+            <input
+              type="text"
+              value={(content as PortfolioContent & { heroTagline?: string })?.heroTagline || ""}
+              onChange={(e) => setContent({ ...(content as PortfolioContent), heroTagline: e.target.value })}
+              disabled={!editMode}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+            />
+          </div>
+
+          {editMode && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Hero Banner Image</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleBannerUpload}
+                  disabled={uploading}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                />
+                {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
+              </div>
+              {(content as PortfolioContent & { bannerImage?: string })?.bannerImage && (
+                <div className="mt-2">
+                  <img src={(content as PortfolioContent & { bannerImage?: string })?.bannerImage} alt="Banner Preview" className="w-full h-32 object-cover rounded-lg" />
+                </div>
+              )}
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">About Text</label>
@@ -327,7 +389,9 @@ function ProjectsTab() {
     demo: "",
     featured: false,
     category: "",
+    imageUrl: "",
   });
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -360,16 +424,46 @@ function ProjectsTab() {
       demo: formData.demo,
       featured: formData.featured,
       category: formData.category,
+      image: formData.imageUrl,
     };
 
     const res = await adminAPI.createProject(newProject);
     if (res.success) {
       alert("Project added successfully!");
-      setFormData({ title: "", description: "", tech: "", github: "", demo: "", featured: false, category: "" });
+      setFormData({ title: "", description: "", tech: "", github: "", demo: "", featured: false, category: "", imageUrl: "" });
       setShowForm(false);
       loadProjects();
     } else {
       alert("Failed to add project");
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formDataObj = new FormData();
+      formDataObj.append('file', file);
+
+      const res = await fetch('/api/admin/upload/image', {
+        method: 'POST',
+        body: formDataObj,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setFormData({ ...formData, imageUrl: data.imageUrl });
+        alert('Image uploaded successfully!');
+      } else {
+        alert('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -444,6 +538,25 @@ function ProjectsTab() {
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg"
           />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Project Image</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+              />
+              {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
+            </div>
+            {formData.imageUrl && (
+              <div className="mt-2">
+                <img src={formData.imageUrl} alt="Preview" className="w-32 h-24 object-cover rounded-lg" />
+                <p className="text-xs text-gray-500 mt-1">Image uploaded</p>
+              </div>
+            )}
+          </div>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"

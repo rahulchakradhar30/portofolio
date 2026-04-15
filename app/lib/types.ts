@@ -67,6 +67,7 @@ export interface PortfolioContent {
   heroTitle: string;
   heroSubtitle: string;
   heroTagline: string;
+  bannerImage?: string;
   aboutText: string;
   aboutStats: {
     label: string;
