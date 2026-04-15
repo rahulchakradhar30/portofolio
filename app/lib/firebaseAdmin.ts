@@ -1,31 +1,77 @@
 import * as admin from 'firebase-admin';
+import * as fs from 'fs';
+import * as path from 'path';
 
-// Initialize firebase admin with environment variables
+// Initialize firebase admin with service account credentials
 const initializeAdmin = () => {
   if (admin.apps.length > 0) {
+    console.log('Firebase Admin already initialized, reusing existing instance');
     return admin.app();
   }
 
-  const serviceAccount = {
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  };
+  console.log('Initializing Firebase Admin...');
+  
+  try {
+    // Try to load from firebase-credentials.json first
+    const credentialsPath = path.join(process.cwd(), 'firebase-credentials.json');
+    
+    if (fs.existsSync(credentialsPath)) {
+      console.log('Loading Firebase credentials from firebase-credentials.json');
+      const serviceAccount = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+      
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id,
+      });
+      
+      console.log('Firebase Admin initialized successfully from credentials file');
+      return admin.app();
+    }
+    
+    // Fallback to environment variables
+    console.log('Loading Firebase credentials from environment variables');
+    
+    const serviceAccount = {
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    };
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    projectId: process.env.FIREBASE_PROJECT_ID,
-  });
+    if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
+      throw new Error('Missing Firebase credentials in environment variables and no credentials file found');
+    }
 
-  return admin.app();
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+      projectId: process.env.FIREBASE_PROJECT_ID,
+    });
+
+    console.log('Firebase Admin initialized successfully from environment variables');
+    return admin.app();
+  } catch (error) {
+    console.error('Failed to initialize Firebase Admin:', error);
+    throw error;
+  }
 };
 
-try {
-  initializeAdmin();
-} catch (error) {
-  console.log('Firebase Admin already initialized');
-}
+// Initialize on module load
+initializeAdmin();
 
 // Lazy getters to avoid initialization issues during build
-export const getAdminAuth = () => admin.auth();
-export const getAdminDb = () => admin.firestore();
+export const getAdminAuth = () => {
+  try {
+    return admin.auth();
+  } catch (error) {
+    console.error('Error getting admin auth:', error);
+    throw error;
+  }
+};
+
+export const getAdminDb = () => {
+  try {
+    return admin.firestore();
+  } catch (error) {
+    console.error('Error getting admin firestore:', error);
+    throw error;
+  }
+};
