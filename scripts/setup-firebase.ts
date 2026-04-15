@@ -5,9 +5,13 @@
  * Run: npx ts-node scripts/setup-firebase.ts
  */
 
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize Firebase Admin
 const serviceAccountPath = path.join(process.cwd(), 'firebase-credentials.json');
@@ -20,10 +24,16 @@ if (!fs.existsSync(serviceAccountPath)) {
 
 const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-});
+try {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+    projectId: serviceAccount.project_id,
+  });
+} catch (error: any) {
+  if (!error.message.includes('already exists')) {
+    throw error;
+  }
+}
 
 const db = admin.firestore();
 
