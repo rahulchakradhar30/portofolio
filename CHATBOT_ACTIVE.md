@@ -1,7 +1,7 @@
 # CHATBOT SUCCESSFULLY ACTIVATED ✅
 
 ## API Key Status: ACTIVE
-- Groq API Key: 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
+- Groq API Key: Configured in .env.local (not committed to repo for security)
 - Environment: Configured in .env.local
 - Status: Live and responding
 

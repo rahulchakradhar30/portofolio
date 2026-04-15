@@ -144,7 +144,7 @@ app/
 
 Your `.env.local` now has:
 ```
-OPENAI_API_KEY=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
+OPENAI_API_KEY=sk-proj-[REDACTED FOR SECURITY - Store in .env.local]
 ```
 
 ✅ **Secure**: This key is server-side only and never exposed to the client
