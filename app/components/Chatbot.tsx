@@ -2,11 +2,15 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, Minimize2, Maximize2 } from 'lucide-react';
+import { X, Sparkles, Minimize2, Maximize2, ExternalLink, MessageCircle } from 'lucide-react';
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+
+  const openChatGPT = () => {
+    window.open('https://chat.openai.com', '_blank');
+  };
 
   return (
     <>
@@ -26,7 +30,7 @@ export default function Chatbot() {
         <Sparkles className="w-6 h-6" />
       </motion.button>
 
-      {/* Chat Window with Embedded ChatGPT */}
+      {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -35,7 +39,7 @@ export default function Chatbot() {
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.3 }}
             className={`fixed ${
-              isMinimized ? 'bottom-24 right-6 w-96 h-16' : 'bottom-24 right-6 w-96 h-[700px]'
+              isMinimized ? 'bottom-24 right-6 w-96 h-16' : 'bottom-24 right-6 w-96 h-[600px]'
             } bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden transition-all duration-300`}
           >
             {/* Header */}
@@ -43,7 +47,7 @@ export default function Chatbot() {
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
                 <div>
-                  <h3 className="font-bold text-sm">ChatGPT</h3>
+                  <h3 className="font-bold text-sm">ChatGPT Assistant</h3>
                   {!isMinimized && <p className="text-xs text-white/80">Free & Unlimited</p>}
                 </div>
               </div>
@@ -72,15 +76,62 @@ export default function Chatbot() {
               </div>
             </div>
 
-            {/* Embedded ChatGPT */}
+            {/* Content */}
             {!isMinimized && (
-              <div className="flex-1 overflow-hidden">
-                <iframe
-                  src="https://chat.openai.com"
-                  className="w-full h-full border-none"
-                  title="ChatGPT"
-                  allow="clipboard-read; clipboard-write"
-                />
+              <div className="flex-1 overflow-auto p-6 bg-gradient-to-b from-gray-50 to-white flex flex-col items-center justify-center text-center">
+                {/* Icon */}
+                <div className="mb-4">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                  >
+                    <MessageCircle className="w-20 h-20 text-blue-600" />
+                  </motion.div>
+                </div>
+
+                {/* Title */}
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">ChatGPT</h2>
+
+                {/* Description */}
+                <p className="text-gray-600 mb-6 text-sm leading-relaxed max-w-xs">
+                  Get unlimited, free access to ChatGPT. Click the button below to open ChatGPT and start chatting with AI!
+                </p>
+
+                {/* Features List */}
+                <div className="text-left mb-6 space-y-2 w-full">
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-green-500">✓</span>
+                    <span>Free & Unlimited</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-green-500">✓</span>
+                    <span>No API Keys Needed</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-green-500">✓</span>
+                    <span>Full ChatGPT Features</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-green-500">✓</span>
+                    <span>Web Browsing & Code</span>
+                  </div>
+                </div>
+
+                {/* Button */}
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={openChatGPT}
+                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 font-semibold mb-3"
+                >
+                  <span>Open ChatGPT</span>
+                  <ExternalLink className="w-4 h-4" />
+                </motion.button>
+
+                {/* Helper Text */}
+                <p className="text-xs text-gray-500">
+                  💡 Opens in a new window or tab
+                </p>
               </div>
             )}
           </motion.div>
