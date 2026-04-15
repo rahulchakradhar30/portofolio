@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { firebaseHelpers } from '@/app/lib/firebase';
 import { verifyPassword, generateJWT, checkRateLimit } from '@/app/lib/auth';
-import { cookies } from 'next/headers';
+import { AdminUser } from '@/app/lib/types';
 
 interface LoginRequest {
   email: string;
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin user
-    const adminUser = await firebaseHelpers.getUserByEmail(email) as any;
+    const adminUser = await firebaseHelpers.getUserByEmail(email);
 
     if (!adminUser) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify password
-    if (!verifyPassword(password, (adminUser as any).password_hash)) {
+    if (!verifyPassword(password, adminUser!.password_hash)) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if 2FA is enabled
-    if (adminUser.otp_enabled && adminUser.otp_secret) {
+    if (adminUser!.otp_enabled && adminUser.otp_secret) {
       if (!totpCode) {
         return NextResponse.json(
           {

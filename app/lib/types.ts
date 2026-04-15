@@ -24,6 +24,23 @@ export interface Skill {
   proficiency: number; // 0-100
 }
 
+export interface AdminUser {
+  id: string;
+  email: string;
+  name?: string;
+  password_hash: string;
+  otp_enabled?: boolean;
+  otp_secret?: string;
+}
+
+export interface OTPSchema {
+  id: string;
+  email: string;
+  otp: string;
+  type: string;
+  expires_at: Date | Record<string, unknown>;
+}
+
 export interface ContactMessage {
   id: string;
   firstName: string;

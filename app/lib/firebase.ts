@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, query, where, getDocs, addDoc, getDoc, updateDoc, deleteDoc, doc, orderBy, serverTimestamp } from 'firebase/firestore';
-import type { Project, Skill, ContactMessage, PortfolioContent } from './types';
+import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser, OTPSchema } from './types';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
@@ -19,11 +19,32 @@ export const auth = getAuth(app);
 // Helper functions for common database operations
 export const firebaseHelpers = {
   // Users collection operations
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<AdminUser | null> {
     const usersRef = collection(db, 'admin_users');
     const q = query(usersRef, where('email', '==', email));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.empty ? null : { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
+    if (querySnapshot.empty) return null;
+    const data = querySnapshot.docs[0].data();
+    return { id: querySnapshot.docs[0].id, ...data } as AdminUser;
+  },
+
+  async getLatestOTP(email: string, type: string = 'email_verification'): Promise<OTPSchema | null> {
+    const otpsRef = collection(db, 'email_otps');
+    const q = query(
+      otpsRef,
+      where('email', '==', email),
+      where('type', '==', type),
+      orderBy('created_at', 'desc')
+    );
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) return null;
+    const data = querySnapshot.docs[0].data();
+    return { id: querySnapshot.docs[0].id, ...data } as OTPSchema;
+  },
+
+  async deleteOTP(otpId: string) {
+    const otpRef = doc(db, 'email_otps', otpId);
+    await deleteDoc(otpRef);
   },
 
   async createUser(userData: Record<string, unknown>) {
@@ -33,7 +54,7 @@ export const firebaseHelpers = {
       created_at: serverTimestamp(),
       updated_at: serverTimestamp(),
     });
-    return { id: docRef.id, ...userData };
+    return { id: docRef.id, ...userData } as AdminUser;
   },
 
   async updateUser(userId: string, userData: Partial<Record<string, unknown>>) {
@@ -42,7 +63,7 @@ export const firebaseHelpers = {
       ...userData,
       updated_at: serverTimestamp(),
     });
-    return { id: userId, ...userData };
+    return { id: userId, ...userData } as Partial<AdminUser>;
   },
 
   // OTP operations
@@ -56,23 +77,6 @@ export const firebaseHelpers = {
       created_at: serverTimestamp(),
     });
     return { id: docRef.id, email, otp, type, expires_at: expiresAt };
-  },
-
-  async getLatestOTP(email: string, type: string = 'email_verification') {
-    const otpsRef = collection(db, 'email_otps');
-    const q = query(
-      otpsRef,
-      where('email', '==', email),
-      where('type', '==', type),
-      orderBy('created_at', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.empty ? null : { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() };
-  },
-
-  async deleteOTP(otpId: string) {
-    const otpRef = doc(db, 'email_otps', otpId);
-    await deleteDoc(otpRef);
   },
 
   // Projects operations

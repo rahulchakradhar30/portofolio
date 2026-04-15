@@ -70,12 +70,16 @@ export async function POST(request: NextRequest) {
 
     if (!existingContent) {
       await firebaseHelpers.updatePortfolioContent({
-        hero_title: 'PEREPOGU RAHUL CHAKRADHAR',
-        hero_subtitle: 'AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR',
-        hero_tagline: 'CREATE YOUR OWN',
-        about_text: 'Passionate about AI, technology, and content creation.',
+        heroTitle: 'PEREPOGU RAHUL CHAKRADHAR',
+        heroSubtitle: 'AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR',
+        heroTagline: 'CREATE YOUR OWN',
+        aboutText: 'Passionate about AI, technology, and content creation.',
         email: email,
         location: 'Bengaluru, Karnataka',
+        instagram: '',
+        linkedin: '',
+        github: '',
+        aboutStats: [],
       });
     }
 

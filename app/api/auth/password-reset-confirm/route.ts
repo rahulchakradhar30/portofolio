@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { firebaseHelpers } from '@/app/lib/firebase';
 import { hashPassword } from '@/app/lib/auth';
+import type { OTPSchema } from '@/app/lib/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify OTP exists and is valid
-    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'password_reset') as any;
+    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'password_reset') as OTPSchema;
 
     if (!otpRecord) {
       return NextResponse.json(
