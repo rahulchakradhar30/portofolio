@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       name,
       otp_secret: null,
       otp_enabled: false,
-    })) as AdminUser | null;
+    })) as unknown as AdminUser | null;
 
     if (!newUser) {
       return NextResponse.json(
