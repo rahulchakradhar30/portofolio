@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Real AI Chat using Groq (Free models - Mixtral, Llama 2)
+// Real AI Chat using Groq (Free models - Llama 3.1, Gemma 2)
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Try Groq API first (real AI models - Mixtral 8x7B, Llama 2)
+    // Try Groq API first (real AI models - Llama 3.1 70B Versatile)
     if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'gsk_placeholder_get_free_key_from_groq_console') {
       try {
         console.log('[Chat] Attempting Groq API...');
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Groq API with Mixtral 8x7B (FREE - Real AI model)
+// Groq API with available models (Llama 2, Llama 3.1, Gemma 2)
 async function tryGroqAPI(messages: any[]): Promise<string | null> {
   try {
     // Format messages for Groq
@@ -62,6 +62,7 @@ async function tryGroqAPI(messages: any[]): Promise<string | null> {
       content: msg.content
     }));
 
+    // Use llama-3.1-70b-versatile (most capable free model currently available)
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -69,7 +70,7 @@ async function tryGroqAPI(messages: any[]): Promise<string | null> {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'mixtral-8x7b-32768', // Free model with good quality
+        model: 'llama-3.1-70b-versatile', // Updated: Using Llama 3.1 (much more capable)
         messages: formattedMessages,
         max_tokens: 500,
         temperature: 0.7,
