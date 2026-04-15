@@ -12,43 +12,70 @@ interface LoginRequest {
 export async function POST(request: NextRequest) {
   try {
     const { email, password, totpCode }: LoginRequest = await request.json();
+    console.log('✅ Login attempt for:', email);
 
     if (!email || !password) {
+      console.error('❌ Missing email or password');
       return NextResponse.json(
-        { error: 'Email and password are required' },
+        { success: false, error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
     // Rate limiting: max 5 login attempts per 15 minutes
     if (!checkRateLimit(`login-${email}`, 5, 15 * 60 * 1000)) {
+      console.error('❌ Rate limit exceeded for:', email);
       return NextResponse.json(
-        { error: 'Too many login attempts. Please try again later.' },
+        { success: false, error: 'Too many login attempts. Please try again later.' },
         { status: 429 }
       );
     }
 
     // Get admin user
-    const adminUser = (await serverFirebaseHelpers.getUserByEmail(email)) as AdminUser | null;
+    console.log('🔍 Looking up user in Firestore...');
+    let adminUser: AdminUser | null = null;
+    try {
+      adminUser = (await serverFirebaseHelpers.getUserByEmail(email)) as AdminUser | null;
+    } catch (lookupError) {
+      console.error('❌ Error looking up user:', lookupError);
+      throw new Error(`Failed to lookup user: ${lookupError instanceof Error ? lookupError.message : String(lookupError)}`);
+    }
 
     if (!adminUser) {
+      console.error('❌ User not found:', email);
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { success: false, error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
+    console.log('✅ User found:', adminUser.email);
+    console.log('📝 Password hash available:', adminUser.password_hash ? 'YES' : 'NO');
+
     // Verify password
-    if (!verifyPassword(password, adminUser.password_hash)) {
+    console.log('🔐 Verifying password...');
+    if (!adminUser.password_hash) {
+      console.error('❌ No password hash found for user');
+      throw new Error('User password hash is missing');
+    }
+
+    const passwordMatch = verifyPassword(password, adminUser.password_hash);
+    console.log('🔐 Password match result:', passwordMatch);
+
+    if (!passwordMatch) {
+      console.error('❌ Password verification failed for:', email);
       return NextResponse.json(
-        { error: 'Invalid email or password' },
+        { success: false, error: 'Invalid email or password' },
         { status: 401 }
       );
     }
+
+    console.log('✅ Password verified successfully');
 
     // Check if 2FA is enabled
     if (adminUser.otp_enabled && adminUser.otp_secret) {
       if (!totpCode) {
+        console.log('ℹ️   2FA required but not provided');
         return NextResponse.json(
           {
             success: false,
@@ -64,7 +91,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = generateJWT(adminUser.id, adminUser.email);
+    console.log('🎫 Generating JWT token...');
+    let token: string;
+    try {
+      token = generateJWT(adminUser.id, adminUser.email);
+    } catch (tokenError) {
+      console.error('❌ Error generating JWT:', tokenError);
+      throw new Error(`Failed to generate token: ${tokenError instanceof Error ? tokenError.message : String(tokenError)}`);
+    }
+
+    console.log('✅ JWT token generated');
 
     // Set secure HTTP-only cookie
     const response = NextResponse.json(
@@ -88,11 +124,18 @@ export async function POST(request: NextRequest) {
       path: '/admin',
     });
 
+    console.log('✅ Login successful for:', email);
     return response;
   } catch (error) {
-    console.error('Login error:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Login error:', errorMessage);
+    console.error('❌ Full stack:', error);
     return NextResponse.json(
-      { error: 'Login failed' },
+      { 
+        success: false,
+        error: 'Login failed',
+        details: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+      },
       { status: 500 }
     );
   }
