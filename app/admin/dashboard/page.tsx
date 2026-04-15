@@ -9,19 +9,25 @@ import type { Project, Skill, ContactMessage, PortfolioContent } from "@/app/lib
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [authState, setAuthState] = useState(() => {
-    if (typeof window === 'undefined') return { isAuth: false, adminName: "" };
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [authState, setAuthState] = useState({ isAuth: false, adminName: "" });
+
+  useEffect(() => {
     const auth = localStorage.getItem("adminAuth");
     if (auth) {
       try {
         const parsed = JSON.parse(auth);
-        return { isAuth: true, adminName: parsed.name };
+        setAuthState({ isAuth: true, adminName: parsed.name });
       } catch (error) {
-        return { isAuth: false, adminName: "" };
+        setAuthState({ isAuth: false, adminName: "" });
       }
     }
-    return { isAuth: false, adminName: "" };
-  });
+    setIsHydrated(true);
+  }, []);
+
+  if (!isHydrated) {
+    return <div className="min-h-screen bg-gray-50" />;
+  }
 
   if (!authState.isAuth) {
     return <AdminLogin onSuccess={(name) => {
