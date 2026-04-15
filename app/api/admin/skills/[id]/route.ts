@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -20,7 +20,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const skill = await firebaseHelpers.getSkillById(id);
+    const skill = await serverFirebaseHelpers.getSkillById(id);
 
     if (!skill) {
       return NextResponse.json(
@@ -60,7 +60,7 @@ export async function PUT(
       );
     }
 
-    const updatedSkill = await firebaseHelpers.updateSkill(id, {
+    const updatedSkill = await serverFirebaseHelpers.updateSkill(id, {
       title,
       description,
       proficiency,
@@ -94,7 +94,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await firebaseHelpers.deleteSkill(id);
+    await serverFirebaseHelpers.deleteSkill(id);
 
     return NextResponse.json(
       { success: true, message: 'Skill deleted' },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -16,7 +16,7 @@ async function verifyAdminAuth(request: NextRequest) {
 // GET - List all skills
 export async function GET() {
   try {
-    const skills = await firebaseHelpers.getAllSkills();
+    const skills = await serverFirebaseHelpers.getAllSkills();
 
     return NextResponse.json({ skills }, { status: 200 });
   } catch (error) {
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newSkill = await firebaseHelpers.createSkill({
+    const newSkill = await serverFirebaseHelpers.createSkill({
       title,
       description: description || '',
       proficiency: proficiency || 50,

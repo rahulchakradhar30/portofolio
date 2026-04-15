@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { setupGoogleAuthenticator, verifyJWT, generateSecureString } from '@/app/lib/auth';
 import { send2FASetupEmail } from '@/app/lib/email';
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get admin user
-    const adminUser = await firebaseHelpers.getUserByEmail(payload.email) as any;
+    const adminUser = await serverFirebaseHelpers.getUserByEmail(payload.email) as any;
 
     if (!adminUser) {
       return NextResponse.json(

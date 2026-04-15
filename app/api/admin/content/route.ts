@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -16,7 +16,7 @@ async function verifyAdminAuth(request: NextRequest) {
 // GET - Get portfolio content
 export async function GET() {
   try {
-    const content = await firebaseHelpers.getPortfolioContent();
+    const content = await serverFirebaseHelpers.getPortfolioContent();
 
     // Return default if not found
     if (!content) {
@@ -55,7 +55,7 @@ export async function PUT(request: NextRequest) {
 
     const { heroTitle, heroSubtitle, heroTagline, aboutText, email, location } = await request.json();
 
-    const updatedContent = await firebaseHelpers.updatePortfolioContent({
+    const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({
       heroTitle,
       heroSubtitle,
       heroTagline,

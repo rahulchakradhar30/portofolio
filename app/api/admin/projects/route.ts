@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -16,7 +16,7 @@ async function verifyAdminAuth(request: NextRequest) {
 // GET - List all projects
 export async function GET() {
   try {
-    const projects = await firebaseHelpers.getAllProjects();
+    const projects = await serverFirebaseHelpers.getAllProjects();
 
     return NextResponse.json({ projects }, { status: 200 });
   } catch (error) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newProject = await firebaseHelpers.createProject({
+    const newProject = await serverFirebaseHelpers.createProject({
       title,
       description,
       longDescription,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
 
-    const messages = await firebaseHelpers.getAllMessages(unreadOnly);
+    const messages = await serverFirebaseHelpers.getAllMessages(unreadOnly);
 
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
@@ -53,7 +53,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updatedMessage = await firebaseHelpers.updateMessage(messageId, isRead);
+    const updatedMessage = await serverFirebaseHelpers.updateMessage(messageId, isRead);
 
     return NextResponse.json(
       { success: true, message: updatedMessage },
@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await firebaseHelpers.deleteMessage(messageId);
+    await serverFirebaseHelpers.deleteMessage(messageId);
 
     return NextResponse.json(
       { success: true, message: 'Message deleted' },

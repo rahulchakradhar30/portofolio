@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { generateOTP, getOTPExpiration, checkRateLimit } from '@/app/lib/auth';
 import { sendOTPEmail } from '@/app/lib/email';
 
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     console.log('Password reset requested for:', email);
 
     // Check if user exists
-    const user = await firebaseHelpers.getUserByEmail(email);
+    const user = await serverFirebaseHelpers.getUserByEmail(email);
     console.log('User lookup result:', user ? 'User found' : 'User not found');
 
     if (!user) {
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     console.log('Generated OTP, storing in database...');
 
     // Store reset OTP in email_otps table (mark as password reset)
-    await firebaseHelpers.storeOTP(email, otp, expiresAt, 'password_reset');
+    await serverFirebaseHelpers.storeOTP(email, otp, expiresAt, 'password_reset');
 
     console.log('OTP stored, sending email...');
 

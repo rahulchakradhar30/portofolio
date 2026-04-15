@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { hashPassword } from '@/app/lib/auth';
 import type { OTPSchema } from '@/app/lib/types';
 
@@ -22,8 +22,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('Password reset confirm for:', email);
+
     // Verify OTP exists and is valid
-    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'password_reset') as OTPSchema;
+    const otpRecord = await serverFirebaseHelpers.getLatestOTP(email, 'password_reset') as OTPSchema;
 
     if (!otpRecord) {
       return NextResponse.json(
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
     const passwordHash = hashPassword(newPassword);
 
     // Update admin user password
-    const user = await firebaseHelpers.getUserByEmail(email);
+    const user = await serverFirebaseHelpers.getUserByEmail(email);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -60,10 +62,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await firebaseHelpers.updateUser(user.id, { password_hash: passwordHash });
+    await serverFirebaseHelpers.updateUser(user.id, { password_hash: passwordHash });
 
-    // Delete the used OTP
-    await firebaseHelpers.deleteOTP(otpRecord.id);
+    // Mark OTP as verified
+    await serverFirebaseHelpers.markOTPVerified((otpRecord as any).id);
+
+    // Log activity
+    await serverFirebaseHelpers.logActivity(email, 'password_reset_success');
 
     return NextResponse.json(
       {
@@ -74,6 +79,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error('Password reset confirm error:', error);
+    console.error('Error details:', error instanceof Error ? error.message : String(error));
     return NextResponse.json(
       { error: 'Failed to reset password' },
       { status: 500 }

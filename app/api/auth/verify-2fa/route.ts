@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyTOTPCode, generateJWT } from '@/app/lib/auth';
 import { cookies } from 'next/headers';
 import type { AdminUser } from '@/app/lib/types';
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch admin user
-    const admin = (await firebaseHelpers.getUserByEmail(email)) as AdminUser | null;
+    const admin = (await serverFirebaseHelpers.getUserByEmail(email)) as AdminUser | null;
 
     if (!admin) {
       return NextResponse.json(

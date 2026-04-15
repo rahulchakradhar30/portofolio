@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { hashPassword } from '@/app/lib/auth';
 import { sendWelcomeEmail } from '@/app/lib/email';
 import type { OTPSchema, AdminUser } from '@/app/lib/types';
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get OTP from database
-    const otpRecord = (await firebaseHelpers.getLatestOTP(email, 'email_verification')) as OTPSchema | null;
+    const otpRecord = (await serverFirebaseHelpers.getLatestOTP(email, 'email_verification')) as OTPSchema | null;
 
     if (!otpRecord || otpRecord.otp !== otp) {
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
     // Create admin user
     const passwordHash = hashPassword(password);
 
-    const newUser = (await firebaseHelpers.createUser({
+    const newUser = (await serverFirebaseHelpers.createUser({
       email,
       password_hash: passwordHash,
       name,
@@ -68,16 +68,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Delete used OTP
-    await firebaseHelpers.deleteOTP(otpRecord.id);
+    await serverFirebaseHelpers.deleteOTP(otpRecord.id);
 
     // Send welcome email
     await sendWelcomeEmail(email, name);
 
     // Create default portfolio content if not exists
-    const existingContent = await firebaseHelpers.getPortfolioContent();
+    const existingContent = await serverFirebaseHelpers.getPortfolioContent();
 
     if (!existingContent) {
-      await firebaseHelpers.updatePortfolioContent({
+      await serverFirebaseHelpers.updatePortfolioContent({
         heroTitle: 'PEREPOGU RAHUL CHAKRADHAR',
         heroSubtitle: 'AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR',
         heroTagline: 'CREATE YOUR OWN',

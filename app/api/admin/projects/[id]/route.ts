@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -20,7 +20,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const project = await firebaseHelpers.getProjectById(id);
+    const project = await serverFirebaseHelpers.getProjectById(id);
 
     if (!project) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function PUT(
     const { title, description, longDescription, imageUrl, techStack, githubUrl, demoUrl, category, featured } =
       await request.json();
 
-    const updatedProject = await firebaseHelpers.updateProject(id, {
+    const updatedProject = await serverFirebaseHelpers.updateProject(id, {
       title,
       description,
       longDescription,
@@ -91,7 +91,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await firebaseHelpers.deleteProject(id);
+    await serverFirebaseHelpers.deleteProject(id);
 
     return NextResponse.json(
       { success: true, message: 'Project deleted' },

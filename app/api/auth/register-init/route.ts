@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import firebaseHelpers from '@/app/lib/firebase';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { generateOTP, getOTPExpiration, checkRateLimit } from '@/app/lib/auth';
 import { sendOTPEmail } from '@/app/lib/email';
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email already exists
-    const existingUser = await firebaseHelpers.getUserByEmail(email);
+    const existingUser = await serverFirebaseHelpers.getUserByEmail(email);
 
     if (existingUser) {
       return NextResponse.json(
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = getOTPExpiration();
 
     // Store OTP in database
-    await firebaseHelpers.storeOTP(email, otp, expiresAt, 'email_verification');
+    await serverFirebaseHelpers.storeOTP(email, otp, expiresAt, 'email_verification');
 
     // Send OTP email
     const emailSent = await sendOTPEmail(email, otp);
