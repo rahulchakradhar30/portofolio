@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3, Award } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
+import AIAssistant from "@/app/components/AIAssistant";
 import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser, Certification } from "@/app/lib/types";
 
 export default function AdminDashboard() {
@@ -133,6 +134,14 @@ export default function AdminDashboard() {
           {activeTab === "settings" && <SettingsTab />}
         </div>
       </div>
+
+      {/* AI Assistant */}
+      <AIAssistant
+        onContentGenerated={(content, type) => {
+          // Content will be used via the chatbot UI
+          console.log('Generated content:', content, 'Type:', type);
+        }}
+      />
     </div>
   );
 }
@@ -286,7 +295,7 @@ function ContentTab() {
               value={content?.heroTitle || ""}
               onChange={(e) => setContent({ ...(content as PortfolioContent), heroTitle: e.target.value })}
               disabled={!editMode}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-gray-100 disabled:text-gray-700 disabled:border-gray-300 transition"
             />
           </div>
 
@@ -297,7 +306,7 @@ function ContentTab() {
               value={content?.heroSubtitle || ""}
               onChange={(e) => setContent({ ...(content as PortfolioContent), heroSubtitle: e.target.value })}
               disabled={!editMode}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-gray-100 disabled:text-gray-700 disabled:border-gray-300 transition"
             />
           </div>
 
@@ -308,7 +317,7 @@ function ContentTab() {
               value={(content as PortfolioContent & { heroTagline?: string })?.heroTagline || ""}
               onChange={(e) => setContent({ ...(content as PortfolioContent), heroTagline: e.target.value })}
               disabled={!editMode}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-gray-100 disabled:text-gray-700 disabled:border-gray-300 transition"
             />
           </div>
 
@@ -346,7 +355,7 @@ function ContentTab() {
               value={content?.aboutText || ""}
               onChange={(e) => setContent({ ...(content as PortfolioContent), aboutText: e.target.value })}
               disabled={!editMode}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600 resize-none"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-gray-100 disabled:text-gray-700 disabled:border-gray-300 transition resize-none"
             />
           </div>
 
@@ -357,7 +366,7 @@ function ContentTab() {
               value={content?.email || ""}
               onChange={(e) => setContent({ ...(content as PortfolioContent), email: e.target.value })}
               disabled={!editMode}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-gray-100 disabled:text-gray-700 disabled:border-gray-300 transition"
             />
           </div>
 
@@ -368,7 +377,7 @@ function ContentTab() {
               value={content?.location || ""}
               onChange={(e) => setContent({ ...(content as PortfolioContent), location: e.target.value })}
               disabled={!editMode}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-gray-100 disabled:text-gray-700 disabled:border-gray-300 transition"
             />
           </div>
 
@@ -530,42 +539,42 @@ function ProjectsTab() {
             placeholder="Project Title"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <textarea
             placeholder="Project Description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition resize-none"
           />
           <input
             type="text"
             placeholder="Tech Stack (comma-separated)"
             value={formData.tech}
             onChange={(e) => setFormData({ ...formData, tech: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <input
             type="text"
             placeholder="GitHub URL"
             value={formData.github}
             onChange={(e) => setFormData({ ...formData, github: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <input
             type="text"
             placeholder="Demo URL"
             value={formData.demo}
             onChange={(e) => setFormData({ ...formData, demo: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <input
             type="text"
             placeholder="Category"
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Project Image</label>
@@ -575,7 +584,7 @@ function ProjectsTab() {
                 accept="image/*"
                 onChange={handleImageUpload}
                 disabled={uploading}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black file:bg-violet-600 file:text-white file:border-0 file:px-4 file:py-2 file:rounded-md file:cursor-pointer hover:border-violet-400 transition"
               />
               {uploading && <span className="text-sm text-gray-500">Uploading...</span>}
             </div>
@@ -597,65 +606,68 @@ function ProjectsTab() {
             value={formData.longDescription}
             onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition resize-none"
           />
           <input
             type="text"
             placeholder="YouTube URL (optional)"
             value={formData.youtubeUrl}
             onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <input
             type="text"
             placeholder="YouTube Title"
             value={formData.youtubeTitle}
             onChange={(e) => setFormData({ ...formData, youtubeTitle: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <input
             type="text"
             placeholder="Code URL (optional)"
             value={formData.codeUrl}
             onChange={(e) => setFormData({ ...formData, codeUrl: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <input
             type="text"
             placeholder="Code Label (e.g., 'View Code', 'GitHub Repo')"
             value={formData.codeName}
             onChange={(e) => setFormData({ ...formData, codeName: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <div className="flex gap-4">
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.showCode}
                 onChange={(e) => setFormData({ ...formData, showCode: e.target.checked })}
+                className="w-4 h-4 accent-violet-600"
               />
-              <span className="text-sm">Show Code Section</span>
+              <span className="text-sm text-gray-700 font-medium">Show Code Section</span>
             </label>
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={formData.showDetails}
                 onChange={(e) => setFormData({ ...formData, showDetails: e.target.checked })}
+                className="w-4 h-4 accent-violet-600"
               />
-              <span className="text-sm">Show Details Section</span>
+              <span className="text-sm text-gray-700 font-medium">Show Details Section</span>
             </label>
           </div>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               checked={formData.featured}
               onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+              className="w-4 h-4 accent-violet-600"
             />
-            <span>Featured</span>
+            <span className="text-sm text-gray-700 font-medium">Featured</span>
           </label>
           <button
             onClick={handleAddProject}
-            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
+            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
           >
             Add Project
           </button>
@@ -777,29 +789,29 @@ function SkillsTab() {
             placeholder="Skill Title"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <textarea
             placeholder="Skill Description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition resize-none"
           />
           <div>
-            <label className="text-sm font-medium text-gray-700">Proficiency: {formData.proficiency}%</label>
+            <label className="text-sm font-medium text-gray-700 block mb-2">Proficiency: {formData.proficiency}%</label>
             <input
               type="range"
               min="0"
               max="100"
               value={formData.proficiency}
               onChange={(e) => setFormData({ ...formData, proficiency: parseInt(e.target.value) })}
-              className="w-full"
+              className="w-full accent-violet-600"
             />
           </div>
           <button
             onClick={handleAddSkill}
-            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
+            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
           >
             Add Skill
           </button>

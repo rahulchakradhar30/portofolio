@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ExternalLink, Code, GitBranch, Play } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -67,202 +67,266 @@ export default function ProjectDetail() {
   const youtubeId = project.youtubeUrl ? getYouTubeId(project.youtubeUrl) : null;
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-br from-gray-50 to-white">
-      {/* Header */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 mb-8 font-semibold"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          Back to Home
-        </Link>
+    <div className="min-h-screen pt-20 md:pt-28 pb-20 bg-gradient-to-br from-slate-900 to-slate-800">
+      {/* Decorative background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Hero Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-6xl mx-auto px-4 md:px-8 mb-20"
-      >
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
-          {/* Image */}
-          <div className="relative">
-            {project.image ? (
-              <Image
-                src={project.image}
-                alt={project.title}
-                width={600}
-                height={400}
-                className="rounded-3xl w-full h-auto object-cover shadow-lg"
-              />
-            ) : (
-              <div className="bg-gradient-to-br from-violet-200 to-pink-200 rounded-3xl overflow-hidden aspect-video flex items-center justify-center">
-                <div className="text-2xl md:text-6xl font-bold text-white opacity-20">
-                  {project.category}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8">
+        {/* Header */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 mb-8 font-semibold transition group"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" />
+          Back to Home
+        </Link>
+
+        {/* Hero Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="mb-20"
+        >
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            {/* Image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.1 }}
+              className="relative"
+            >
+              {project.image ? (
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-pink-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-300"></div>
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    width={600}
+                    height={400}
+                    className="relative rounded-3xl w-full h-auto object-cover shadow-2xl"
+                  />
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (
+                <div className="bg-gradient-to-br from-violet-600 to-pink-600 rounded-3xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
+                  <div className="text-2xl md:text-6xl font-bold text-white opacity-30">
+                    {project.category}
+                  </div>
+                </div>
+              )}
+            </motion.div>
 
-          {/* Content */}
-          <div className="space-y-6">
-            <div>
-              <span className="px-4 py-2 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold inline-block mb-4">
-                {project.category}
-              </span>
-              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
-                {project.title}
-              </h1>
-            </div>
-
-            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-              {project.description}
-            </p>
-
-            {/* Tech Stack */}
-            {project.tech && project.tech.length > 0 && (
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="space-y-6"
+            >
               <div>
-                <div className="text-sm text-gray-600 mb-3 font-semibold">Technologies</div>
-                <div className="flex flex-wrap gap-2">
-                  {project.tech.map((tech: string) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="inline-block px-4 py-2 bg-gradient-to-r from-violet-600/20 to-pink-600/20 border border-violet-500/50 text-violet-300 rounded-full text-sm font-semibold mb-4"
+                >
+                  {project.category}
+                </motion.span>
+                <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                  {project.title}
+                </h1>
               </div>
-            )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 pt-4">
-              {project.demo && (
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
-                >
-                  <ExternalLink className="w-5 h-5" />
-                  Live Demo
-                </a>
-              )}
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
-                >
-                  <GitBranch className="w-5 h-5" />
-                  GitHub
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </motion.section>
+              <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+                {project.description}
+              </p>
 
-      {/* YouTube Video Section */}
-      {youtubeId && (
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="max-w-6xl mx-auto px-4 md:px-8 mb-20"
-        >
-          <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
-            <div className="bg-gradient-to-r from-violet-600 to-pink-600 px-6 md:px-8 py-4">
-              <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-                <Play className="w-6 h-6" />
-                {project.youtubeTitle || "Video"}
-              </h2>
-            </div>
-            <div className="aspect-video w-full">
-              <iframe
-                className="w-full h-full"
-                src={`https://www.youtube.com/embed/${youtubeId}`}
-                title={project.youtubeTitle || "Project Video"}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </motion.section>
-      )}
-
-      {/* Details and Code Sections */}
-      {(project.showDetails || project.showCode) && (
-        <motion.section
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="max-w-6xl mx-auto px-4 md:px-8"
-        >
-          <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200">
-              {project.showDetails && (
-                <button
-                  onClick={() => setActiveTab("details")}
-                  className={`flex-1 px-6 py-4 font-semibold transition ${
-                    activeTab === "details"
-                      ? "text-violet-600 border-b-2 border-violet-600"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  Details
-                </button>
-              )}
-              {project.showCode && (
-                <button
-                  onClick={() => setActiveTab("code")}
-                  className={`flex-1 px-6 py-4 font-semibold transition ${
-                    activeTab === "code"
-                      ? "text-violet-600 border-b-2 border-violet-600"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  Code
-                </button>
-              )}
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-6 md:p-8">
-              {activeTab === "details" && project.longDescription && (
-                <div className="prose prose-lg max-w-none text-gray-700">
-                  <p className="whitespace-pre-line leading-relaxed">
-                    {project.longDescription}
-                  </p>
+              {/* Tech Stack */}
+              {project.tech && project.tech.length > 0 && (
+                <div>
+                  <div className="text-sm text-gray-400 mb-3 font-semibold uppercase tracking-wider">Technologies</div>
+                  <div className="flex flex-wrap gap-2">
+                    {project.tech.map((tech: string) => (
+                      <motion.span
+                        key={tech}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="px-4 py-2 bg-violet-600/20 border border-violet-500/50 text-violet-300 rounded-full text-sm font-medium hover:bg-violet-600/30 transition"
+                      >
+                        {tech}
+                      </motion.span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {activeTab === "code" && project.codeUrl && (
-                <div className="space-y-4">
-                  <p className="text-gray-700">
-                    Access the source code for this project:
-                  </p>
-                  <a
-                    href={project.codeUrl}
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3 pt-6">
+                {project.demo && (
+                  <motion.a
+                    href={project.demo}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition font-semibold"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
                   >
-                    <Code className="w-5 h-5" />
-                    {project.codeName || "View Code"}
-                  </a>
-                </div>
-              )}
-            </div>
+                    <ExternalLink className="w-5 h-5" />
+                    Live Demo
+                  </motion.a>
+                )}
+                {project.github && (
+                  <motion.a
+                    href={project.github}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-slate-700/50 border border-slate-600 text-gray-200 rounded-lg hover:bg-slate-700 transition-all font-semibold"
+                  >
+                    <GitBranch className="w-5 h-5" />
+                    GitHub
+                  </motion.a>
+                )}
+              </div>
+            </motion.div>
           </div>
         </motion.section>
-      )}
+
+        {/* YouTube Video Section */}
+        {youtubeId && (
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+              <div className="bg-gradient-to-r from-violet-600 to-pink-600 px-6 md:px-8 py-6">
+                <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                  <Play className="w-7 h-7 bg-white/20 p-1.5 rounded-full" />
+                  {project.youtubeTitle || "Project Video"}
+                </h2>
+              </div>
+              <div className="aspect-video w-full">
+                <iframe
+                  className="w-full h-full"
+                  src={`https://www.youtube.com/embed/${youtubeId}`}
+                  title={project.youtubeTitle || "Project Video"}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {/* Details and Code Sections */}
+        {(project.showDetails || project.showCode) && (
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+              {/* Tabs */}
+              <div className="flex border-b border-slate-700/50 bg-slate-800/70 backdrop-blur">
+                {project.showDetails && (
+                  <motion.button
+                    onClick={() => setActiveTab("details")}
+                    className={`flex-1 px-6 py-4 font-semibold transition relative ${
+                      activeTab === "details"
+                        ? "text-violet-400"
+                        : "text-gray-400 hover:text-gray-300"
+                    }`}
+                    whileHover={{ backgroundColor: "rgba(139, 92, 246, 0.1)" }}
+                  >
+                    Details
+                    {activeTab === "details" && (
+                      <motion.div
+                        layoutId="tab-indicator"
+                        className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-600 to-pink-600"
+                      />
+                    )}
+                  </motion.button>
+                )}
+                {project.showCode && (
+                  <motion.button
+                    onClick={() => setActiveTab("code")}
+                    className={`flex-1 px-6 py-4 font-semibold transition relative ${
+                      activeTab === "code"
+                        ? "text-violet-400"
+                        : "text-gray-400 hover:text-gray-300"
+                    }`}
+                    whileHover={{ backgroundColor: "rgba(139, 92, 246, 0.1)" }}
+                  >
+                    Code
+                    {activeTab === "code" && (
+                      <motion.div
+                        layoutId="tab-indicator"
+                        className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-600 to-pink-600"
+                      />
+                    )}
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-8">
+                <AnimatePresence mode="wait">
+                  {activeTab === "details" && project.longDescription && (
+                    <motion.div
+                      key="details"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="prose prose-invert max-w-none text-gray-200"
+                    >
+                      <p className="whitespace-pre-line leading-relaxed text-base md:text-lg text-gray-300 font-light">
+                        {project.longDescription}
+                      </p>
+                    </motion.div>
+                  )}
+
+                  {activeTab === "code" && project.codeUrl && (
+                    <motion.div
+                      key="code"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                      className="space-y-6"
+                    >
+                      <p className="text-gray-300 text-lg">
+                        Access the source code repository for complete project details:
+                      </p>
+                      <motion.a
+                        href={project.codeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+                      >
+                        <Code className="w-5 h-5" />
+                        {project.codeName || "View Code"}
+                      </motion.a>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.section>
+        )}
+      </div>
     </div>
   );
 }
