@@ -31,15 +31,17 @@ const serverFirebaseHelpers = {
       console.log('Server: Creating new user:', userData.email);
       const db = getAdminDb();
       const usersRef = db.collection('admin_users');
+      const now = new Date();
       const docRef = await usersRef.add({
         ...userData,
-        created_at: new Date(),
-        updated_at: new Date(),
+        created_at: now.toISOString ? now.toISOString() : now,
+        updated_at: now.toISOString ? now.toISOString() : now,
       });
       console.log('Server: User created with ID:', docRef.id);
-      return { id: docRef.id, ...userData };
+      return { id: docRef.id, ...userData, created_at: now, updated_at: now };
     } catch (error) {
       console.error('Server: Error creating user:', error);
+      console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   },
@@ -49,14 +51,16 @@ const serverFirebaseHelpers = {
       console.log('Server: Updating user:', userId);
       const db = getAdminDb();
       const userRef = db.collection('admin_users').doc(userId);
+      const now = new Date();
       await userRef.update({
         ...userData,
-        updated_at: new Date(),
+        updated_at: now.toISOString ? now.toISOString() : now,
       });
       console.log('Server: User updated');
-      return { id: userId, ...userData };
+      return { id: userId, ...userData, updated_at: now };
     } catch (error) {
       console.error('Server: Error updating user:', error);
+      console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   },
@@ -67,18 +71,29 @@ const serverFirebaseHelpers = {
       console.log('Server: Storing OTP for:', email, 'Type:', type);
       const db = getAdminDb();
       const otpsRef = db.collection('email_otps');
+      
+      // Convert Date objects to timestamps for Firestore
+      const now = new Date();
       const docRef = await otpsRef.add({
         email,
         otp,
         type,
-        expires_at: expiresAt,
-        created_at: new Date(),
+        expires_at: expiresAt.toISOString ? expiresAt.toISOString() : expiresAt,
+        created_at: now.toISOString ? now.toISOString() : now,
         verified: false,
       });
       console.log('Server: OTP stored with ID:', docRef.id);
-      return { id: docRef.id, email, otp, type, expires_at: expiresAt };
+      return { 
+        id: docRef.id, 
+        email, 
+        otp, 
+        type, 
+        expires_at: expiresAt,
+        created_at: now 
+      };
     } catch (error) {
       console.error('Server: Error storing OTP:', error);
+      console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   },
@@ -114,13 +129,15 @@ const serverFirebaseHelpers = {
     try {
       console.log('Server: Marking OTP as verified:', otpId);
       const db = getAdminDb();
+      const now = new Date();
       await db.collection('email_otps').doc(otpId).update({
         verified: true,
-        verified_at: new Date(),
+        verified_at: now.toISOString ? now.toISOString() : now,
       });
       console.log('Server: OTP marked as verified');
     } catch (error) {
       console.error('Server: Error marking OTP verified:', error);
+      console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   },
@@ -142,11 +159,12 @@ const serverFirebaseHelpers = {
     try {
       console.log('Server: Logging activity:', action, 'for:', email);
       const db = getAdminDb();
+      const now = new Date();
       await db.collection('activity_logs').add({
         email,
         action,
         details,
-        timestamp: new Date(),
+        timestamp: now.toISOString ? now.toISOString() : now,
         ip: details.ip || 'unknown',
       });
     } catch (error) {
@@ -191,15 +209,17 @@ const serverFirebaseHelpers = {
     try {
       console.log('Server: Creating project:', projectData.title);
       const db = getAdminDb();
+      const now = new Date();
       const docRef = await db.collection('projects').add({
         ...projectData,
-        created_at: new Date(),
-        updated_at: new Date(),
+        created_at: now.toISOString ? now.toISOString() : now,
+        updated_at: now.toISOString ? now.toISOString() : now,
       });
       console.log('Server: Project created with ID:', docRef.id);
-      return { id: docRef.id, ...projectData };
+      return { id: docRef.id, ...projectData, created_at: now, updated_at: now };
     } catch (error) {
       console.error('Server: Error creating project:', error);
+      console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
       throw error;
     }
   },

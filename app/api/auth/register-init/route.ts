@@ -58,9 +58,19 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('=== REGISTRATION ERROR ===');
+    console.error('Full error:', error);
+    console.error('Error type:', typeof error);
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      console.error('Error name:', error.name);
+    }
     return NextResponse.json(
-      { error: 'Failed to initiate registration' },
+      { 
+        error: 'Failed to initiate registration',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }
