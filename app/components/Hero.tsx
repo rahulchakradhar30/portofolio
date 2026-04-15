@@ -1,9 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
 export default function Hero() {
+  const [heroData, setHeroData] = useState({
+    heroTitle: "PEREPOGU RAHUL CHAKRADHAR",
+    heroSubtitle: "AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR",
+    heroTagline: "CREATE YOUR OWN",
+  });
+
+  useEffect(() => {
+    const fetchHeroData = async () => {
+      try {
+        const res = await fetch('/api/admin/content');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.content) {
+            setHeroData({
+              heroTitle: data.content.heroTitle || heroData.heroTitle,
+              heroSubtitle: data.content.heroSubtitle || heroData.heroSubtitle,
+              heroTagline: data.content.heroTagline || heroData.heroTagline,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching hero data:', error);
+      }
+    };
+
+    fetchHeroData();
+  }, []);
+
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-green-50 to-violet-50 relative overflow-hidden">
       {/* Background decorative elements */}
@@ -31,7 +60,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-gray-800 via-violet-700 to-pink-600 bg-clip-text text-transparent mb-6 leading-tight"
         >
-          PEREPOGU RAHUL CHAKRADHAR
+          {heroData.heroTitle}
         </motion.h1>
 
         <motion.p
@@ -40,7 +69,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="text-xl md:text-2xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed"
         >
-          AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR
+          {heroData.heroSubtitle}
         </motion.p>
 
         <motion.div
@@ -49,7 +78,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="text-lg md:text-xl text-violet-600 font-semibold mb-8 max-w-3xl mx-auto leading-relaxed text-center"
         >
-          Student at GITAM University, Bengaluru.
+          {heroData.heroTagline}
         </motion.div>
 
         <motion.div

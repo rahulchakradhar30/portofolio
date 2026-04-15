@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Menu, X, LogOut, MessageSquare, Settings } from "lucide-react";
+import { adminAPI } from "@/app/lib/adminAPI";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -204,15 +205,40 @@ function AdminLogin({ onSuccess }: { onSuccess: (name: string) => void }) {
 
 // Tab Components
 function OverviewTab() {
+  const [stats, setStats] = useState({ projects: 0, skills: 0, messages: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const [projectsRes, skillsRes, messagesRes] = await Promise.all([
+          adminAPI.getProjects(),
+          fetch('/api/admin/skills').then(r => r.json()),
+          adminAPI.getMessages(),
+        ]);
+        setStats({
+          projects: projectsRes.projects?.length || 0,
+          skills: projectsRes.success ? projectsRes.projects?.length || 0 : 0,
+          messages: messagesRes.messages?.length || 0,
+        });
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadStats();
+  }, []);
+
   return (
     <div className="space-y-6">
       <h2 className="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { label: "Total Projects", value: "6", color: "from-blue-500 to-blue-600" },
-          { label: "Total Skills", value: "6", color: "from-violet-500 to-violet-600" },
-          { label: "Messages", value: "12", color: "from-pink-500 to-pink-600" },
-          { label: "Users Hired", value: "0", color: "from-green-500 to-green-600" },
+          { label: "Total Projects", value: stats.projects, color: "from-blue-500 to-blue-600" },
+          { label: "Total Skills", value: stats.skills, color: "from-violet-500 to-violet-600" },
+          { label: "Messages", value: stats.messages, color: "from-pink-500 to-pink-600" },
+          { label: "Portfolio Views", value: "Live", color: "from-green-500 to-green-600" },
         ].map((stat, i) => (
           <motion.div
             key={i}
@@ -221,7 +247,7 @@ function OverviewTab() {
             transition={{ delay: i * 0.1 }}
             className={`bg-gradient-to-br ${stat.color} text-white p-6 rounded-2xl`}
           >
-            <div className="text-4xl font-bold">{stat.value}</div>
+            <div className="text-4xl font-bold">{loading ? "..." : stat.value}</div>
             <div className="text-opacity-80">{stat.label}</div>
           </motion.div>
         ))}
@@ -231,8 +257,47 @@ function OverviewTab() {
 }
 
 function ContentTab() {
-  const [heroTitle, setHeroTitle] = useState("PEREPOGU RAHUL CHAKRADHAR");
+  const [content, setContent] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    loadContent();
+  }, []);
+
+  const loadContent = async () => {
+    try {
+      const res = await adminAPI.getPortfolioContent();
+      if (res.success && res.content) {
+        setContent(res.content);
+      }
+    } catch (error) {
+      console.error('Error loading content:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await adminAPI.updatePortfolioContent(content);
+      if (res.success) {
+        alert('Content updated successfully!');
+        setEditMode(false);
+      } else {
+        alert('Failed to save content');
+      }
+    } catch (error) {
+      console.error('Error saving content:', error);
+      alert('Error saving content');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return <div className="text-center text-gray-500">Loading...</div>;
 
   return (
     <div className="space-y-6">
@@ -249,33 +314,63 @@ function ContentTab() {
             className="px-4 py-2 bg-violet-600 text-white rounded-lg flex items-center gap-2"
           >
             <Edit2 className="w-5 h-5" />
-            {editMode ? "Done" : "Edit"}
+            {editMode ? "Cancel" : "Edit"}
           </motion.button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hero Title
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Hero Title</label>
             <input
               type="text"
-              value={heroTitle}
-              onChange={(e) => setHeroTitle(e.target.value)}
+              value={content?.heroTitle || ""}
+              onChange={(e) => setContent({ ...content, heroTitle: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              About Section Text
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Hero Subtitle</label>
+            <input
+              type="text"
+              value={content?.heroSubtitle || ""}
+              onChange={(e) => setContent({ ...content, heroSubtitle: e.target.value })}
+              disabled={!editMode}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">About Text</label>
             <textarea
               rows={4}
+              value={content?.aboutText || ""}
+              onChange={(e) => setContent({ ...content, aboutText: e.target.value })}
               disabled={!editMode}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600 resize-none"
-              defaultValue="I'm a passionate AI enthusiast..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+            <input
+              type="email"
+              value={content?.email || ""}
+              onChange={(e) => setContent({ ...content, email: e.target.value })}
+              disabled={!editMode}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+            <input
+              type="text"
+              value={content?.location || ""}
+              onChange={(e) => setContent({ ...content, location: e.target.value })}
+              disabled={!editMode}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-50 disabled:text-gray-600"
             />
           </div>
 
@@ -283,9 +378,11 @@ function ContentTab() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
+              onClick={handleSave}
+              disabled={saving}
+              className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold disabled:opacity-50"
             >
-              Save Changes
+              {saving ? "Saving..." : "Save Changes"}
             </motion.button>
           )}
         </div>
@@ -295,6 +392,75 @@ function ContentTab() {
 }
 
 function ProjectsTab() {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    tech: "",
+    github: "",
+    demo: "",
+    featured: false,
+    category: "",
+  });
+
+  useEffect(() => {
+    loadProjects();
+  }, []);
+
+  const loadProjects = async () => {
+    try {
+      const res = await adminAPI.getProjects();
+      if (res.success) {
+        setProjects(res.projects);
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddProject = async () => {
+    if (!formData.title || !formData.description) {
+      alert("Title and description are required");
+      return;
+    }
+
+    const newProject = {
+      title: formData.title,
+      description: formData.description,
+      tech: formData.tech.split(",").map((t) => t.trim()),
+      github: formData.github,
+      demo: formData.demo,
+      featured: formData.featured,
+      category: formData.category,
+    };
+
+    const res = await adminAPI.createProject(newProject);
+    if (res.success) {
+      alert("Project added successfully!");
+      setFormData({ title: "", description: "", tech: "", github: "", demo: "", featured: false, category: "" });
+      setShowForm(false);
+      loadProjects();
+    } else {
+      alert("Failed to add project");
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (confirm("Are you sure you want to delete this project?")) {
+      const res = await adminAPI.deleteProject(projectId);
+      if (res.success) {
+        alert("Project deleted!");
+        loadProjects();
+      } else {
+        alert("Failed to delete project");
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -302,6 +468,7 @@ function ProjectsTab() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-violet-600 text-white rounded-lg flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -309,34 +476,151 @@ function ProjectsTab() {
         </motion.button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        {[1, 2, 3].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-4 rounded-lg border border-gray-200 flex items-center justify-between"
+      {showForm && (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
+          <input
+            type="text"
+            placeholder="Project Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <textarea
+            placeholder="Project Description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            rows={3}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Tech Stack (comma-separated)"
+            value={formData.tech}
+            onChange={(e) => setFormData({ ...formData, tech: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="GitHub URL"
+            value={formData.github}
+            onChange={(e) => setFormData({ ...formData, github: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Demo URL"
+            value={formData.demo}
+            onChange={(e) => setFormData({ ...formData, demo: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Category"
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.featured}
+              onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+            />
+            <span>Featured</span>
+          </label>
+          <button
+            onClick={handleAddProject}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
           >
-            <div>
-              <h3 className="font-semibold text-gray-800">Project {i}</h3>
-              <p className="text-sm text-gray-600">Featured project</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <Edit2 className="w-5 h-5 text-blue-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <Trash2 className="w-5 h-5 text-red-600" />
-              </button>
-            </div>
-          </motion.div>
-        ))}
+            Add Project
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4">
+        {loading ? (
+          <div className="text-center text-gray-500">Loading...</div>
+        ) : (
+          projects.map((project: any) => (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg border border-gray-200 flex items-center justify-between hover:border-violet-300"
+            >
+              <div>
+                <h3 className="font-semibold text-gray-800">{project.title}</h3>
+                <p className="text-sm text-gray-600">{project.category}</p>
+              </div>
+              <div className="flex gap-2">
+                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                  <Edit2 className="w-5 h-5 text-blue-600" />
+                </button>
+                <button onClick={() => handleDeleteProject(project.id)} className="p-2 hover:bg-gray-100 rounded-lg">
+                  <Trash2 className="w-5 h-5 text-red-600" />
+                </button>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );
 }
 
 function SkillsTab() {
+  const [skills, setSkills] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    proficiency: 75,
+  });
+
+  useEffect(() => {
+    loadSkills();
+  }, []);
+
+  const loadSkills = async () => {
+    try {
+      const res = await fetch('/api/admin/skills');
+      if (res.ok) {
+        const data = await res.json();
+        setSkills(data.skills || []);
+      }
+    } catch (error) {
+      console.error('Error loading skills:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddSkill = async () => {
+    if (!formData.title) {
+      alert("Skill title is required");
+      return;
+    }
+
+    const res = await adminAPI.createSkill(formData);
+    if (res.success) {
+      alert("Skill added successfully!");
+      setFormData({ title: "", description: "", proficiency: 75 });
+      setShowForm(false);
+      loadSkills();
+    }
+  };
+
+  const handleDeleteSkill = async (skillId: string) => {
+    if (confirm("Delete this skill?")) {
+      const res = await adminAPI.deleteSkill(skillId);
+      if (res.success) {
+        alert("Skill deleted!");
+        loadSkills();
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -344,6 +628,7 @@ function SkillsTab() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-violet-600 text-white rounded-lg flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -351,61 +636,137 @@ function SkillsTab() {
         </motion.button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {["AI & Machine Learning", "Content Creation", "Full Stack Dev"].map((skill, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-4 rounded-lg border border-gray-200"
+      {showForm && (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
+          <input
+            type="text"
+            placeholder="Skill Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <textarea
+            placeholder="Skill Description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            rows={3}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <div>
+            <label className="text-sm font-medium text-gray-700">Proficiency: {formData.proficiency}%</label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={formData.proficiency}
+              onChange={(e) => setFormData({ ...formData, proficiency: parseInt(e.target.value) })}
+              className="w-full"
+            />
+          </div>
+          <button
+            onClick={handleAddSkill}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-800">{skill}</h3>
-              <div className="flex gap-2">
-                <button className="text-blue-600 hover:bg-gray-100 p-1 rounded">
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                <button className="text-red-600 hover:bg-gray-100 p-1 rounded">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+            Add Skill
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {loading ? (
+          <div className="text-center text-gray-500">Loading...</div>
+        ) : (
+          skills.map((skill: any) => (
+            <motion.div
+              key={skill.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg border border-gray-200"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-800">{skill.title}</h3>
+                <div className="flex gap-2">
+                  <button className="text-blue-600 hover:bg-gray-100 p-1 rounded">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => handleDeleteSkill(skill.id)} className="text-red-600 hover:bg-gray-100 p-1 rounded">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-violet-600 h-2 rounded-full w-4/5"></div>
-            </div>
-          </motion.div>
-        ))}
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-violet-600 h-2 rounded-full" style={{ width: `${skill.proficiency || 75}%` }}></div>
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );
 }
 
 function MessagesTab() {
+  const [messages, setMessages] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMessages();
+  }, []);
+
+  const loadMessages = async () => {
+    try {
+      const res = await adminAPI.getMessages();
+      if (res.success) {
+        setMessages(res.messages);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (confirm("Delete this message?")) {
+      const res = await adminAPI.deleteMessage(messageId);
+      if (res.success) {
+        alert("Message deleted!");
+        loadMessages();
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-gray-800">Contact Messages</h2>
 
       <div className="space-y-3">
-        {[1, 2, 3].map((i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-4 rounded-lg border border-gray-200 hover:border-violet-300 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-gray-800">Message {i}</h3>
-                <p className="text-sm text-gray-600">From: user@example.com</p>
+        {loading ? (
+          <div className="text-center text-gray-500">Loading...</div>
+        ) : (
+          messages.map((message: any) => (
+            <motion.div
+              key={message.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:border-violet-300 transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-800">{message.subject}</h3>
+                  <p className="text-sm text-gray-600">From: {message.email}</p>
+                  <p className="text-sm text-gray-600 mt-2">{message.message}</p>
+                </div>
+                <button
+                  onClick={() => handleDeleteMessage(message.id)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <Trash2 className="w-5 h-5 text-red-600" />
+                </button>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
-                  Unread
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))
+        )}
       </div>
     </div>
   );
