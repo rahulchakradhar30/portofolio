@@ -1,5 +1,11 @@
 // Data types and interfaces for the portfolio
 
+// Firestore Timestamp type
+export interface FirestoreTimestamp {
+  toDate(): Date;
+  toMillis(): number;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -38,7 +44,7 @@ export interface OTPSchema {
   email: string;
   otp: string;
   type: string;
-  expires_at: Date | Record<string, unknown>;
+  expires_at: Date | FirestoreTimestamp;
 }
 
 export interface ContactMessage {
@@ -69,3 +75,4 @@ export interface PortfolioContent {
   linkedin: string;
   github: string;
 }
+
