@@ -434,6 +434,87 @@ const serverFirebaseHelpers = {
       throw error;
     }
   },
+
+  // Certifications management
+  getAllCertifications: async () => {
+    try {
+      console.log('Server: Getting all certifications');
+      const db = getAdminDb();
+      const snapshot = await db.collection('certifications').orderBy('created_at', 'desc').get();
+      const certifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log('Server: Found', certifications.length, 'certifications');
+      return certifications;
+    } catch (error) {
+      console.error('Server: Error getting certifications:', error);
+      throw error;
+    }
+  },
+
+  getCertificationById: async (certificationId: string) => {
+    try {
+      console.log('Server: Getting certification:', certificationId);
+      const db = getAdminDb();
+      const docSnap = await db.collection('certifications').doc(certificationId).get();
+      if (!docSnap.exists) {
+        console.log('Server: Certification not found');
+        return null;
+      }
+      console.log('Server: Certification found');
+      return { id: docSnap.id, ...docSnap.data() };
+    } catch (error) {
+      console.error('Server: Error getting certification:', error);
+      return null;
+    }
+  },
+
+  createCertification: async (certificationData: Record<string, any>) => {
+    try {
+      console.log('Server: Creating certification:', certificationData.title);
+      const db = getAdminDb();
+      const now = new Date();
+      const createdAtStr = now.toISOString ? now.toISOString() : now;
+      const docRef = await db.collection('certifications').add({
+        ...certificationData,
+        created_at: createdAtStr,
+        updated_at: createdAtStr,
+      });
+      console.log('Server: Certification created with ID:', docRef.id);
+      return { id: docRef.id, ...certificationData, created_at: createdAtStr, updated_at: createdAtStr };
+    } catch (error) {
+      console.error('Server: Error creating certification:', error);
+      throw error;
+    }
+  },
+
+  updateCertification: async (certificationId: string, certificationData: Record<string, any>) => {
+    try {
+      console.log('Server: Updating certification:', certificationId);
+      const db = getAdminDb();
+      const now = new Date();
+      const updatedAtStr = now.toISOString ? now.toISOString() : now;
+      await db.collection('certifications').doc(certificationId).update({
+        ...certificationData,
+        updated_at: updatedAtStr,
+      });
+      console.log('Server: Certification updated');
+      return { id: certificationId, ...certificationData, updated_at: updatedAtStr };
+    } catch (error) {
+      console.error('Server: Error updating certification:', error);
+      throw error;
+    }
+  },
+
+  deleteCertification: async (certificationId: string) => {
+    try {
+      console.log('Server: Deleting certification:', certificationId);
+      const db = getAdminDb();
+      await db.collection('certifications').doc(certificationId).delete();
+      console.log('Server: Certification deleted');
+    } catch (error) {
+      console.error('Server: Error deleting certification:', error);
+      throw error;
+    }
+  },
 };
 
 export default serverFirebaseHelpers;

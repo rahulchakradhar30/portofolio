@@ -55,7 +55,7 @@ export default function Skills() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {skills.length === 0 ? (
-              <div className="col-span-full text-center text-gray-500">No skills found. Add skills from the admin dashboard.</div>
+              <div className="col-span-full text-center text-gray-500">No skills found.</div>
             ) : (
               skills.map((skill, index) => (
                 <motion.div
@@ -67,7 +67,7 @@ export default function Skills() {
                   className="bg-white/80 p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-white/50 backdrop-blur-sm"
                 >
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-400 to-pink-400 flex items-center justify-center mb-6 shadow-lg">
-                    <span className="text-2xl">📚</span>
+                    <span className="text-2xl">{skill.icon || "📚"}</span>
                   </div>
                   <h3 className="text-2xl font-bold text-gray-800 mb-3">{skill.title}</h3>
                   <p className="text-gray-600 leading-relaxed">{skill.description}</p>

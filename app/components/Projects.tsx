@@ -51,7 +51,7 @@ export default function Projects() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.length === 0 ? (
-              <div className="col-span-full text-center text-gray-500">No projects found. Start by adding projects in the admin dashboard.</div>
+              <div className="col-span-full text-center text-gray-500">No projects found.</div>
             ) : (
               projects.map((project, index) => (
                 <motion.div
@@ -64,6 +64,15 @@ export default function Projects() {
                 >
                   {/* Project Image */}
                   <div className="relative h-48 bg-gradient-to-br from-violet-100 to-pink-100 overflow-hidden">
+                    {project.image ? (
+                      <img 
+                        src={project.image} 
+                        alt={project.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-pink-500/20"></div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-pink-500/20"></div>
                     <div className="absolute top-4 left-4">
                       {project.featured && (

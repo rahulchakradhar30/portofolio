@@ -81,3 +81,19 @@ export interface PortfolioContent {
   github: string;
 }
 
+export interface Certification {
+  id: string;
+  title: string;
+  issuer: string;
+  issuedDate: string;
+  expiryDate?: string;
+  credentialId?: string;
+  credentialUrl?: string;
+  image: string;
+  description: string;
+  linkedinUrl?: string;
+  featured: boolean;
+  created_at?: Date;
+  updated_at?: Date;
+}
+

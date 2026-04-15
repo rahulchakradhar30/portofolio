@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3 } from "lucide-react";
+import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3, Award } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
-import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser } from "@/app/lib/types";
+import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser, Certification } from "@/app/lib/types";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -29,6 +29,7 @@ export default function AdminDashboard() {
     { id: "content", label: "Content", icon: Edit2 },
     { id: "projects", label: "Projects", icon: Plus },
     { id: "skills", label: "Skills", icon: Plus },
+    { id: "certifications", label: "Certifications", icon: Award },
     { id: "messages", label: "Messages", icon: Plus },
     { id: "users", label: "Users", icon: Users },
     { id: "activity", label: "Activity", icon: Activity },
@@ -113,6 +114,7 @@ export default function AdminDashboard() {
           {activeTab === "content" && <ContentTab />}
           {activeTab === "projects" && <ProjectsTab />}
           {activeTab === "skills" && <SkillsTab />}
+          {activeTab === "certifications" && <CertificationsTab />}
           {activeTab === "messages" && <MessagesTab />}
           {activeTab === "users" && <UsersTab />}
           {activeTab === "activity" && <ActivityTab />}
@@ -228,18 +230,10 @@ function ContentTab() {
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/admin/upload/image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setContent({ ...content, bannerImage: data.imageUrl });
-        alert('Banner image uploaded successfully!');
+      const res = await adminAPI.uploadToCloudinary(file);
+      if (res.success) {
+        setContent({ ...content, bannerImage: res.imageUrl });
+        alert('Banner image uploaded to Cloudinary successfully!');
       } else {
         alert('Failed to upload image');
       }
@@ -444,18 +438,10 @@ function ProjectsTab() {
 
     setUploading(true);
     try {
-      const formDataObj = new FormData();
-      formDataObj.append('file', file);
-
-      const res = await fetch('/api/admin/upload/image', {
-        method: 'POST',
-        body: formDataObj,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setFormData({ ...formData, imageUrl: data.imageUrl });
-        alert('Image uploaded successfully!');
+      const res = await adminAPI.uploadToCloudinary(file);
+      if (res.success) {
+        setFormData({ ...formData, imageUrl: res.imageUrl });
+        alert('Image uploaded to Cloudinary successfully!');
       } else {
         alert('Failed to upload image');
       }
@@ -918,6 +904,254 @@ function ActivityTab() {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function CertificationsTab() {
+  const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    issuer: "",
+    issuedDate: "",
+    expiryDate: "",
+    credentialId: "",
+    credentialUrl: "",
+    imageUrl: "",
+    description: "",
+    linkedinUrl: "",
+    featured: false,
+  });
+
+  useEffect(() => {
+    loadCertifications();
+  }, []);
+
+  const loadCertifications = async () => {
+    try {
+      const res = await adminAPI.getCertifications();
+      if (res.success) {
+        setCertifications(res.certifications || []);
+      }
+    } catch (error) {
+      console.error('Error loading certifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const res = await adminAPI.uploadToCloudinary(file);
+      if (res.success) {
+        setFormData({ ...formData, imageUrl: res.imageUrl });
+        alert('Image uploaded to Cloudinary successfully!');
+      } else {
+        alert('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Error uploading image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAddCertification = async () => {
+    if (!formData.title || !formData.issuer || !formData.imageUrl) {
+      alert("Title, issuer, and image are required");
+      return;
+    }
+
+    const newCertification = {
+      title: formData.title,
+      issuer: formData.issuer,
+      issuedDate: formData.issuedDate,
+      expiryDate: formData.expiryDate,
+      credentialId: formData.credentialId,
+      credentialUrl: formData.credentialUrl,
+      image: formData.imageUrl,
+      description: formData.description,
+      linkedinUrl: formData.linkedinUrl,
+      featured: formData.featured,
+    };
+
+    const res = await adminAPI.createCertification(newCertification as any);
+    if (res.success) {
+      alert("Certification added successfully!");
+      setFormData({ title: "", issuer: "", issuedDate: "", expiryDate: "", credentialId: "", credentialUrl: "", imageUrl: "", description: "", linkedinUrl: "", featured: false });
+      setShowForm(false);
+      loadCertifications();
+    } else {
+      alert("Failed to add certification");
+    }
+  };
+
+  const handleDeleteCertification = async (certId: string) => {
+    if (confirm("Are you sure you want to delete this certification?")) {
+      const res = await adminAPI.deleteCertification(certId);
+      if (res.success) {
+        alert("Certification deleted!");
+        loadCertifications();
+      } else {
+        alert("Failed to delete certification");
+      }
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800">Manage Certifications</h2>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowForm(!showForm)}
+          className="px-4 py-2 bg-violet-600 text-white rounded-lg flex items-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Add Certification
+        </motion.button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white p-6 rounded-lg border border-gray-200 space-y-4">
+          <input
+            type="text"
+            placeholder="Certification Title"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Issuer Name"
+            value={formData.issuer}
+            onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <div className="grid md:grid-cols-2 gap-4">
+            <input
+              type="date"
+              placeholder="Issued Date"
+              value={formData.issuedDate}
+              onChange={(e) => setFormData({ ...formData, issuedDate: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+            <input
+              type="date"
+              placeholder="Expiry Date (optional)"
+              value={formData.expiryDate}
+              onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+          <textarea
+            placeholder="Description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            rows={3}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Credential ID (optional)"
+            value={formData.credentialId}
+            onChange={(e) => setFormData({ ...formData, credentialId: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="url"
+            placeholder="Credential URL (optional)"
+            value={formData.credentialUrl}
+            onChange={(e) => setFormData({ ...formData, credentialUrl: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="url"
+            placeholder="LinkedIn URL (optional)"
+            value={formData.linkedinUrl}
+            onChange={(e) => setFormData({ ...formData, linkedinUrl: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Certificate Image</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploading}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
+              />
+              {uploading && <span className="text-sm text-gray-500">Uploading to Cloudinary...</span>}
+            </div>
+            {formData.imageUrl && (
+              <div className="mt-2">
+                <img src={formData.imageUrl} alt="Preview" className="w-32 h-24 object-cover rounded-lg" />
+                <p className="text-xs text-gray-500 mt-1">✓ Uploaded to Cloudinary</p>
+              </div>
+            )}
+          </div>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.featured}
+              onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+            />
+            <span>Featured</span>
+          </label>
+          <button
+            onClick={handleAddCertification}
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg font-semibold"
+          >
+            Add Certification
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {loading ? (
+          <div className="text-center text-gray-500">Loading...</div>
+        ) : (
+          certifications.map((cert: Certification) => (
+            <motion.div
+              key={cert.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg border border-gray-200 hover:border-violet-300 transition-colors"
+            >
+              <div className="flex gap-4">
+                {cert.image && (
+                  <img src={cert.image} alt={cert.title} className="w-20 h-20 object-cover rounded-lg" />
+                )}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800">{cert.title}</h3>
+                  <p className="text-sm text-gray-600">{cert.issuer}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {new Date(cert.issuedDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button className="p-2 hover:bg-gray-100 rounded-lg">
+                    <Edit2 className="w-5 h-5 text-blue-600" />
+                  </button>
+                  <button onClick={() => handleDeleteCertification(cert.id)} className="p-2 hover:bg-gray-100 rounded-lg">
+                    <Trash2 className="w-5 h-5 text-red-600" />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
