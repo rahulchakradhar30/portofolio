@@ -25,11 +25,10 @@ export async function sendOTPEmail(
         'Use the code below to reset your portfolio admin password. This code expires in 10 minutes.',
     };
 
-    await resend.emails.send({
-      from: 'noreply@yourdomain.com', // Update with your domain
-      to: email,
-      subject: subjectMap[type] || subjectMap['Email Verification'],
-      html: `
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const resetLink = `${baseUrl}/auth/reset-password?email=${encodeURIComponent(email)}`;
+
+    let emailHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #333;">${titleMap[type] || titleMap['Email Verification']}</h2>
           <p style="color: #666; font-size: 16px;">
@@ -39,7 +38,18 @@ export async function sendOTPEmail(
             <p style="font-size: 36px; font-weight: bold; color: #7c3aed; letter-spacing: 5px; margin: 0;">
               ${otp}
             </p>
-          </div>
+          </div>`;
+
+    if (type === 'Password Reset') {
+      emailHtml += `
+          <p style="text-align: center; margin: 20px 0;">
+            <a href="${resetLink}" style="background: #7c3aed; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">
+              Reset Password
+            </a>
+          </p>`;
+    }
+
+    emailHtml += `
           <p style="color: #999; font-size: 14px;">
             This code expires in 10 minutes. If you didn't request this, please ignore this email.
           </p>
@@ -48,7 +58,13 @@ export async function sendOTPEmail(
             © 2024 Portfolio Admin. All rights reserved.
           </p>
         </div>
-      `,
+      `;
+
+    await resend.emails.send({
+      from: 'noreply@yourdomain.com',
+      to: email,
+      subject: subjectMap[type] || subjectMap['Email Verification'],
+      html: emailHtml,
     });
     return true;
   } catch (error) {

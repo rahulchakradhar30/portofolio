@@ -128,6 +128,15 @@ export default function AdminLogin() {
               "Sign In"
             )}
           </motion.button>
+
+          <div className="text-center">
+            <a 
+              href="/auth/forgot-password"
+              className="text-violet-600 hover:text-violet-700 font-medium text-sm"
+            >
+              Forgot Password?
+            </a>
+          </div>
         </form>
       </motion.div>
     </div>
