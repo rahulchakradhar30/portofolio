@@ -76,12 +76,15 @@ const serverFirebaseHelpers = {
       
       // Convert Date objects to timestamps for Firestore
       const now = new Date();
+      const expiresAtStr = expiresAt.toISOString ? expiresAt.toISOString() : expiresAt;
+      const createdAtStr = now.toISOString ? now.toISOString() : now;
+      
       const docRef = await otpsRef.add({
         email,
         otp,
         type,
-        expires_at: expiresAt.toISOString ? expiresAt.toISOString() : expiresAt,
-        created_at: now.toISOString ? now.toISOString() : now,
+        expires_at: expiresAtStr,
+        created_at: createdAtStr,
         verified: false,
       });
       console.log('Server: OTP stored with ID:', docRef.id);
@@ -90,8 +93,8 @@ const serverFirebaseHelpers = {
         email, 
         otp, 
         type, 
-        expires_at: expiresAt,
-        created_at: now 
+        expires_at: expiresAtStr,
+        created_at: createdAtStr
       };
     } catch (error) {
       console.error('Server: Error storing OTP:', error);
