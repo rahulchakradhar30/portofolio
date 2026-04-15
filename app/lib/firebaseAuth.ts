@@ -1,6 +1,6 @@
 'use client';
 
-import { auth, db, firebaseHelpers } from './firebase';
+import firebaseHelpers, { auth, db } from './firebase';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,

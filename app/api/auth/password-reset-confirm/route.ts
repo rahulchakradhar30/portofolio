@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firebaseHelpers } from '@/app/lib/firebase';
+import firebaseHelpers from '@/app/lib/firebase';
 import { hashPassword } from '@/app/lib/auth';
 import type { OTPSchema } from '@/app/lib/types';
 

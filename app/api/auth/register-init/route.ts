@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firebaseHelpers } from '@/app/lib/firebase';
+import firebaseHelpers from '@/app/lib/firebase';
 import { generateOTP, getOTPExpiration, checkRateLimit } from '@/app/lib/auth';
 import { sendOTPEmail } from '@/app/lib/email';
 

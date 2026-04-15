@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firebaseHelpers } from '@/app/lib/firebase';
+import firebaseHelpers from '@/app/lib/firebase';
 import { setupGoogleAuthenticator, verifyJWT, generateSecureString } from '@/app/lib/auth';
 import { send2FASetupEmail } from '@/app/lib/email';
 

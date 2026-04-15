@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firebaseHelpers } from '@/app/lib/firebase';
+import firebaseHelpers from '@/app/lib/firebase';
 import { hashPassword } from '@/app/lib/auth';
 import { sendWelcomeEmail } from '@/app/lib/email';
+import type { OTPSchema, AdminUser } from '@/app/lib/types';
 
 interface VerifyOTPRequest {
   email: string;
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get OTP from database
-    const otpRecord = await firebaseHelpers.getLatestOTP(email, 'email_verification');
+    const otpRecord = (await firebaseHelpers.getLatestOTP(email, 'email_verification')) as OTPSchema | null;
 
     if (!otpRecord || otpRecord.otp !== otp) {
       return NextResponse.json(
@@ -51,13 +52,20 @@ export async function POST(request: NextRequest) {
     // Create admin user
     const passwordHash = hashPassword(password);
 
-    const newUser = await firebaseHelpers.createUser({
+    const newUser = (await firebaseHelpers.createUser({
       email,
       password_hash: passwordHash,
       name,
       otp_secret: null,
       otp_enabled: false,
-    });
+    })) as AdminUser | null;
+
+    if (!newUser) {
+      return NextResponse.json(
+        { error: 'Failed to create user' },
+        { status: 500 }
+      );
+    }
 
     // Delete used OTP
     await firebaseHelpers.deleteOTP(otpRecord.id);

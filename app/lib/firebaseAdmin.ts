@@ -26,5 +26,10 @@ try {
   console.log('Firebase Admin already initialized');
 }
 
-export const adminAuth = admin.auth();
-export const adminDb = admin.firestore();
+// Lazy getters to avoid initialization issues during build
+export const getAdminAuth = () => admin.auth();
+export const getAdminDb = () => admin.firestore();
+
+// For backwards compatibility
+export const adminAuth = getAdminAuth();
+export const adminDb = getAdminDb();

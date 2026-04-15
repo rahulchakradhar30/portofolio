@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firebaseHelpers } from '@/app/lib/firebase';
+import firebaseHelpers from '@/app/lib/firebase';
 import { verifyJWT } from '@/app/lib/auth';
 
 // Helper to verify admin token
@@ -14,7 +14,7 @@ async function verifyAdminAuth(request: NextRequest) {
 }
 
 // GET - List all projects
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const projects = await firebaseHelpers.getAllProjects();
 
