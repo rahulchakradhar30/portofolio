@@ -37,14 +37,20 @@ export default function AdminLogin() {
         return;
       }
 
-      // Dynamically import Firebase auth functions
-      const { firebaseLogin } = await import("@/app/lib/firebaseAuth");
-      
-      const result = await firebaseLogin(email, password);
+      // Call backend login API instead of Firebase Auth
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (result.success) {
-        // Redirect to 2FA setup or dashboard
-        router.push("/admin/setup-2fa");
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        // Redirect to admin dashboard
+        router.push("/admin/dashboard");
       } else {
         setError(result.error || "Authentication failed");
       }
