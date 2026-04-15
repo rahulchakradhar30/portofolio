@@ -98,12 +98,13 @@ export async function sendOTPEmail(
       return false;
     }
     
-    if (!response.id) {
-      console.error('No email ID in response - email may not have been sent');
+    // Check if data contains ID (successful response)
+    if (!response.data?.id) {
+      console.error('No email ID in response.data - email may not have been sent');
       return false;
     }
     
-    console.log('Email sent successfully with ID:', response.id);
+    console.log('Email sent successfully with ID:', response.data.id);
     console.log('=== EMAIL SENDING COMPLETED ===');
     return true;
   } catch (error) {
