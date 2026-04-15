@@ -1,6 +1,13 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Helper function to get Resend client with current API key
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not set');
+  }
+  return new Resend(apiKey);
+}
 
 export async function sendOTPEmail(
   email: string,
@@ -76,7 +83,7 @@ export async function sendOTPEmail(
     console.log('To:', email);
     console.log('Subject:', subjectMap[type] || subjectMap['Email Verification']);
 
-    const response = await resend.emails.send({
+    const response = await getResendClient().emails.send({
       from: 'onboarding@resend.dev',
       to: email,
       subject: subjectMap[type] || subjectMap['Email Verification'],
@@ -84,6 +91,19 @@ export async function sendOTPEmail(
     });
 
     console.log('Resend response:', response);
+    
+    // Check if response contains error
+    if (response.error) {
+      console.error('Resend API error:', response.error);
+      return false;
+    }
+    
+    if (!response.id) {
+      console.error('No email ID in response - email may not have been sent');
+      return false;
+    }
+    
+    console.log('Email sent successfully with ID:', response.id);
     console.log('=== EMAIL SENDING COMPLETED ===');
     return true;
   } catch (error) {
@@ -100,7 +120,7 @@ export async function sendOTPEmail(
 
 export async function sendWelcomeEmail(email: string, name: string): Promise<boolean> {
   try {
-    await resend.emails.send({
+    await getResendClient().emails.send({
       from: 'onboarding@resend.dev',
       to: email,
       subject: 'Welcome to Portfolio Admin Dashboard',
@@ -142,8 +162,8 @@ export async function sendWelcomeEmail(email: string, name: string): Promise<boo
 
 export async function send2FASetupEmail(email: string, backupCodes: string[]): Promise<boolean> {
   try {
-    await resend.emails.send({
-      from: 'noreply@yourdomain.com',
+    await getResendClient().emails.send({
+      from: 'onboarding@resend.dev',
       to: email,
       subject: 'Two-Factor Authentication Enabled',
       html: `
