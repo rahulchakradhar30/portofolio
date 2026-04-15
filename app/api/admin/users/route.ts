@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/app/lib/firebaseAdmin";
+import { getAdminDb } from "@/app/lib/firebaseAdmin";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const adminDb = getAdminDb();
   try {
     const token = request.cookies.get("adminToken")?.value;
 

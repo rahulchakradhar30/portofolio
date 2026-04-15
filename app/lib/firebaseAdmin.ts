@@ -29,7 +29,3 @@ try {
 // Lazy getters to avoid initialization issues during build
 export const getAdminAuth = () => admin.auth();
 export const getAdminDb = () => admin.firestore();
-
-// For backwards compatibility
-export const adminAuth = getAdminAuth();
-export const adminDb = getAdminDb();

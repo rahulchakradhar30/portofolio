@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 import firebaseHelpers from '@/app/lib/firebase';
 import { hashPassword } from '@/app/lib/auth';

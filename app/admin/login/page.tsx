@@ -34,8 +34,9 @@ export default function AdminLogin() {
       } else {
         setError(result.error || "Authentication failed");
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred");
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(errorMessage || "An error occurred");
     } finally {
       setLoading(false);
     }

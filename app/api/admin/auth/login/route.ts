@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/app/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb } from "@/app/lib/firebaseAdmin";
 
 export const dynamic = 'force-dynamic';
 
@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
     const { idToken, localId } = data;
 
     // Get admin user from Firestore
+    const adminDb = getAdminDb();
     const userRef = adminDb.collection("admin_users").doc(localId);
     const userDoc = await userRef.get();
 

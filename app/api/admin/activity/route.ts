@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminDb } from "@/app/lib/firebaseAdmin";
+import { getAdminDb } from "@/app/lib/firebaseAdmin";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    const adminDb = getAdminDb();
 
     const querySnapshot = await adminDb
       .collection("admin_activity_logs")

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as speakeasy from 'speakeasy';
-import { adminAuth, adminDb } from "@/app/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb } from "@/app/lib/firebaseAdmin";
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
     const { secret, verificationCode } = await request.json();
     const token = request.cookies.get("adminToken")?.value;
 

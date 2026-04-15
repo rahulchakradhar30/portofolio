@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { adminAuth, adminDb } from "@/app/lib/firebaseAdmin";
+import { getAdminAuth, getAdminDb } from "@/app/lib/firebaseAdmin";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +15,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify token with Admin SDK
+    const adminAuth = getAdminAuth();
+    const adminDb = getAdminDb();
     const decodedToken = await adminAuth.verifyIdToken(token);
     const userRef = adminDb.collection("admin_users").doc(decodedToken.uid);
     const userDoc = await userRef.get();
