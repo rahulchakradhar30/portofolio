@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
-import { firebaseLogin, firebaseRegister } from "@/app/lib/firebaseAuth";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -14,6 +13,13 @@ export default function AdminLogin() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Lazy load Firebase functions only on client
+  useEffect(() => {
+    // Firebase will be initialized when needed
+    setInitialized(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +27,9 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
+      // Dynamically import Firebase auth functions
+      const { firebaseLogin, firebaseRegister } = await import("@/app/lib/firebaseAuth");
+      
       let result;
       if (isLogin) {
         result = await firebaseLogin(email, password);
