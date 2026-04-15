@@ -1,63 +1,45 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, ExternalLink, Code, GitBranch } from "lucide-react";
+import { ArrowLeft, ExternalLink, Code, GitBranch, Play } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-
-// Sample project details data
-const projectsData: Record<string, any> = {
-  "weather-x-gitam": {
-    title: "WEATHER_X_GITAM",
-    description: "A low-cost weather monitoring station built for just ₹4,000 (vs ₹40,000 market cost). Designed for rural areas and farmers, providing pinpoint location weather data for agricultural decision-making.",
-    image: "/projects/weather-station.jpg",
-    category: "IoT/Hardware",
-    featured: true,
-    tech: ["IoT", "Hardware", "Sensors", "Embedded Systems"],
-    longDescription: "WEATHER_X_GITAM is a revolutionary weather monitoring solution designed specifically for rural communities and farmers. Built with a focus on affordability and accuracy, this project demonstrates how technology can be made accessible to those who need it most.\n\nKey Features:\n• Cost significantly reduced from ₹40,000 to ₹4,000\n• Real-time pinpoint location weather data\n• Easy-to-use interface for farmers\n• Durable hardware built for harsh conditions\n• Integration with mobile apps for remote monitoring\n\nImpact:\nThis project has helped farmers make better agricultural decisions based on accurate local weather data, improving crop yields and reducing losses.",
-    github: "#",
-    demo: "#",
-    images: ["/projects/weather-1.jpg", "/projects/weather-2.jpg", "/projects/weather-3.jpg"],
-    timeline: "2023 - 2024",
-    team: "Solo Project",
-    status: "Active"
-  },
-  "eeshan-protector": {
-    title: "EESHAN - THE PROTECTOR",
-    description: "A zero-budget mythological sci-fi cinematic experiment. An AI-assisted film blending ancient mythology with futuristic science fiction, exploring themes of Dharma, Order, and cosmic balance.",
-    image: "/projects/eeshan.jpg",
-    category: "Film/AI",
-    featured: true,
-    tech: ["AI Tools", "Filmmaking", "Visual Effects", "Sound Design"],
-    longDescription: "EESHAN - THE PROTECTOR is an ambitious cinematic project that explores the intersection of ancient mythology and futuristic technology. Created with zero budget, it showcases how modern AI tools can democratize filmmaking.\n\nProject Highlights:\n• AI-generated visuals and effects\n• Zero-budget production model\n• 100K+ organic views\n• Mythological storytelling meets sci-fi\n• Professional sound design and composition\n\nThis project received strong audience engagement and demonstrated the potential of AI-assisted filmmaking while maintaining artistic integrity.",
-    github: "#",
-    demo: "#",
-    images: ["/projects/eeshan-1.jpg", "/projects/eeshan-2.jpg"],
-    timeline: "2024",
-    team: "Solo Project + Collaborators",
-    status: "Active"
-  },
-  "chakradhar-ott": {
-    title: "Chakradhar OTT Platform",
-    description: "Full-stack OTT platform with live premiere events. Features movie streaming, ticket-based live events, admin-controlled ecosystem, and integrated payment system.",
-    image: "/projects/ott-platform.jpg",
-    category: "Web Development",
-    featured: true,
-    tech: ["Next.js", "Firebase", "Razorpay", "Real-time Chat"],
-    longDescription: "Chakradhar OTT Platform is a comprehensive streaming solution that combines traditional movie streaming with live premiere events. Built with modern web technologies, it provides a complete digital cinema experience.\n\nKey Features:\n• Movie streaming catalog\n• Live premiere event system\n• Ticket-based payment integration\n• Real-time chat during premieres\n• Admin control panel\n• User authentication and profiles\n• Wishlist functionality\n\nTechnical Stack:\n• Frontend: Next.js + React\n• Backend: Firebase Firestore & Authentication\n• Payments: Razorpay integration\n• Hosting: Vercel\n\nThis platform demonstrates full-stack development expertise and product-level thinking.",
-    github: "#",
-    demo: "#",
-    images: ["/projects/ott-1.jpg", "/projects/ott-2.jpg", "/projects/ott-3.jpg"],
-    timeline: "2024 - Present",
-    team: "Solo Developer",
-    status: "Active"
-  },
-};
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import type { Project } from "@/app/lib/types";
 
 export default function ProjectDetail() {
   const params = useParams();
   const projectId = params.id as string;
-  const project = projectsData[projectId];
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"details" | "code">("details");
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(`/api/admin/projects/${projectId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setProject(data.project);
+        }
+      } catch (error) {
+        console.error("Error fetching project:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProject();
+  }, [projectId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-500">Loading project...</div>
+      </div>
+    );
+  }
 
   if (!project) {
     return (
@@ -65,20 +47,29 @@ export default function ProjectDetail() {
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">Project Not Found</h1>
           <Link
-            href="/projects"
+            href="/"
             className="text-violet-600 hover:text-violet-700 font-semibold"
           >
-            ← Back to Projects
+            ← Back to Home
           </Link>
         </div>
       </div>
     );
   }
 
+  // Extract YouTube video ID from URL
+  const getYouTubeId = (url: string) => {
+    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const youtubeId = project.youtubeUrl ? getYouTubeId(project.youtubeUrl) : null;
+
   return (
-    <div className="min-h-screen pt-24 pb-16">
+    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-br from-gray-50 to-white">
       {/* Header */}
-      <div className="max-w-6xl mx-auto px-8">
+      <div className="max-w-6xl mx-auto px-4 md:px-8">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-700 mb-8 font-semibold"
@@ -93,16 +84,26 @@ export default function ProjectDetail() {
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="max-w-6xl mx-auto px-8 mb-20"
+        className="max-w-6xl mx-auto px-4 md:px-8 mb-20"
       >
-        <div className="grid md:grid-cols-2 gap-12 items-start">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
           {/* Image */}
           <div className="relative">
-            <div className="bg-gradient-to-br from-violet-200 to-pink-200 rounded-3xl overflow-hidden aspect-video flex items-center justify-center">
-              <div className="text-6xl font-bold text-white opacity-20">
-                {project.category}
+            {project.image ? (
+              <Image
+                src={project.image}
+                alt={project.title}
+                width={600}
+                height={400}
+                className="rounded-3xl w-full h-auto object-cover shadow-lg"
+              />
+            ) : (
+              <div className="bg-gradient-to-br from-violet-200 to-pink-200 rounded-3xl overflow-hidden aspect-video flex items-center justify-center">
+                <div className="text-2xl md:text-6xl font-bold text-white opacity-20">
+                  {project.category}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Content */}
@@ -111,117 +112,157 @@ export default function ProjectDetail() {
               <span className="px-4 py-2 bg-violet-100 text-violet-700 rounded-full text-sm font-semibold inline-block mb-4">
                 {project.category}
               </span>
-              <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
                 {project.title}
               </h1>
             </div>
 
-            <p className="text-xl text-gray-600 leading-relaxed">
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
               {project.description}
             </p>
 
-            <div className="grid grid-cols-2 gap-6 py-6">
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Timeline</div>
-                <div className="font-semibold text-gray-900">{project.timeline}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Status</div>
-                <div className="font-semibold text-green-600">{project.status}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Team</div>
-                <div className="font-semibold text-gray-900">{project.team}</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 mb-1">Category</div>
-                <div className="font-semibold text-gray-900">{project.category}</div>
-              </div>
-            </div>
-
             {/* Tech Stack */}
-            <div>
-              <div className="text-sm text-gray-600 mb-3 font-semibold">Technologies</div>
-              <div className="flex flex-wrap gap-2">
-                {project.tech.map((tech: string) => (
-                  <span
-                    key={tech}
-                    className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                  >
-                    {tech}
-                  </span>
-                ))}
+            {project.tech && project.tech.length > 0 && (
+              <div>
+                <div className="text-sm text-gray-600 mb-3 font-semibold">Technologies</div>
+                <div className="flex flex-wrap gap-2">
+                  {project.tech.map((tech: string) => (
+                    <span
+                      key={tech}
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Action Buttons */}
-            <div className="flex gap-4 pt-6">
-              <motion.a
-                href={project.github}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-              >
-                <Code className="w-5 h-5" />
-                View Code
-              </motion.a>
-              <motion.a
-                href={project.demo}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition-colors"
-              >
-                <ExternalLink className="w-5 h-5" />
-                Live Demo
-              </motion.a>
+            <div className="flex flex-wrap gap-3 pt-4">
+              {project.demo && (
+                <a
+                  href={project.demo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition"
+                >
+                  <ExternalLink className="w-5 h-5" />
+                  Live Demo
+                </a>
+              )}
+              {project.github && (
+                <a
+                  href={project.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition"
+                >
+                  <GitBranch className="w-5 h-5" />
+                  GitHub
+                </a>
+              )}
             </div>
           </div>
         </div>
       </motion.section>
 
-      {/* Detailed Description */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-6xl mx-auto px-8 mb-20"
-      >
-        <div className="bg-white p-12 rounded-3xl shadow-lg border border-gray-100">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">Project Overview</h2>
-          <div className="prose prose-lg max-w-none text-gray-700 space-y-4">
-            {project.longDescription.split("\n").map((paragraph: string, i: number) => (
-              <p key={i} className="text-gray-600 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+      {/* YouTube Video Section */}
+      {youtubeId && (
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="max-w-6xl mx-auto px-4 md:px-8 mb-20"
+        >
+          <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
+            <div className="bg-gradient-to-r from-violet-600 to-pink-600 px-6 md:px-8 py-4">
+              <h2 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                <Play className="w-6 h-6" />
+                {project.youtubeTitle || "Video"}
+              </h2>
+            </div>
+            <div className="aspect-video w-full">
+              <iframe
+                className="w-full h-full"
+                src={`https://www.youtube.com/embed/${youtubeId}`}
+                title={project.youtubeTitle || "Project Video"}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
           </div>
-        </div>
-      </motion.section>
+        </motion.section>
+      )}
 
-      {/* Gallery */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="max-w-6xl mx-auto px-8"
-      >
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Project Gallery</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {project.images?.map((image: string, i: number) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-gradient-to-br from-violet-100 to-pink-100 rounded-2xl aspect-video flex items-center justify-center overflow-hidden"
-            >
-              <div className="text-4xl font-bold text-white opacity-20">
-                Image {i + 1}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.section>
+      {/* Details and Code Sections */}
+      {(project.showDetails || project.showCode) && (
+        <motion.section
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+          className="max-w-6xl mx-auto px-4 md:px-8"
+        >
+          <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200">
+              {project.showDetails && (
+                <button
+                  onClick={() => setActiveTab("details")}
+                  className={`flex-1 px-6 py-4 font-semibold transition ${
+                    activeTab === "details"
+                      ? "text-violet-600 border-b-2 border-violet-600"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Details
+                </button>
+              )}
+              {project.showCode && (
+                <button
+                  onClick={() => setActiveTab("code")}
+                  className={`flex-1 px-6 py-4 font-semibold transition ${
+                    activeTab === "code"
+                      ? "text-violet-600 border-b-2 border-violet-600"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  Code
+                </button>
+              )}
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 md:p-8">
+              {activeTab === "details" && project.longDescription && (
+                <div className="prose prose-lg max-w-none text-gray-700">
+                  <p className="whitespace-pre-line leading-relaxed">
+                    {project.longDescription}
+                  </p>
+                </div>
+              )}
+
+              {activeTab === "code" && project.codeUrl && (
+                <div className="space-y-4">
+                  <p className="text-gray-700">
+                    Access the source code for this project:
+                  </p>
+                  <a
+                    href={project.codeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition font-semibold"
+                  >
+                    <Code className="w-5 h-5" />
+                    {project.codeName || "View Code"}
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.section>
+      )}
     </div>
   );
 }

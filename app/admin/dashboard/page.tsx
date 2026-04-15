@@ -396,12 +396,19 @@ function ProjectsTab() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    longDescription: "",
     tech: "",
     github: "",
     demo: "",
     featured: false,
     category: "",
     imageUrl: "",
+    youtubeUrl: "",
+    youtubeTitle: "",
+    codeUrl: "",
+    codeName: "",
+    showCode: false,
+    showDetails: false,
   });
   const [uploading, setUploading] = useState(false);
 
@@ -435,19 +442,26 @@ function ProjectsTab() {
     const newProject = {
       title: formData.title,
       description: formData.description,
+      longDescription: formData.longDescription,
       tech: formData.tech.split(",").map((t) => t.trim()).filter((t) => t),
       github: formData.github,
       demo: formData.demo,
       featured: formData.featured,
       category: formData.category,
       image: formData.imageUrl,
+      youtubeUrl: formData.youtubeUrl,
+      youtubeTitle: formData.youtubeTitle,
+      codeUrl: formData.codeUrl,
+      codeName: formData.codeName,
+      showCode: formData.showCode,
+      showDetails: formData.showDetails,
     };
 
     try {
       const res = await adminAPI.createProject(newProject);
       if (res.success) {
         alert("Project added successfully!");
-        setFormData({ title: "", description: "", tech: "", github: "", demo: "", featured: false, category: "", imageUrl: "" });
+        setFormData({ title: "", description: "", longDescription: "", tech: "", github: "", demo: "", featured: false, category: "", imageUrl: "", youtubeUrl: "", youtubeTitle: "", codeUrl: "", codeName: "", showCode: false, showDetails: false });
         setShowForm(false);
         loadProjects();
       } else {
@@ -577,6 +591,59 @@ function ProjectsTab() {
                 <p className="text-xs text-gray-500 mt-1">Image uploaded</p>
               </div>
             )}
+          </div>
+          <textarea
+            placeholder="Long Description (full details)"
+            value={formData.longDescription}
+            onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
+            rows={3}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="YouTube URL (optional)"
+            value={formData.youtubeUrl}
+            onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="YouTube Title"
+            value={formData.youtubeTitle}
+            onChange={(e) => setFormData({ ...formData, youtubeTitle: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Code URL (optional)"
+            value={formData.codeUrl}
+            onChange={(e) => setFormData({ ...formData, codeUrl: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Code Label (e.g., 'View Code', 'GitHub Repo')"
+            value={formData.codeName}
+            onChange={(e) => setFormData({ ...formData, codeName: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+          />
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.showCode}
+                onChange={(e) => setFormData({ ...formData, showCode: e.target.checked })}
+              />
+              <span className="text-sm">Show Code Section</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.showDetails}
+                onChange={(e) => setFormData({ ...formData, showDetails: e.target.checked })}
+              />
+              <span className="text-sm">Show Details Section</span>
+            </label>
           </div>
           <label className="flex items-center gap-2">
             <input

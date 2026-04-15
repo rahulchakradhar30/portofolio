@@ -10,14 +10,20 @@ export interface Project {
   id: string;
   title: string;
   description: string;
+  longDescription?: string;
   image: string;
   tech: string[];
   github: string;
   demo: string;
   featured: boolean;
   category: string;
+  youtubeUrl?: string;
+  youtubeTitle?: string;
+  codeUrl?: string;
+  codeName?: string;
+  showCode?: boolean;
+  showDetails?: boolean;
   details?: string;
-  longDescription?: string;
 }
 
 export interface Skill {
