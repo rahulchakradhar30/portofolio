@@ -37,6 +37,10 @@ export interface AdminUser {
   password_hash: string;
   otp_enabled?: boolean;
   otp_secret?: string;
+  role?: 'admin' | 'editor' | 'viewer';
+  status?: 'active' | 'inactive' | 'suspended';
+  created_at?: Date;
+  last_login?: Date;
 }
 
 export interface OTPSchema {

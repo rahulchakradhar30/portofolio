@@ -12,14 +12,24 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+let db: ReturnType<typeof getFirestore> | null = null;
+let auth: ReturnType<typeof getAuth> | null = null;
+
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+} catch {
+  console.warn('Firebase initialization in progress or not available');
+}
+
+export { db, auth };
 
 // Helper functions for common database operations
 export const firebaseHelpers = {
   // Users collection operations
   async getUserByEmail(email: string): Promise<AdminUser | null> {
+    if (!db) return null;
     const usersRef = collection(db, 'admin_users');
     const q = query(usersRef, where('email', '==', email));
     const querySnapshot = await getDocs(q);
@@ -29,6 +39,7 @@ export const firebaseHelpers = {
   },
 
   async getLatestOTP(email: string, type: string = 'email_verification'): Promise<OTPSchema | null> {
+    if (!db) return null;
     const otpsRef = collection(db, 'email_otps');
     const q = query(
       otpsRef,
@@ -43,11 +54,13 @@ export const firebaseHelpers = {
   },
 
   async deleteOTP(otpId: string) {
+    if (!db) return;
     const otpRef = doc(db, 'email_otps', otpId);
     await deleteDoc(otpRef);
   },
 
   async createUser(userData: Record<string, unknown>) {
+    if (!db) throw new Error('Database not initialized');
     const usersRef = collection(db, 'admin_users');
     const docRef = await addDoc(usersRef, {
       ...userData,
@@ -58,6 +71,7 @@ export const firebaseHelpers = {
   },
 
   async updateUser(userId: string, userData: Partial<Record<string, unknown>>) {
+    if (!db) throw new Error('Database not initialized');
     const userRef = doc(db, 'admin_users', userId);
     await updateDoc(userRef, {
       ...userData,
@@ -68,6 +82,7 @@ export const firebaseHelpers = {
 
   // OTP operations
   async storeOTP(email: string, otp: string, expiresAt: Date, type: string = 'email_verification') {
+    if (!db) throw new Error('Database not initialized');
     const otpsRef = collection(db, 'email_otps');
     const docRef = await addDoc(otpsRef, {
       email,
@@ -81,6 +96,7 @@ export const firebaseHelpers = {
 
   // Projects operations
   async getAllProjects() {
+    if (!db) return [];
     const projectsRef = collection(db, 'projects');
     const q = query(projectsRef, orderBy('created_at', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -88,12 +104,14 @@ export const firebaseHelpers = {
   },
 
   async getProjectById(projectId: string) {
+    if (!db) return null;
     const projectRef = doc(db, 'projects', projectId);
     const docSnap = await getDoc(projectRef);
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
   },
 
   async createProject(projectData: Omit<Project, 'id'>) {
+    if (!db) throw new Error('Database not initialized');
     const projectsRef = collection(db, 'projects');
     const docRef = await addDoc(projectsRef, {
       ...projectData,
@@ -104,6 +122,7 @@ export const firebaseHelpers = {
   },
 
   async updateProject(projectId: string, projectData: Partial<Omit<Project, 'id'>>) {
+    if (!db) throw new Error('Database not initialized');
     const projectRef = doc(db, 'projects', projectId);
     await updateDoc(projectRef, {
       ...projectData,
@@ -113,12 +132,14 @@ export const firebaseHelpers = {
   },
 
   async deleteProject(projectId: string) {
+    if (!db) throw new Error('Database not initialized');
     const projectRef = doc(db, 'projects', projectId);
     await deleteDoc(projectRef);
   },
 
   // Skills operations
   async getAllSkills() {
+    if (!db) return [];
     const skillsRef = collection(db, 'skills');
     const q = query(skillsRef, orderBy('created_at', 'desc'));
     const querySnapshot = await getDocs(q);
@@ -126,12 +147,14 @@ export const firebaseHelpers = {
   },
 
   async getSkillById(skillId: string) {
+    if (!db) return null;
     const skillRef = doc(db, 'skills', skillId);
     const docSnap = await getDoc(skillRef);
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
   },
 
   async createSkill(skillData: Omit<Skill, 'id'>) {
+    if (!db) throw new Error('Database not initialized');
     const skillsRef = collection(db, 'skills');
     const docRef = await addDoc(skillsRef, {
       ...skillData,
@@ -142,6 +165,7 @@ export const firebaseHelpers = {
   },
 
   async updateSkill(skillId: string, skillData: Partial<Omit<Skill, 'id'>>) {
+    if (!db) throw new Error('Database not initialized');
     const skillRef = doc(db, 'skills', skillId);
     await updateDoc(skillRef, {
       ...skillData,
@@ -151,12 +175,14 @@ export const firebaseHelpers = {
   },
 
   async deleteSkill(skillId: string) {
+    if (!db) throw new Error('Database not initialized');
     const skillRef = doc(db, 'skills', skillId);
     await deleteDoc(skillRef);
   },
 
   // Portfolio content operations
   async getPortfolioContent() {
+    if (!db) return null;
     const contentRef = collection(db, 'portfolio_content');
     const querySnapshot = await getDocs(contentRef);
     if (querySnapshot.empty) return null;
@@ -164,6 +190,7 @@ export const firebaseHelpers = {
   },
 
   async updatePortfolioContent(contentData: Partial<PortfolioContent>) {
+    if (!db) throw new Error('Database not initialized');
     const contentRef = collection(db, 'portfolio_content');
     const querySnapshot = await getDocs(contentRef);
     if (querySnapshot.empty) {
@@ -188,6 +215,7 @@ export const firebaseHelpers = {
 
   // Contact messages operations
   async getAllMessages(unreadOnly: boolean = false) {
+    if (!db) return [];
     const messagesRef = collection(db, 'contact_messages');
     let q;
     if (unreadOnly) {
@@ -200,17 +228,20 @@ export const firebaseHelpers = {
   },
 
   async updateMessage(messageId: string, isRead: boolean) {
+    if (!db) throw new Error('Database not initialized');
     const messageRef = doc(db, 'contact_messages', messageId);
     await updateDoc(messageRef, { is_read: isRead });
     return { id: messageId, is_read: isRead };
   },
 
   async deleteMessage(messageId: string) {
+    if (!db) throw new Error('Database not initialized');
     const messageRef = doc(db, 'contact_messages', messageId);
     await deleteDoc(messageRef);
   },
 
   async createMessage(messageData: Omit<ContactMessage, 'id' | 'createdAt' | 'read' | 'is_read'>) {
+    if (!db) throw new Error('Database not initialized');
     const messagesRef = collection(db, 'contact_messages');
     const docRef = await addDoc(messagesRef, {
       ...messageData,

@@ -1,47 +1,62 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Menu, X, LogOut } from "lucide-react";
+import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3 } from "lucide-react";
+import { firebaseLogout } from "@/app/lib/firebaseAuth";
 import { adminAPI } from "@/app/lib/adminAPI";
-import type { Project, Skill, ContactMessage, PortfolioContent } from "@/app/lib/types";
+import type { Project, Skill, ContactMessage, PortfolioContent, AdminUser } from "@/app/lib/types";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [authState, setAuthState] = useState({ isAuth: false, adminName: "" });
+  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = localStorage.getItem("adminAuth");
-    if (auth) {
+    const checkAuth = async () => {
       try {
-        const parsed = JSON.parse(auth);
-        setAuthState({ isAuth: true, adminName: parsed.name });
+        const res = await fetch("/api/admin/auth/me", { method: "GET" });
+        if (res.ok) {
+          const data = await res.json();
+          setAdminUser(data.user);
+          setIsHydrated(true);
+        } else {
+          router.push("/admin/login");
+        }
       } catch (error) {
-        setAuthState({ isAuth: false, adminName: "" });
+        console.error("Auth check failed:", error);
+        router.push("/admin/login");
+      } finally {
+        setLoading(false);
       }
-    }
-    setIsHydrated(true);
-  }, []);
+    };
 
-  if (!isHydrated) {
+    checkAuth();
+  }, [router]);
+
+  if (!isHydrated || loading) {
     return <div className="min-h-screen bg-gray-50" />;
   }
 
-  if (!authState.isAuth) {
-    return <AdminLogin onSuccess={(name) => {
-      setAuthState({ isAuth: true, adminName: name });
-    }} />;
+  const handleLogout = async () => {
+    await firebaseLogout();
+    sessionStorage.removeItem("adminToken");
+    router.push("/admin/login");
   }
 
   const adminTabs = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "content", label: "Content", icon: "✏️" },
-    { id: "projects", label: "Projects", icon: "🎯" },
-    { id: "skills", label: "Skills", icon: "⭐" },
-    { id: "messages", label: "Messages", icon: "💬" },
-    { id: "settings", label: "Settings", icon: "⚙️" },
+    { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "content", label: "Content", icon: Edit2 },
+    { id: "projects", label: "Projects", icon: Plus },
+    { id: "skills", label: "Skills", icon: Plus },
+    { id: "messages", label: "Messages", icon: Plus },
+    { id: "users", label: "Users", icon: Users },
+    { id: "activity", label: "Activity", icon: Activity },
+    { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
 
   return (
@@ -63,29 +78,29 @@ export default function AdminDashboard() {
         </div>
 
         <nav className="p-4 space-y-2">
-          {adminTabs.map((tab) => (
-            <motion.button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? "bg-violet-600 text-white"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800"
-              }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className="text-xl">{tab.icon}</span>
-              {sidebarOpen && <span>{tab.label}</span>}
-            </motion.button>
-          ))}
+          {adminTabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <motion.button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-violet-600 text-white"
+                    : "text-gray-400 hover:text-white hover:bg-gray-800"
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Icon className="w-5 h-5" />
+                {sidebarOpen && <span>{tab.label}</span>}
+              </motion.button>
+            );
+          })}
         </nav>
 
         <button
-          onClick={() => {
-            localStorage.removeItem("adminAuth");
-            setAuthState({ isAuth: false, adminName: "" });
-          }}
+          onClick={handleLogout}
           className="absolute bottom-4 left-4 right-4 flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors"
         >
           <LogOut className="w-5 h-5" />
@@ -108,7 +123,10 @@ export default function AdminDashboard() {
             )}
           </button>
           <div className="flex items-center gap-4">
-            <span className="text-gray-700 font-medium">Welcome, {authState.adminName}!</span>
+            <div>
+              <p className="text-sm text-gray-600">Logged in as</p>
+              <p className="text-gray-800 font-medium">{adminUser?.email}</p>
+            </div>
             <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full"></div>
           </div>
         </div>
@@ -120,86 +138,11 @@ export default function AdminDashboard() {
           {activeTab === "projects" && <ProjectsTab />}
           {activeTab === "skills" && <SkillsTab />}
           {activeTab === "messages" && <MessagesTab />}
+          {activeTab === "users" && <UsersTab />}
+          {activeTab === "activity" && <ActivityTab />}
           {activeTab === "settings" && <SettingsTab />}
         </div>
       </div>
-    </div>
-  );
-}
-
-// Admin Login Component
-function AdminLogin({ onSuccess }: { onSuccess: (name: string) => void }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleLogin = () => {
-    // Simple demo login (in production, use proper authentication)
-    if (email === "admin@portfolio.com" && password === "admin123") {
-      const authData = { name: "Admin", email };
-      localStorage.setItem("adminAuth", JSON.stringify(authData));
-      onSuccess("Admin");
-    } else {
-      setError("Invalid credentials!");
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-pink-50">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-10 rounded-3xl shadow-2xl max-w-md w-full"
-      >
-        <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Admin Login
-        </h1>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-              placeholder="admin@portfolio.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && <div className="text-red-600 text-sm bg-red-50 p-2 rounded">{error}</div>}
-
-          <motion.button
-            onClick={handleLogin}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full px-6 py-3 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-lg"
-          >
-            Login
-          </motion.button>
-
-          <p className="text-center text-sm text-gray-600 mt-4">
-            Demo Credentials:<br />
-            Email: admin@portfolio.com<br />
-            Password: admin123
-          </p>
-        </div>
-      </motion.div>
     </div>
   );
 }
@@ -773,6 +716,119 @@ function MessagesTab() {
           ))
         )}
       </div>
+    </div>
+  );
+}
+
+function UsersTab() {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await fetch("/api/admin/users");
+        if (res.ok) {
+          const data = await res.json();
+          setUsers(data.users || []);
+        }
+      } catch (error) {
+        console.error("Error loading users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadUsers();
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-800">Admin Users</h2>
+      </div>
+
+      {loading ? (
+        <div className="text-center text-gray-500">Loading...</div>
+      ) : (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Email</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Role</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                <th className="px-6 py-3 text-left text-sm font-medium text-gray-700">Last Login</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.id} className="border-b hover:bg-gray-50">
+                  <td className="px-6 py-3 text-gray-800">{user.email}</td>
+                  <td className="px-6 py-3 text-gray-600">{user.role || "admin"}</td>
+                  <td className="px-6 py-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      user.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {user.status || "active"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-3 text-gray-600">{user.last_login ? new Date(user.last_login).toLocaleDateString() : "Never"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActivityTab() {
+  const [activities, setActivities] = useState<Array<{id: string; action: string; timestamp?: Record<string, unknown> | string}>>([])
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadActivities = async () => {
+      try {
+        const res = await fetch("/api/admin/activity");
+        if (res.ok) {
+          const data = await res.json();
+          setActivities(data.activities || []);
+        }
+      } catch (error) {
+        console.error("Error loading activities:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadActivities();
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-800">Activity Logs</h2>
+
+      {loading ? (
+        <div className="text-center text-gray-500">Loading...</div>
+      ) : (
+        <div className="space-y-3">
+          {activities.map((activity, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white p-4 rounded-lg border border-gray-200"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-medium text-gray-800">{activity.action}</p>
+                </div>
+                <span className="text-xs text-gray-500">{activity.timestamp ? new Date(String(activity.timestamp)).toLocaleString() : 'N/A'}</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
