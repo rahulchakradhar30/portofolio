@@ -36,22 +36,22 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-green-50 to-violet-50 relative overflow-hidden">
+    <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-green-50 to-violet-50 relative overflow-hidden py-20 md:py-0">
       {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-20 w-32 h-32 bg-pink-200 rounded-full blur-xl"></div>
-        <div className="absolute bottom-20 right-20 w-40 h-40 bg-violet-200 rounded-full blur-xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-green-200 rounded-full blur-2xl"></div>
+      <div className="absolute inset-0 opacity-5 md:opacity-10">
+        <div className="absolute top-10 md:top-20 left-10 md:left-20 w-20 md:w-32 h-20 md:h-32 bg-pink-200 rounded-full blur-xl"></div>
+        <div className="absolute bottom-10 md:bottom-20 right-10 md:right-20 w-24 md:w-40 h-24 md:h-40 bg-violet-200 rounded-full blur-xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 md:w-64 h-40 md:h-64 bg-green-200 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="text-center relative z-10 px-8">
+      <div className="text-center relative z-10 px-4 md:px-8 max-w-5xl mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-6"
+          className="mb-4 md:mb-6"
         >
-          <span className="inline-block px-4 py-2 bg-pink-100 text-pink-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-block px-3 md:px-4 py-1 md:py-2 bg-pink-100 text-pink-700 rounded-full text-xs md:text-sm font-medium mb-3 md:mb-4">
             Welcome to my portfolio
           </span>
         </motion.div>
@@ -60,7 +60,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-gray-800 via-violet-700 to-pink-600 bg-clip-text text-transparent mb-6 leading-tight"
+          className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-bold bg-gradient-to-r from-gray-800 via-violet-700 to-pink-600 bg-clip-text text-transparent mb-4 md:mb-6 leading-tight"
         >
           {heroData.heroTitle}
         </motion.h1>
@@ -69,7 +69,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-xl md:text-2xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed"
+          className="text-sm sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-4 md:mb-6 max-w-3xl mx-auto leading-relaxed"
         >
           {heroData.heroSubtitle}
         </motion.p>
@@ -78,7 +78,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-lg md:text-xl text-violet-600 font-semibold mb-8 max-w-3xl mx-auto leading-relaxed text-center"
+          className="text-base sm:text-lg md:text-xl text-violet-600 font-semibold mb-6 md:mb-8 max-w-3xl mx-auto leading-relaxed text-center"
         >
           {heroData.heroTagline}
         </motion.div>
@@ -87,13 +87,13 @@ export default function Hero() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center"
         >
           <Link href="/projects">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+              className="px-6 sm:px-8 py-3 md:py-4 bg-gradient-to-r from-violet-600 to-pink-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-sm md:text-base w-full sm:w-auto"
             >
               Explore My Work
             </motion.button>
