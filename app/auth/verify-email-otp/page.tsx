@@ -167,7 +167,7 @@ export default function VerifyEmailOTP() {
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-violet-500 focus:outline-none transition text-center text-2xl letter-spacing tracking-widest"
               placeholder="000000"
-              maxLength="6"
+              maxLength={6}
               required
             />
             <p className="text-xs text-gray-500 mt-1">
