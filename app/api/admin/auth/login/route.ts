@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth } from '@/app/lib/firebaseAdmin';
 import { ADMIN_SESSION_COOKIE } from '@/app/lib/adminAuth';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
+import { rejectDisallowedOrigin } from '@/app/lib/security';
 
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 5;
 
 export async function POST(request: NextRequest) {
   try {
+    const originError = rejectDisallowedOrigin(request);
+    if (originError) return originError;
+
+    const limit = enforceRateLimit({ request, scope: 'admin-login', max: 12, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const { idToken } = await request.json();
     if (!idToken) {
       return NextResponse.json({ error: 'Missing ID token' }, { status: 400 });

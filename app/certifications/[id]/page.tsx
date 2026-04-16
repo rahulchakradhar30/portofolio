@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useParams } from "next/navigation";
 import type { Certification } from "@/app/lib/types";
+import ImageLightbox from "@/app/components/ImageLightbox";
 
 function getYouTubeId(url: string) {
   const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
@@ -19,6 +20,15 @@ export default function CertificationDetailPage() {
   const certId = params.id as string;
   const [certification, setCertification] = useState<Certification | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images.filter(Boolean));
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -41,7 +51,7 @@ export default function CertificationDetailPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 px-4 pb-20 pt-24 text-white sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[1600px]">
         <Link href="/certifications" className="mb-8 inline-flex items-center gap-2 text-cyan-300 hover:text-cyan-200">
           <ArrowLeft className="h-4 w-4" />
           Back to Certifications
@@ -53,9 +63,14 @@ export default function CertificationDetailPage() {
           <p className="mt-1 text-sm text-slate-400">Issued {certification.issuedDate ? new Date(certification.issuedDate).toLocaleDateString() : 'N/A'}</p>
 
           {certification.image && (
-            <div className="relative mt-6 h-72 overflow-hidden rounded-2xl border border-slate-700/60">
+            <button
+              type="button"
+              onClick={() => openLightbox([certification.image || ""], 0)}
+              className="relative mt-6 h-72 w-full overflow-hidden rounded-2xl border border-slate-700/60"
+              title="Click to view full image"
+            >
               <Image src={certification.image} alt={certification.title} fill className="object-cover" />
-            </div>
+            </button>
           )}
 
           {certification.description && <p className="mt-6 leading-relaxed text-slate-200">{certification.description}</p>}
@@ -81,9 +96,15 @@ export default function CertificationDetailPage() {
             <h2 className="text-2xl font-bold mb-6">Gallery</h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {certification.galleryImages.map((image, idx) => (
-                <div key={`${image}-${idx}`} className="relative h-48 overflow-hidden rounded-2xl border border-slate-700/60">
+                <button
+                  key={`${image}-${idx}`}
+                  type="button"
+                  onClick={() => openLightbox(certification.galleryImages || [], idx)}
+                  className="relative h-48 overflow-hidden rounded-2xl border border-slate-700/60"
+                  title="Click to open and zoom"
+                >
                   <Image src={image} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
-                </div>
+                </button>
               ))}
             </div>
           </section>
@@ -108,6 +129,15 @@ export default function CertificationDetailPage() {
             </div>
           </section>
         )}
+
+        {lightboxOpen ? (
+          <ImageLightbox
+            images={lightboxImages}
+            open={lightboxOpen}
+            initialIndex={lightboxIndex}
+            onClose={() => setLightboxOpen(false)}
+          />
+        ) : null}
       </div>
     </main>
   );

@@ -29,7 +29,7 @@ export default function CertificationsPage() {
 
   return (
     <main className="section-surface min-h-screen px-4 pb-20 pt-28 sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1600px]">
         <Link href="/" className="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-50">
           <ArrowLeft className="h-4 w-4" />
           Back to Home
@@ -41,7 +41,7 @@ export default function CertificationsPage() {
         {loading ? (
           <div className="text-slate-500">Loading certifications...</div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {certifications.map((cert, index) => (
               <motion.article
                 key={cert.id}

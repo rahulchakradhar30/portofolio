@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { assertAdminSession } from '@/app/lib/adminAuth';
+import { logAdminAudit } from '@/app/lib/adminAudit';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
 
 // GET - List all contact messages
 export async function GET(request: NextRequest) {
@@ -26,6 +28,9 @@ export async function GET(request: NextRequest) {
 // PUT - Mark message as read
 export async function PUT(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-message-update', max: 90, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
@@ -39,6 +44,13 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedMessage = await serverFirebaseHelpers.updateMessage(messageId, isRead);
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'message.update',
+      details: { messageId, isRead: Boolean(isRead) },
+    });
 
     return NextResponse.json(
       { success: true, message: updatedMessage },
@@ -56,6 +68,9 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete message
 export async function DELETE(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-message-delete', max: 30, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
@@ -69,6 +84,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     await serverFirebaseHelpers.deleteMessage(messageId);
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'message.delete',
+      details: { messageId },
+    });
 
     return NextResponse.json(
       { success: true, message: 'Message deleted' },

@@ -268,7 +268,7 @@ export default function Chatbot() {
                       onKeyPress={handleKeyPress}
                       placeholder="Type a message..."
                       disabled={loading}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed text-sm"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-sm"
                     />
                     <motion.button
                       whileHover={{ scale: 1.05 }}

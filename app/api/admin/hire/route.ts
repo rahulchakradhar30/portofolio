@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { assertAdminSession } from '@/app/lib/adminAuth';
+import { logAdminAudit } from '@/app/lib/adminAudit';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +22,9 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-hire-update', max: 90, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
@@ -29,6 +34,14 @@ export async function PUT(request: NextRequest) {
     }
 
     const updatedRequest = await serverFirebaseHelpers.updateHireRequest(requestId, isRead);
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'hire.update',
+      details: { requestId, isRead: Boolean(isRead) },
+    });
+
     return NextResponse.json({ success: true, hireRequest: updatedRequest }, { status: 200 });
   } catch (error) {
     console.error('Update hire request error:', error);
@@ -38,6 +51,9 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-hire-delete', max: 30, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
@@ -47,6 +63,14 @@ export async function DELETE(request: NextRequest) {
     }
 
     await serverFirebaseHelpers.deleteHireRequest(requestId);
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'hire.delete',
+      details: { requestId },
+    });
+
     return NextResponse.json({ success: true, message: 'Hire request deleted' }, { status: 200 });
   } catch (error) {
     console.error('Delete hire request error:', error);

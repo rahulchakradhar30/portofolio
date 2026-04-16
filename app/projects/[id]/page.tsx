@@ -7,6 +7,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Project } from "@/app/lib/types";
+import ImageLightbox from "@/app/components/ImageLightbox";
 
 export default function ProjectDetail() {
   const params = useParams();
@@ -14,6 +15,15 @@ export default function ProjectDetail() {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "code">("details");
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images.filter(Boolean));
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -77,7 +87,7 @@ export default function ProjectDetail() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 md:px-8">
+      <div className="relative z-10 mx-auto max-w-[1600px] px-4 md:px-8 lg:px-10 2xl:px-16">
         {/* Header */}
         <Link
           href="/"
@@ -94,7 +104,7 @@ export default function ProjectDetail() {
           transition={{ duration: 0.8 }}
           className="mb-20"
         >
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12 2xl:gap-16">
             {/* Image */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -105,13 +115,20 @@ export default function ProjectDetail() {
               {project.image ? (
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-violet-600 to-pink-600 rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition duration-300"></div>
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    width={600}
-                    height={400}
-                    className="relative rounded-3xl w-full h-auto object-cover shadow-2xl"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => openLightbox([project.image], 0)}
+                    className="relative block w-full overflow-hidden rounded-3xl"
+                    title="Click to view full image"
+                  >
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      width={600}
+                      height={400}
+                      className="relative rounded-3xl w-full h-auto object-cover shadow-2xl"
+                    />
+                  </button>
                 </div>
               ) : (
                 <div className="bg-gradient-to-br from-violet-600 to-pink-600 rounded-3xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
@@ -241,9 +258,15 @@ export default function ProjectDetail() {
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Project Gallery</h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {project.galleryImages.map((image, index) => (
-                  <div key={`${image}-${index}`} className="relative h-48 overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900">
+                  <button
+                    key={`${image}-${index}`}
+                    type="button"
+                    onClick={() => openLightbox(project.galleryImages || [], index)}
+                    className="relative h-48 overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900"
+                    title="Click to open and zoom"
+                  >
                     <Image src={image} alt={`${project.title} gallery ${index + 1}`} fill className="object-cover" />
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -277,6 +300,15 @@ export default function ProjectDetail() {
             </div>
           </motion.section>
         )}
+
+        {lightboxOpen ? (
+          <ImageLightbox
+            images={lightboxImages}
+            open={lightboxOpen}
+            initialIndex={lightboxIndex}
+            onClose={() => setLightboxOpen(false)}
+          />
+        ) : null}
 
         {/* Details and Code Sections */}
         {(project.showDetails || project.showCode) && (

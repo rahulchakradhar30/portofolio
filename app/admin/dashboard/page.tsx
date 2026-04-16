@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3, Award, Download, RefreshCw, ShieldCheck, Mail, Search, BadgeCheck, CalendarDays, Link2, Globe, Briefcase } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
-import { SKILL_LOGO_PRESETS, resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
+import { SKILL_LOGO_PRESETS, SKILL_LOGO_CATEGORIES, resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import AIAssistant from "@/app/components/AIAssistant";
 import type { Project, Skill, ContactMessage, HireRequest, PortfolioContent, AdminUser, Certification } from "@/app/lib/types";
 
@@ -1112,6 +1112,8 @@ function SkillsTab() {
   const [showForm, setShowForm] = useState(false);
   const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
   const [logoQuery, setLogoQuery] = useState("");
+  const [logoCategory, setLogoCategory] = useState("All");
+  const [visibleLogoCount, setVisibleLogoCount] = useState(120);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -1192,11 +1194,25 @@ function SkillsTab() {
     setShowForm(true);
   };
 
-  const filteredLogoPresets = SKILL_LOGO_PRESETS.filter((preset) => {
+  const filteredLogoPresets = useMemo(() => {
     const q = logoQuery.trim().toLowerCase();
-    if (!q) return true;
-    return `${preset.name} ${preset.category}`.toLowerCase().includes(q);
-  });
+    return SKILL_LOGO_PRESETS.filter((preset) => {
+      const matchesCategory = logoCategory === "All" || preset.category === logoCategory;
+      if (!matchesCategory) return false;
+      if (!q) return true;
+      const searchable = `${preset.name} ${preset.category} ${(preset.keywords || []).join(" ")}`.toLowerCase();
+      return searchable.includes(q);
+    });
+  }, [logoCategory, logoQuery]);
+
+  const visibleLogoPresets = useMemo(
+    () => filteredLogoPresets.slice(0, visibleLogoCount),
+    [filteredLogoPresets, visibleLogoCount]
+  );
+
+  useEffect(() => {
+    setVisibleLogoCount(120);
+  }, [logoQuery, logoCategory]);
 
   const selectedLogo = SKILL_LOGO_PRESETS.find((preset) => preset.url === formData.icon);
 
@@ -1268,9 +1284,21 @@ function SkillsTab() {
               onChange={(e) => setLogoQuery(e.target.value)}
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
             />
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {SKILL_LOGO_CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setLogoCategory(category)}
+                  className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition ${logoCategory === category ? 'bg-violet-600 text-white' : 'border border-violet-200 bg-white text-violet-700 hover:bg-violet-50'}`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
             <div className="max-h-64 overflow-auto rounded-lg border border-violet-100 bg-white p-2">
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-              {filteredLogoPresets.map((preset) => (
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 2xl:grid-cols-8">
+              {visibleLogoPresets.map((preset) => (
                 <button
                   key={preset.name}
                   type="button"
@@ -1288,7 +1316,17 @@ function SkillsTab() {
                 </button>
               ))}
               </div>
+              {filteredLogoPresets.length > visibleLogoPresets.length && (
+                <button
+                  type="button"
+                  onClick={() => setVisibleLogoCount((prev) => prev + 120)}
+                  className="mt-3 w-full rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 hover:bg-violet-100"
+                >
+                  Load 120 more logos ({filteredLogoPresets.length - visibleLogoPresets.length} remaining)
+                </button>
+              )}
             </div>
+            <p className="text-xs text-gray-500">Showing {visibleLogoPresets.length} of {filteredLogoPresets.length} logos</p>
             {selectedLogo && <p className="text-xs text-gray-600">Selected: <span className="font-semibold">{selectedLogo.name}</span> ({selectedLogo.category})</p>}
             <input
               type="url"

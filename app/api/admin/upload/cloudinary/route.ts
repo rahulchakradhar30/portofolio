@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { assertAdminSession } from '@/app/lib/adminAuth';
+import { logAdminAudit } from '@/app/lib/adminAudit';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
@@ -19,6 +21,9 @@ export async function OPTIONS() {
 // Upload to Cloudinary
 export async function POST(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-upload', max: 20, windowMs: 60_000 });
+    if (!limit.ok) return addCorsHeaders(limit.response);
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return addCorsHeaders(auth.response);
 
@@ -109,6 +114,14 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'upload.cloudinary',
+      details: { publicId: data.public_id, fileName: file.name, fileType: file.type },
+    });
+
     return addCorsHeaders(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

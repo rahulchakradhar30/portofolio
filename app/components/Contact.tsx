@@ -258,7 +258,7 @@ export default function Contact() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500 md:rounded-xl md:px-4 md:py-3 md:text-base"
+                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500 md:rounded-xl md:px-4 md:py-3 md:text-base"
                     placeholder="John"
                   />
                 </div>
@@ -272,7 +272,7 @@ export default function Contact() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
                     placeholder="Doe"
                   />
                 </div>
@@ -288,7 +288,7 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
                   placeholder="john@example.com"
                 />
               </div>
@@ -303,7 +303,7 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
                   placeholder="Project Discussion"
                 />
               </div>
@@ -318,7 +318,7 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleInputChange}
                   required
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
                   placeholder="Tell me about your project..."
                 ></textarea>
               </div>

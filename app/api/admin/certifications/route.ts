@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { assertAdminSession } from '@/app/lib/adminAuth';
+import { logAdminAudit } from '@/app/lib/adminAudit';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
@@ -40,6 +42,9 @@ export async function GET() {
 // POST - Create new certification
 export async function POST(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-cert-create', max: 30, windowMs: 60_000 });
+    if (!limit.ok) return addCorsHeaders(limit.response);
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return addCorsHeaders(auth.response);
 
@@ -76,6 +81,14 @@ export async function POST(request: NextRequest) {
       { success: true, certification: newCertification },
       { status: 201 }
     );
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'certification.create',
+      details: { certificationId: newCertification.id, title },
+    });
+
     return addCorsHeaders(response);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { assertAdminSession } from '@/app/lib/adminAuth';
+import { logAdminAudit } from '@/app/lib/adminAudit';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
 
 // GET - Get portfolio content
 export async function GET() {
@@ -48,6 +50,9 @@ export async function GET() {
 // PUT - Update portfolio content
 export async function PUT(request: NextRequest) {
   try {
+    const limit = enforceRateLimit({ request, scope: 'admin-content-update', max: 30, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
@@ -81,6 +86,13 @@ export async function PUT(request: NextRequest) {
       linkedin,
       github,
       aboutStats,
+    });
+
+    await logAdminAudit({
+      request,
+      email: auth.decoded.email || 'admin',
+      action: 'content.update',
+      details: { heroTitle, email, location },
     });
 
     return NextResponse.json(

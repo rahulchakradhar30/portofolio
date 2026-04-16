@@ -52,7 +52,7 @@ export default function AllProjects() {
   return (
     <section className="section-surface relative min-h-screen px-4 pt-28 pb-20 sm:px-6 md:pt-32 lg:px-10">
       <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-l from-emerald-300 via-cyan-300 to-amber-300"></div>
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1600px]">
         {/* Header */}
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 50 }}
@@ -110,7 +110,7 @@ export default function AllProjects() {
             No projects found for this filter.
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id || index}

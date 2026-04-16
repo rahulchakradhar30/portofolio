@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { enforceRateLimit } from '@/app/lib/rateLimit';
+import { rejectDisallowedOrigin } from '@/app/lib/security';
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
@@ -56,6 +58,17 @@ function sanitizeMessages(messages: ChatMessage[]): ChatMessage[] {
 // Real AI Chat using Groq (Multiple model fallbacks for stability)
 export async function POST(request: NextRequest) {
   try {
+    const originError = rejectDisallowedOrigin(request);
+    if (originError) return originError;
+
+    const limit = enforceRateLimit({
+      request,
+      scope: 'public-chat',
+      max: 20,
+      windowMs: 60_000,
+    });
+    if (!limit.ok) return limit.response;
+
     const body = await request.json();
     const { messages } = body;
 
