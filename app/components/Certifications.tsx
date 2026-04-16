@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { ExternalLink, Award, X } from "lucide-react";
 import type { Certification } from "@/app/lib/types";
+import LoadingSkeleton from "./LoadingSkeleton";
+import { useMotionPreferences } from "./MotionProvider";
 
 export default function Certifications() {
+  const { reducedMotion } = useMotionPreferences();
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCert, setSelectedCert] = useState<Certification | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchCertifications = async () => {
@@ -17,9 +23,12 @@ export default function Certifications() {
         if (res.ok) {
           const data = await res.json();
           setCertifications(data.certifications || []);
+        } else {
+          throw new Error('Failed to fetch certifications');
         }
       } catch (error) {
         console.error('Error fetching certifications:', error);
+        setError(error instanceof Error ? error : new Error('Failed to load certifications'));
       } finally {
         setLoading(false);
       }
@@ -28,54 +37,64 @@ export default function Certifications() {
     fetchCertifications();
   }, []);
 
-  return (
-    <section className="py-24 px-8 bg-gradient-to-br from-white to-violet-50 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 via-violet-400 to-pink-400"></div>
+  if (error) throw error;
 
-      <div className="max-w-7xl mx-auto">
+  const featuredCertifications = certifications.filter((cert) => cert.featured);
+  const visibleCertifications = (featuredCertifications.length > 0 ? featuredCertifications : certifications).slice(0, 6);
+  const hasMore = (featuredCertifications.length > 0 ? featuredCertifications.length : certifications.length) > visibleCertifications.length;
+
+  return (
+    <section className="section-surface relative overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-300 via-cyan-300 to-amber-300"></div>
+
+      <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 50 }}
+          whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={reducedMotion ? undefined : { duration: 0.8 }}
+          viewport={{ once: true, amount: 0.2 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-800 to-violet-700 bg-clip-text text-transparent mb-6">
+          <h2 className="mb-6 bg-gradient-to-r from-[#0d1b2d] to-[#0f766e] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
             Certifications
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-base text-slate-700 md:text-xl">
             Professional certifications and credentials validating my expertise
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-violet-400 mx-auto mt-6"></div>
+          <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-amber-300 to-cyan-300"></div>
         </motion.div>
 
         {loading ? (
-          <div className="text-center text-gray-500 py-12">Loading certifications...</div>
+          <LoadingSkeleton variant="cards" count={6} />
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {certifications.length === 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:gap-8">
+            {visibleCertifications.length === 0 ? (
               <div className="col-span-full text-center text-gray-500">No certifications found.</div>
             ) : (
-              certifications.map((cert, index) => (
+              visibleCertifications.map((cert, index) => (
                 <motion.div
                   key={cert.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                  whileHover={{ y: -10 }}
-                  className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+                  initial={reducedMotion ? false : { opacity: 0, y: 40 }}
+                  whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  transition={reducedMotion ? undefined : { duration: 0.55, delay: index * 0.08 }}
+                  whileHover={reducedMotion ? undefined : { y: -10 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  className="group cursor-pointer overflow-hidden rounded-3xl border border-cyan-100 bg-white shadow-lg transition-all duration-300 hover:shadow-2xl"
                   onClick={() => setSelectedCert(cert)}
                 >
                   {/* Certificate Image */}
-                  <div className="relative h-56 bg-gradient-to-br from-violet-100 to-pink-100 overflow-hidden flex items-center justify-center">
+                  <div className="relative flex h-56 items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-100 to-emerald-100">
                     {cert.image ? (
-                      <img 
-                        src={cert.image} 
-                        alt={cert.title} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      <Image
+                        src={cert.image}
+                        alt={cert.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-300 group-hover:scale-110"
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center">
-                        <Award className="w-16 h-16 text-violet-400 mb-2" />
+                        <Award className="mb-2 h-16 w-16 text-cyan-500" />
                         <span className="text-gray-500">Certificate</span>
                       </div>
                     )}
@@ -93,7 +112,7 @@ export default function Certifications() {
 
                   {/* Certificate Info */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-violet-600 transition-colors">
+                    <h3 className="mb-2 text-xl font-bold text-slate-800 transition-colors group-hover:text-cyan-700">
                       {cert.title}
                     </h3>
                     <p className="text-gray-600 text-sm mb-1">
@@ -107,7 +126,7 @@ export default function Certifications() {
                         e.stopPropagation();
                         setSelectedCert(cert);
                       }}
-                      className="w-full px-4 py-2 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                      className="w-full rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 px-4 py-2 font-semibold text-white transition-all duration-300 hover:shadow-lg"
                     >
                       View Details
                     </button>
@@ -117,6 +136,17 @@ export default function Certifications() {
             )}
           </div>
         )}
+
+        {!loading && hasMore ? (
+          <div className="mt-10 text-center">
+            <Link
+              href="/certifications"
+              className="inline-flex items-center rounded-full border border-cyan-200 bg-white px-6 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+            >
+              View More Certifications
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {/* Modal for Certificate Details */}
@@ -148,11 +178,13 @@ export default function Certifications() {
             <div className="p-8 space-y-6">
               {/* Certificate Image */}
               {selectedCert.image && (
-                <div className="w-full h-64 rounded-xl overflow-hidden bg-gradient-to-br from-violet-100 to-pink-100 flex items-center justify-center">
-                  <img 
-                    src={selectedCert.image} 
-                    alt={selectedCert.title} 
-                    className="w-full h-full object-cover"
+                <div className="relative flex h-64 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-cyan-100 to-emerald-100">
+                  <Image
+                    src={selectedCert.image}
+                    alt={selectedCert.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 768px"
+                    className="object-cover"
                   />
                 </div>
               )}

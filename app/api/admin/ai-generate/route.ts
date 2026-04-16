@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // AI-powered content generation using OpenAI API
 export async function POST(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const body = await request.json();
     const { prompt, type } = body;
 
@@ -59,11 +63,14 @@ export async function POST(request: NextRequest) {
       { success: true, content: generatedText },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API] AI generation error:', error);
+    const status = typeof error === 'object' && error !== null && 'status' in error
+      ? (error as { status?: number }).status
+      : undefined;
     
     // Check if it's an API key issue
-    if (error.status === 401) {
+    if (status === 401) {
       return NextResponse.json(
         { success: false, error: 'OpenAI API key is invalid. Please check your configuration.' },
         { status: 401 }

@@ -8,10 +8,6 @@
 import admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // Initialize Firebase Admin
 const serviceAccountPath = path.join(process.cwd(), 'firebase-credentials.json');
@@ -29,8 +25,9 @@ try {
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
     projectId: serviceAccount.project_id,
   });
-} catch (error: any) {
-  if (!error.message.includes('already exists')) {
+} catch (error: unknown) {
+  const message = error instanceof Error ? error.message : '';
+  if (!message.includes('already exists')) {
     throw error;
   }
 }

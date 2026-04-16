@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // Get single certification
 export async function GET(
@@ -33,6 +34,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { id } = await params;
     const updateData = await request.json();
 
@@ -57,6 +61,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { id } = await params;
     await serverFirebaseHelpers.deleteCertification(id);
 

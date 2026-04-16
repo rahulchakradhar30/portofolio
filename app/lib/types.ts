@@ -12,6 +12,8 @@ export interface Project {
   description: string;
   longDescription?: string;
   image: string;
+  galleryImages?: string[];
+  youtubeLinks?: string[];
   tech: string[];
   github: string;
   demo: string;
@@ -34,6 +36,7 @@ export interface Skill {
   bgColor: string;
   icon: string; // icon name from lucide-react
   proficiency: number; // 0-100
+  featured?: boolean;
 }
 
 export interface AdminUser {
@@ -68,23 +71,43 @@ export interface ContactMessage {
   read: boolean;
 }
 
+export interface HireRequest {
+  id: string;
+  fullName: string;
+  companyName?: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  projectType: string;
+  role?: string;
+  budget?: string;
+  timeline?: string;
+  description: string;
+  preferredContact?: string;
+  createdAt: string;
+  read: boolean;
+  status?: 'new' | 'contacted' | 'quoted' | 'won' | 'archived';
+}
+
 export interface PortfolioContent {
   id: string;
   heroTitle: string;
   heroSubtitle: string;
   heroTagline: string;
   bannerImage?: string;
+  profileImage?: string;
+  resumeUrl?: string;
   aboutText: string;
-  aboutStats: {
+  aboutStats?: {
     label: string;
     value: string;
   }[];
   email: string;
   phone?: string;
   location: string;
-  instagram: string;
-  linkedin: string;
-  github: string;
+  instagram?: string;
+  linkedin?: string;
+  github?: string;
 }
 
 export interface Certification {
@@ -96,6 +119,8 @@ export interface Certification {
   credentialId?: string;
   credentialUrl?: string;
   image: string;
+  galleryImages?: string[];
+  youtubeLinks?: string[];
   description: string;
   linkedinUrl?: string;
   featured: boolean;

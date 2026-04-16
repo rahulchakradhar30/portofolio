@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/app/lib/firebaseAdmin";
+import { assertAdminSession } from "@/app/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("adminToken")?.value;
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
-    }
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
 
     const adminDb = getAdminDb();
 
@@ -34,9 +29,10 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch activities';
     return NextResponse.json(
-      { error: error.message || "Failed to fetch activities" },
+      { error: message },
       { status: 500 }
     );
   }

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
   return response;
@@ -17,6 +19,20 @@ export async function OPTIONS() {
 // Upload to Cloudinary
 export async function POST(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return addCorsHeaders(auth.response);
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      const response = NextResponse.json(
+        { success: false, error: 'Cloudinary is not configured. Missing required environment variables.' },
+        { status: 500 }
+      );
+      return addCorsHeaders(response);
+    }
+
     console.log('[UPLOAD] Starting file upload to Cloudinary...');
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -43,10 +59,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check file type
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/') && file.type !== 'application/pdf') {
       console.warn('[UPLOAD] Invalid file type:', file.type);
       const response = NextResponse.json(
-        { success: false, error: 'File must be an image or video' },
+        { success: false, error: 'File must be an image, video, or PDF' },
         { status: 400 }
       );
       return addCorsHeaders(response);
@@ -55,14 +71,14 @@ export async function POST(request: NextRequest) {
     // Create FormData for Cloudinary
     const uploadFormData = new FormData();
     uploadFormData.append('file', file);
-    uploadFormData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'portfolio');
-    uploadFormData.append('cloud_name', process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '');
+    uploadFormData.append('upload_preset', uploadPreset);
+    uploadFormData.append('cloud_name', cloudName);
 
-    console.log('[UPLOAD] Uploading to Cloudinary with preset:', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+    console.log('[UPLOAD] Uploading to Cloudinary with preset:', uploadPreset);
 
     // Upload to Cloudinary
     const cloudinaryResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
       {
         method: 'POST',
         body: uploadFormData,
@@ -86,6 +102,7 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         imageUrl: data.secure_url,
+        fileUrl: data.secure_url,
         publicId: data.public_id,
         fileName: file.name,
         size: file.size,

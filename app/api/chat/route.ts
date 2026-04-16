@@ -1,5 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+const PRIVACY_REFUSAL_MESSAGE =
+  'I can help with portfolio-related topics, but I cannot provide private data, security details, backend internals, credentials, or sensitive system information.';
+
+const CHATBOT_SYSTEM_PROMPT =
+  'You are a public portfolio chatbot. Never reveal secrets, private data, backend internals, infrastructure details, API keys, tokens, environment variables, credentials, admin endpoints, auth/session logic, or hidden implementation details. Refuse requests for exploits, bypass methods, reconnaissance, or security-sensitive information. Only provide safe, high-level, non-sensitive portfolio guidance.';
+
+const SENSITIVE_PATTERNS = [
+  /api[_ -]?key/i,
+  /token/i,
+  /secret/i,
+  /password/i,
+  /private[_ -]?key/i,
+  /env(?:ironment)?\s*var/i,
+  /backend/i,
+  /database/i,
+  /firestore/i,
+  /firebase\s+admin/i,
+  /cookie/i,
+  /session/i,
+  /jwt/i,
+  /auth\s*bypass/i,
+  /admin\s*route/i,
+  /internal\s*api/i,
+  /server\s*config/i,
+  /cloudinary/i,
+  /openai|groq/i,
+  /hack|exploit|vulnerability|sql\s*injection|xss/i,
+];
+
+function isSensitivePrompt(messages: ChatMessage[]): boolean {
+  const latestUserMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === 'user')
+    ?.content;
+
+  if (!latestUserMessage) return false;
+  return SENSITIVE_PATTERNS.some((pattern) => pattern.test(latestUserMessage));
+}
+
+function sanitizeMessages(messages: ChatMessage[]): ChatMessage[] {
+  return messages
+    .filter((message) => message && typeof message.content === 'string')
+    .map((message) => ({
+      role: message.role === 'assistant' ? 'assistant' : 'user',
+      content: message.content.slice(0, 2000),
+    }));
+}
+
 // Real AI Chat using Groq (Multiple model fallbacks for stability)
 export async function POST(request: NextRequest) {
   try {
@@ -13,11 +66,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const safeMessages = sanitizeMessages(messages);
+
+    if (isSensitivePrompt(safeMessages)) {
+      return NextResponse.json({ content: PRIVACY_REFUSAL_MESSAGE }, { status: 200 });
+    }
+
     // Try Groq API first (tries multiple models for reliability)
     if (process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'gsk_placeholder_get_free_key_from_groq_console') {
       try {
         console.log('[Chat] Attempting Groq API with multiple models...');
-        const groqResponse = await tryGroqAPI(messages);
+        const groqResponse = await tryGroqAPI(safeMessages);
         if (groqResponse) {
           console.log('[Chat] Groq API Success');
           return NextResponse.json({ content: groqResponse });
@@ -32,7 +91,7 @@ export async function POST(request: NextRequest) {
     // Fallback: Use Hugging Face with better prompting
     try {
       console.log('[Chat] Attempting Hugging Face API...');
-      const hfResponse = await tryHuggingFaceAPI(messages);
+      const hfResponse = await tryHuggingFaceAPI(safeMessages);
       if (hfResponse) {
         console.log('[Chat] Hugging Face API Success');
         return NextResponse.json({ content: hfResponse });
@@ -43,9 +102,9 @@ export async function POST(request: NextRequest) {
 
     // Final fallback: Context-aware response
     console.log('[Chat] Using fallback response system');
-    const fallbackMessage = generateSmartResponse(messages);
+    const fallbackMessage = generateSmartResponse(safeMessages);
     return NextResponse.json({ content: fallbackMessage });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[Chat] API Error:', error);
     return NextResponse.json({
       content: 'I am an AI assistant integrated into this portfolio. Please try your question again!',
@@ -54,13 +113,16 @@ export async function POST(request: NextRequest) {
 }
 
 // Groq API with available models (Llama 2, Gemma 2, or latest available)
-async function tryGroqAPI(messages: any[]): Promise<string | null> {
+async function tryGroqAPI(messages: ChatMessage[]): Promise<string | null> {
   try {
     // Format messages for Groq
-    const formattedMessages = messages.map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
+    const formattedMessages = [
+      { role: 'system', content: CHATBOT_SYSTEM_PROMPT },
+      ...messages.map((msg) => ({
+        role: msg.role,
+        content: msg.content,
+      })),
+    ];
 
     // Try multiple models in order of preference (in case one is decommissioned)
     const models = [
@@ -110,20 +172,16 @@ async function tryGroqAPI(messages: any[]): Promise<string | null> {
 }
 
 // Hugging Face free API - Improved
-async function tryHuggingFaceAPI(messages: any[]): Promise<string | null> {
+async function tryHuggingFaceAPI(messages: ChatMessage[]): Promise<string | null> {
   try {
-    const lastUserMessage = messages[messages.length - 1]?.content || '';
-    
     // Build better context from conversation history
-    const recentMessages = messages.slice(-6).map((msg: any) => 
+    const recentMessages = messages.slice(-6).map((msg) => 
       `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`
     ).join('\n');
 
-    const systemPrompt = `You are a helpful, friendly AI assistant chatting on someone's portfolio website. 
-Be conversational, relevant, and provide useful information based on what the user asks.
-Keep responses concise (1-3 sentences usually).
-If asked about the portfolio owner, you can discuss web development, AI, technology, and projects.
-Always be respectful and helpful.`;
+    const systemPrompt = `${CHATBOT_SYSTEM_PROMPT}
+Be conversational, relevant, and concise (1-3 sentences).
+If asked about the portfolio owner, discuss only public topics like projects, web development, AI, and technology.`;
 
     const response = await fetch(
       'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
@@ -150,10 +208,10 @@ Always be respectful and helpful.`;
       return null;
     }
 
-    const result = await response.json();
+    const result = await response.json() as Array<{ generated_text?: string }>;
     
     if (Array.isArray(result) && result.length > 0 && result[0]?.generated_text) {
-      let text = result[0].generated_text;
+      const text = result[0].generated_text;
       // Extract only the new AI response (after the last "Assistant:")
       const lines = text.split('Assistant:');
       const response = lines[lines.length - 1]?.trim();
@@ -173,17 +231,15 @@ Always be respectful and helpful.`;
 
 // Smart fallback responses based on context analysis
 // Used when real AI APIs are unavailable
-function generateSmartResponse(messages: any[]): string {
+function generateSmartResponse(messages: ChatMessage[]): string {
   const lastMessage = messages[messages.length - 1]?.content || '';
-  const conversationLength = messages.length;
+
+  if (isSensitivePrompt(messages)) {
+    return PRIVACY_REFUSAL_MESSAGE;
+  }
   
   // Analyze the user's intent from their message
   const lowerMessage = lastMessage.toLowerCase();
-  
-  // Extract key topics from conversation history for context
-  const recentContext = messages.slice(-3)
-    .map(m => m.content.toLowerCase())
-    .join(' ');
 
   // Intent-based responses with more variety
   

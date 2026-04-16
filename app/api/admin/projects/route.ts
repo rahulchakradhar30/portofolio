@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
   return response;
@@ -38,9 +40,12 @@ export async function GET() {
 // POST - Create new project
 export async function POST(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return addCorsHeaders(auth.response);
+
     console.log('[API] Creating new project...');
     const body = await request.json();
-    const { title, description, longDescription, tech, github, demo, image, category, featured, youtubeUrl, youtubeTitle, codeUrl, codeName, showCode, showDetails } = body;
+    const { title, description, longDescription, tech, github, demo, image, category, featured, youtubeUrl, youtubeTitle, codeUrl, codeName, showCode, showDetails, galleryImages, youtubeLinks } = body;
 
     if (!title || !description) {
       console.warn('[API] Missing required fields: title or description');
@@ -67,6 +72,8 @@ export async function POST(request: NextRequest) {
       codeName: codeName || '',
       showCode: showCode || false,
       showDetails: showDetails || false,
+      galleryImages: Array.isArray(galleryImages) ? galleryImages : [],
+      youtubeLinks: Array.isArray(youtubeLinks) ? youtubeLinks : [],
     });
 
     console.log('[API] Project created successfully:', newProject.id);

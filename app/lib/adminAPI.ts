@@ -1,12 +1,26 @@
 // Admin API utilities for making authenticated requests
 
-interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
 export const adminAPI = {
+  async getAdminAuthStatus() {
+    try {
+      const res = await fetch('/api/admin/auth/me', { method: 'GET' });
+      if (!res.ok) return { success: false, authenticated: false };
+      const data = await res.json();
+      return { success: true, authenticated: true, user: data.user };
+    } catch {
+      return { success: false, authenticated: false };
+    }
+  },
+
+  async logoutAdmin() {
+    try {
+      const res = await fetch('/api/admin/auth/logout', { method: 'POST' });
+      return { success: res.ok };
+    } catch {
+      return { success: false };
+    }
+  },
+
   // Projects
   async getProjects() {
     try {
@@ -168,10 +182,71 @@ export const adminAPI = {
 
   async deleteMessage(messageId: string) {
     try {
-      const res = await fetch(`/api/admin/messages/${messageId}`, {
+      const res = await fetch('/api/admin/messages', {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId }),
       });
       if (!res.ok) throw new Error('Failed to delete message');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async updateMessage(messageId: string, isRead: boolean) {
+    try {
+      const res = await fetch('/api/admin/messages', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messageId, isRead }),
+      });
+      if (!res.ok) throw new Error('Failed to update message');
+      const data = await res.json();
+      return { success: true, message: data.message };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  // Hire Requests
+  async getHireRequests() {
+    try {
+      const res = await fetch('/api/admin/hire', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Failed to fetch hire requests');
+      const data = await res.json();
+      return { success: true, hireRequests: data.hireRequests || [] };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async updateHireRequest(requestId: string, isRead: boolean) {
+    try {
+      const res = await fetch('/api/admin/hire', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, isRead }),
+      });
+      if (!res.ok) throw new Error('Failed to update hire request');
+      const data = await res.json();
+      return { success: true, hireRequest: data.hireRequest };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async deleteHireRequest(requestId: string) {
+    try {
+      const res = await fetch('/api/admin/hire', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId }),
+      });
+      if (!res.ok) throw new Error('Failed to delete hire request');
       return { success: true };
     } catch (error) {
       return { success: false, error: String(error) };
@@ -247,7 +322,12 @@ export const adminAPI = {
       });
       if (!res.ok) throw new Error('Failed to upload to Cloudinary');
       const data = await res.json();
-      return { success: true, imageUrl: data.imageUrl, publicId: data.publicId };
+      return {
+        success: true,
+        imageUrl: data.imageUrl,
+        fileUrl: data.fileUrl || data.imageUrl,
+        publicId: data.publicId,
+      };
     } catch (error) {
       return { success: false, error: String(error) };
     }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // GET - Get portfolio content
 export async function GET() {
@@ -15,8 +16,19 @@ export async function GET() {
             heroSubtitle: 'AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR',
             heroTagline: 'CREATE YOUR OWN',
             aboutText: 'Passionate about AI, technology, and content creation.',
+            profileImage: '',
+            resumeUrl: '',
             email: 'rahulchakradharperepogu@gmail.com',
             location: 'Bengaluru, Karnataka',
+            instagram: 'https://www.instagram.com/rahul_chakradhar_30/?hl=en',
+            linkedin: 'https://www.linkedin.com/in/perepogu-rahul-chakradhar-721017379/',
+            github: 'https://github.com/rahulchakradhar30',
+            aboutStats: [
+              { label: 'Major Projects', value: '3+' },
+              { label: 'Certifications', value: '5+' },
+              { label: 'Websites Published', value: '2+' },
+              { label: 'Success Rate', value: '90%' },
+            ],
           },
         },
         { status: 200 }
@@ -36,16 +48,39 @@ export async function GET() {
 // PUT - Update portfolio content
 export async function PUT(request: NextRequest) {
   try {
-    const { heroTitle, heroSubtitle, heroTagline, bannerImage, aboutText, email, location } = await request.json();
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
+    const {
+      heroTitle,
+      heroSubtitle,
+      heroTagline,
+      bannerImage,
+      profileImage,
+      resumeUrl,
+      aboutText,
+      email,
+      location,
+      instagram,
+      linkedin,
+      github,
+      aboutStats,
+    } = await request.json();
 
     const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({
       heroTitle,
       heroSubtitle,
       heroTagline,
       bannerImage,
+      profileImage,
+      resumeUrl,
       aboutText,
       email,
       location,
+      instagram,
+      linkedin,
+      github,
+      aboutStats,
     });
 
     return NextResponse.json(

@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/app/lib/firebaseAdmin";
+import { assertAdminSession } from "@/app/lib/adminAuth";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  const adminDb = getAdminDb();
   try {
-    const token = request.cookies.get("adminToken")?.value;
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
 
-    if (!token) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
-    }
+    const adminDb = getAdminDb();
 
     const querySnapshot = await adminDb
       .collection("admin_users")
@@ -32,9 +28,10 @@ export async function GET(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch users';
     return NextResponse.json(
-      { error: error.message || "Failed to fetch users" },
+      { error: message },
       { status: 500 }
     );
   }

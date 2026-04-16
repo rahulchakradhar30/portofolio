@@ -7,7 +7,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden">
+    <footer className="relative overflow-hidden bg-gradient-to-r from-[#07101a] via-[#0b1f2e] to-[#07101a] text-white">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 left-10 w-20 h-20 border border-violet-300 rounded-full"></div>
@@ -15,8 +15,8 @@ export default function Footer() {
         <div className="absolute bottom-10 left-1/3 w-24 h-24 border border-green-300 rounded-full"></div>
       </div>
 
-      <div className="relative z-10 py-16 px-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="relative z-10 px-4 py-16 sm:px-6 lg:px-10">
+        <div className="mx-auto max-w-[1600px]">
           <div className="grid md:grid-cols-4 gap-8 mb-12">
             {/* Brand */}
             <motion.div
@@ -25,7 +25,7 @@ export default function Footer() {
               transition={{ duration: 0.8 }}
               className="md:col-span-2"
             >
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent mb-4">
+              <h3 className="mb-4 bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-2xl font-black text-transparent">
                 RAHUL CHAKRADHAR PEREPOGU
               </h3>
               <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
@@ -37,7 +37,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   href="#"
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-violet-600 transition-colors duration-300"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 transition-colors duration-300 hover:bg-cyan-600"
                 >
                   <Code className="w-5 h-5" />
                 </motion.a>
@@ -45,7 +45,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   href="#"
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors duration-300"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 transition-colors duration-300 hover:bg-emerald-600"
                 >
                   <Link className="w-5 h-5" />
                 </motion.a>
@@ -53,7 +53,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   href="#"
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-sky-500 transition-colors duration-300"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 transition-colors duration-300 hover:bg-amber-500"
                 >
                   <Hash className="w-5 h-5" />
                 </motion.a>
@@ -61,7 +61,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.9 }}
                   href="mailto:rahulchakradharperepogu@gmail.com"
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 transition-colors duration-300"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-800 transition-colors duration-300 hover:bg-cyan-600"
                 >
                   <Mail className="w-5 h-5" />
                 </motion.a>
@@ -76,10 +76,11 @@ export default function Footer() {
             >
               <h4 className="text-lg font-semibold mb-4 text-white">Quick Links</h4>
               <ul className="space-y-2">
-                <li><a href="#about" className="text-gray-400 hover:text-violet-400 transition-colors">About</a></li>
-                <li><a href="#skills" className="text-gray-400 hover:text-violet-400 transition-colors">Skills</a></li>
-                <li><a href="#projects" className="text-gray-400 hover:text-violet-400 transition-colors">Projects</a></li>
-                <li><a href="#contact" className="text-gray-400 hover:text-violet-400 transition-colors">Contact</a></li>
+                <li><a href="#about" className="text-gray-400 transition-colors hover:text-cyan-300">About</a></li>
+                <li><a href="#skills" className="text-gray-400 transition-colors hover:text-cyan-300">Skills</a></li>
+                <li><a href="#projects" className="text-gray-400 transition-colors hover:text-cyan-300">Projects</a></li>
+                <li><a href="/hire" className="text-gray-400 transition-colors hover:text-cyan-300">Hire</a></li>
+                <li><a href="#contact" className="text-gray-400 transition-colors hover:text-cyan-300">Contact</a></li>
               </ul>
             </motion.div>
 

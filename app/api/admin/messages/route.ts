@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // GET - List all contact messages
 export async function GET(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { searchParams } = new URL(request.url);
     const unreadOnly = searchParams.get('unread') === 'true';
 
@@ -22,6 +26,9 @@ export async function GET(request: NextRequest) {
 // PUT - Mark message as read
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { messageId, isRead } = await request.json();
 
     if (!messageId) {
@@ -49,6 +56,9 @@ export async function PUT(request: NextRequest) {
 // DELETE - Delete message
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { messageId } = await request.json();
 
     if (!messageId) {

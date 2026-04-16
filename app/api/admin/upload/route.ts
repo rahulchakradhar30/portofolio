@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createHash } from 'crypto';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -75,6 +80,9 @@ export async function POST(request: NextRequest) {
 // DELETE - Delete image from Cloudinary
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { publicId } = await request.json();
 
     if (!publicId) {
@@ -88,9 +96,7 @@ export async function DELETE(request: NextRequest) {
     const timestamp = Math.floor(Date.now() / 1000);
     const stringToSign = `public_id=${publicId}&timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET}`;
     
-    const crypto = require('crypto');
-    const signature = crypto
-      .createHash('sha1')
+    const signature = createHash('sha1')
       .update(stringToSign)
       .digest('hex');
 

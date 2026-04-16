@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
   return response;
@@ -38,8 +40,11 @@ export async function GET() {
 // POST - Create new certification
 export async function POST(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return addCorsHeaders(auth.response);
+
     console.log('[API] Creating new certification...');
-    const { title, issuer, issuedDate, expiryDate, credentialId, credentialUrl, image, description, linkedinUrl, featured } =
+    const { title, issuer, issuedDate, expiryDate, credentialId, credentialUrl, image, description, linkedinUrl, featured, galleryImages, youtubeLinks } =
       await request.json();
 
     if (!title || !issuer || !image) {
@@ -62,6 +67,8 @@ export async function POST(request: NextRequest) {
       description,
       linkedinUrl,
       featured: featured || false,
+      galleryImages: Array.isArray(galleryImages) ? galleryImages : [],
+      youtubeLinks: Array.isArray(youtubeLinks) ? youtubeLinks : [],
     });
 
     console.log('[API] Certification created successfully:', newCertification.id);

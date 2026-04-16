@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
-  response.headers.set('Access-Control-Allow-Origin', '*');
+  const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
   return response;
@@ -38,8 +40,11 @@ export async function GET() {
 // POST - Create new skill
 export async function POST(request: NextRequest) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return addCorsHeaders(auth.response);
+
     console.log('[API] Creating new skill...');
-    const { title, description, proficiency, iconName, color, bgColor } = await request.json();
+    const { title, description, proficiency, iconName, icon, color, bgColor, featured } = await request.json();
 
     if (!title) {
       console.warn('[API] Missing required field: title');
@@ -63,9 +68,10 @@ export async function POST(request: NextRequest) {
       title,
       description: description || '',
       proficiency: proficiency || 50,
-      icon: iconName || 'Star',
+      icon: iconName || icon || 'Star',
       color: color || '#7c3aed',
       bgColor: bgColor || '#ede9fe',
+      featured: Boolean(featured),
     });
 
     console.log('[API] Skill created successfully:', newSkill.id);

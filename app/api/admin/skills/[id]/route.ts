@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // GET - Get single skill
 export async function GET(
@@ -33,8 +34,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { id } = await params;
-    const { title, description, proficiency, iconName, color, bgColor } = await request.json();
+    const { title, description, proficiency, iconName, icon, color, bgColor, featured } = await request.json();
 
     if (proficiency && (proficiency < 0 || proficiency > 100)) {
       return NextResponse.json(
@@ -47,9 +51,10 @@ export async function PUT(
       title,
       description,
       proficiency,
-      icon: iconName,
+      icon: iconName || icon,
       color,
       bgColor: bgColor,
+      featured,
     });
 
     return NextResponse.json(
@@ -71,6 +76,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { id } = await params;
     await serverFirebaseHelpers.deleteSkill(id);
 

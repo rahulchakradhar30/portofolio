@@ -6,28 +6,41 @@ import Projects from "./components/Projects";
 import Certifications from "./components/Certifications";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import SectionErrorBoundary from "./components/SectionErrorBoundary";
 
 export default function Home() {
   return (
     <main>
       <Header />
       <section id="home">
-        <Hero />
+        <SectionErrorBoundary sectionName="Hero">
+          <Hero />
+        </SectionErrorBoundary>
       </section>
       <section id="about">
-        <About />
+        <SectionErrorBoundary sectionName="About">
+          <About />
+        </SectionErrorBoundary>
       </section>
       <section id="skills">
-        <Skills />
+        <SectionErrorBoundary sectionName="Skills">
+          <Skills />
+        </SectionErrorBoundary>
       </section>
       <section id="projects">
-        <Projects />
+        <SectionErrorBoundary sectionName="Projects">
+          <Projects />
+        </SectionErrorBoundary>
       </section>
       <section id="certifications">
-        <Certifications />
+        <SectionErrorBoundary sectionName="Certifications">
+          <Certifications />
+        </SectionErrorBoundary>
       </section>
       <section id="contact">
-        <Contact />
+        <SectionErrorBoundary sectionName="Contact">
+          <Contact />
+        </SectionErrorBoundary>
       </section>
       <Footer />
     </main>

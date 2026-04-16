@@ -19,6 +19,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<'description' | 'details'>('description');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -44,8 +45,12 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
+    setError(null);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+
       const response = await fetch('/api/admin/ai-generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -53,24 +58,40 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
           prompt: input,
           type: selectedType,
         }),
+        signal: controller.signal,
       });
 
+      window.clearTimeout(timeoutId);
+
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'AI service returned an error');
+      }
+
+      const content = typeof data.content === 'string' && data.content.trim()
+        ? data.content
+        : 'Sorry, I could not generate content right now. Please try again.';
 
       // Add AI response
       const aiMessage: AIMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.content,
+        content,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error generating content:', error);
+      setError(error instanceof Error && error.name === 'AbortError'
+        ? 'The AI request timed out. Please try again.'
+        : 'AI is temporarily unavailable. Please try again in a moment.');
       const errorMessage: AIMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: error instanceof Error && error.name === 'AbortError'
+          ? 'The AI request timed out. Please try again.'
+          : 'Sorry, I encountered an error. Please try again.',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -178,6 +199,12 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                   </button>
                 </div>
 
+                {error && (
+                  <div className="mx-4 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    {error}
+                  </div>
+                )}
+
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
                   {messages.length === 0 && (
@@ -185,7 +212,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                       <div>
                         <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                         <p className="text-gray-500 text-sm">
-                          Describe your {selectedType} and I'll generate professional content
+                          Describe your {selectedType} and I&apos;ll generate professional content
                         </p>
                       </div>
                     </div>
@@ -260,6 +287,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
+                      disabled={loading}
                       onKeyPress={(e) => {
                         if (e.key === 'Enter' && !loading) {
                           handleGenerate();
@@ -272,8 +300,9 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                       onClick={handleGenerate}
                       disabled={loading || !input.trim()}
                       className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+                      title={loading ? 'Generating...' : 'Send'}
                     >
-                      <Send className="w-4 h-4" />
+                      {loading ? <span className="text-xs font-semibold">...</span> : <Send className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>

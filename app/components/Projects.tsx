@@ -3,12 +3,17 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ExternalLink, Code, Eye, Star } from "lucide-react";
+import Link from "next/link";
+import { Eye, Star } from "lucide-react";
 import type { Project } from "@/app/lib/types";
+import LoadingSkeleton from "./LoadingSkeleton";
+import { useMotionPreferences } from "./MotionProvider";
 
 export default function Projects() {
+  const { reducedMotion } = useMotionPreferences();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -17,9 +22,12 @@ export default function Projects() {
         if (res.ok) {
           const data = await res.json();
           setProjects(data.projects || []);
+        } else {
+          throw new Error('Failed to fetch projects');
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
+        setError(error instanceof Error ? error : new Error('Failed to load projects'));
       } finally {
         setLoading(false);
       }
@@ -28,44 +36,52 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
-  return (
-    <section className="py-24 px-8 bg-white relative">
-      <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-green-400 via-violet-400 to-pink-400"></div>
+  if (error) throw error;
 
-      <div className="max-w-7xl mx-auto">
+  const featuredProjects = projects.filter((project) => project.featured);
+  const visibleProjects = (featuredProjects.length > 0 ? featuredProjects : projects).slice(0, 6);
+  const hasMore = (featuredProjects.length > 0 ? featuredProjects.length : projects.length) > visibleProjects.length;
+
+  return (
+    <section className="section-surface relative px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-l from-emerald-300 via-cyan-300 to-amber-300"></div>
+
+      <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 50 }}
+          whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={reducedMotion ? undefined : { duration: 0.8 }}
+          viewport={{ once: true, amount: 0.2 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-800 to-violet-700 bg-clip-text text-transparent mb-6">
+          <h2 className="mb-6 bg-gradient-to-r from-[#0d1b2d] to-[#0e7490] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
             Featured Projects
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-base text-slate-700 md:text-xl">
             A showcase of my recent work, blending creativity with cutting-edge technology
           </p>
-          <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-violet-400 mx-auto mt-6"></div>
+          <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-amber-300 to-cyan-300"></div>
         </motion.div>
 
         {loading ? (
-          <div className="text-center text-gray-500 py-12">Loading projects...</div>
+          <LoadingSkeleton variant="cards" count={6} />
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.length === 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:gap-8">
+            {visibleProjects.length === 0 ? (
               <div className="col-span-full text-center text-gray-500">No projects found.</div>
             ) : (
-              projects.map((project, index) => (
+              visibleProjects.map((project, index) => (
                 <motion.div
                   key={project.id || index}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                  whileHover={{ y: -10 }}
-                  className="group bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100"
+                  initial={reducedMotion ? false : { opacity: 0, y: 40 }}
+                  whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+                  transition={reducedMotion ? undefined : { duration: 0.55, delay: index * 0.08 }}
+                  whileHover={reducedMotion ? undefined : { y: -10 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  className="group overflow-hidden rounded-3xl border border-cyan-100 bg-white shadow-lg transition-all duration-300 hover:shadow-2xl"
                 >
                   {/* Project Image */}
-                  <div className="relative h-48 bg-gradient-to-br from-violet-100 to-pink-100 overflow-hidden">
+                  <div className="relative h-52 overflow-hidden bg-gradient-to-br from-cyan-100 to-emerald-100">
                     {project.image ? (
                       <Image 
                         src={project.image} 
@@ -76,7 +92,7 @@ export default function Projects() {
                     ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-pink-500/20"></div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-br from-violet-500/20 to-pink-500/20"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-emerald-500/20"></div>
                     <div className="absolute top-4 left-4">
                       {project.featured && (
                         <span className="px-3 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full flex items-center">
@@ -86,7 +102,7 @@ export default function Projects() {
                       )}
                     </div>
                     <div className="absolute top-4 right-4">
-                      <span className="px-3 py-1 bg-white/80 text-gray-700 text-xs font-medium rounded-full">
+                      <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-700">
                         {project.category || "Project"}
                       </span>
                     </div>
@@ -97,42 +113,26 @@ export default function Projects() {
 
                   {/* Project Content */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-violet-600 transition-colors">
+                    <h3 className="mb-2 text-xl font-bold text-slate-800 transition-colors group-hover:text-cyan-700">
                       {project.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">{project.description}</p>
+                    <p className="mb-4 leading-relaxed text-slate-600">{project.description}</p>
 
                     <div className="flex flex-wrap gap-2 mb-6">
                       {Array.isArray(project.tech) && project.tech.map((tech: string) => (
-                        <span key={tech} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                        <span key={tech} className="rounded-full bg-cyan-50 px-3 py-1 text-sm text-cyan-800">
                           {tech}
                         </span>
                       ))}
                     </div>
 
-                    <div className="flex space-x-4">
-                      <motion.a
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        href={project.github || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-gray-600 hover:text-violet-600 transition-colors"
+                    <div className="flex">
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-800 transition hover:bg-cyan-100"
                       >
-                        <Code className="w-5 h-5 mr-2" />
-                        Code
-                      </motion.a>
-                      <motion.a
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        href={project.demo || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center text-gray-600 hover:text-pink-600 transition-colors"
-                      >
-                        <ExternalLink className="w-5 h-5 mr-2" />
-                        Demo
-                      </motion.a>
+                        Details
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
@@ -140,6 +140,17 @@ export default function Projects() {
             )}
           </div>
         )}
+
+        {!loading && hasMore ? (
+          <div className="mt-10 text-center">
+            <Link
+              href="/projects"
+              className="inline-flex items-center rounded-full border border-cyan-200 bg-white px-6 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+            >
+              View More Projects
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   );

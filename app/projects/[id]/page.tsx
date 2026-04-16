@@ -65,6 +65,9 @@ export default function ProjectDetail() {
   };
 
   const youtubeId = project.youtubeUrl ? getYouTubeId(project.youtubeUrl) : null;
+  const extraYoutubeIds = (project.youtubeLinks || [])
+    .map((link) => getYouTubeId(link))
+    .filter((id): id is string => Boolean(id));
 
   return (
     <div className="min-h-screen pt-20 md:pt-28 pb-20 bg-gradient-to-br from-slate-900 to-slate-800">
@@ -221,6 +224,55 @@ export default function ProjectDetail() {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {project.galleryImages && project.galleryImages.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Project Gallery</h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {project.galleryImages.map((image, index) => (
+                  <div key={`${image}-${index}`} className="relative h-48 overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900">
+                    <Image src={image} alt={`${project.title} gallery ${index + 1}`} fill className="object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {extraYoutubeIds.length > 0 && (
+          <motion.section
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">More Videos</h2>
+              <div className="grid gap-6 md:grid-cols-2">
+                {extraYoutubeIds.map((id, index) => (
+                  <div key={`${id}-${index}`} className="aspect-video overflow-hidden rounded-2xl border border-slate-700/60">
+                    <iframe
+                      className="w-full h-full"
+                      src={`https://www.youtube.com/embed/${id}`}
+                      title={`${project.title} extra video ${index + 1}`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </motion.section>

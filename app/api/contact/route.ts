@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,30 +23,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, we'll store the message in memory/console
-    // TODO: Integrate with Supabase or sendEmail service
     const contactMessage = {
-      id: Date.now().toString(),
       firstName,
       lastName,
       email,
       subject,
       message,
-      createdAt: new Date().toISOString(),
       read: false,
     };
 
-    console.log('New contact message:', contactMessage);
-
-    // TODO: Save to database
-    // TODO: Send email notification to admin
-    // TODO: Send auto-reply to user
+    const savedMessage = await serverFirebaseHelpers.createContactMessage(contactMessage);
 
     return NextResponse.json(
       {
         success: true,
         message: 'Your message has been sent successfully! I will get back to you soon.',
-        data: contactMessage,
+        data: savedMessage,
       },
       { status: 200 }
     );

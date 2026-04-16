@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
+import { assertAdminSession } from '@/app/lib/adminAuth';
 
 // GET - Get single project
 export async function GET(
@@ -33,8 +34,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { id } = await params;
-    const { title, description, longDescription, imageUrl, techStack, githubUrl, demoUrl, category, featured } =
+    const { title, description, longDescription, imageUrl, techStack, githubUrl, demoUrl, category, featured, youtubeUrl, youtubeTitle, codeUrl, codeName, showCode, showDetails, galleryImages, youtubeLinks } =
       await request.json();
 
     const updatedProject = await serverFirebaseHelpers.updateProject(id, {
@@ -47,6 +51,14 @@ export async function PUT(
       demo: demoUrl,
       category,
       featured,
+      youtubeUrl,
+      youtubeTitle,
+      codeUrl,
+      codeName,
+      showCode,
+      showDetails,
+      galleryImages: Array.isArray(galleryImages) ? galleryImages : [],
+      youtubeLinks: Array.isArray(youtubeLinks) ? youtubeLinks : [],
     });
 
     return NextResponse.json(
@@ -68,6 +80,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = await assertAdminSession(request);
+    if (!auth.ok) return auth.response;
+
     const { id } = await params;
     await serverFirebaseHelpers.deleteProject(id);
 

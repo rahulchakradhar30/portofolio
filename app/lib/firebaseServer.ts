@@ -1,5 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getAdminDb, getAdminAuth } from './firebaseAdmin';
+import { getAdminDb } from './firebaseAdmin';
+
+function removeUndefinedValues<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => removeUndefinedValues(item))
+      .filter((item) => item !== undefined) as T;
+  }
+
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([, v]) => v !== undefined)
+      .map(([k, v]) => [k, removeUndefinedValues(v)]);
+    return Object.fromEntries(entries) as T;
+  }
+
+  return value;
+}
 
 // Server-side Firebase helpers using Admin SDK
 const serverFirebaseHelpers = {
@@ -361,25 +378,26 @@ const serverFirebaseHelpers = {
       console.log('Server: Updating portfolio content');
       const db = getAdminDb();
       const snapshot = await db.collection('portfolio_content').limit(1).get();
+      const safeContentData = removeUndefinedValues(contentData);
       
       if (snapshot.empty) {
         // Create new document if doesn't exist
         const docRef = await db.collection('portfolio_content').add({
-          ...contentData,
+          ...safeContentData,
           created_at: new Date(),
           updated_at: new Date(),
         });
         console.log('Server: Portfolio content created');
-        return { id: docRef.id, ...contentData };
+        return { id: docRef.id, ...safeContentData };
       } else {
         // Update existing document
         const docId = snapshot.docs[0].id;
         await db.collection('portfolio_content').doc(docId).update({
-          ...contentData,
+          ...safeContentData,
           updated_at: new Date(),
         });
         console.log('Server: Portfolio content updated');
-        return { id: docId, ...contentData };
+        return { id: docId, ...safeContentData };
       }
     } catch (error) {
       console.error('Server: Error updating portfolio content:', error);
@@ -388,6 +406,52 @@ const serverFirebaseHelpers = {
   },
 
   // Messages management
+  createContactMessage: async (messageData: Record<string, any>) => {
+    try {
+      console.log('Server: Creating contact message');
+      const db = getAdminDb();
+      const now = new Date();
+      const createdAtStr = now.toISOString();
+
+      const docRef = await db.collection('contact_messages').add({
+        ...messageData,
+        created_at: createdAtStr,
+        updated_at: createdAtStr,
+        createdAt: createdAtStr,
+      });
+
+      console.log('Server: Contact message created with ID:', docRef.id);
+      return { id: docRef.id, ...messageData, created_at: createdAtStr, updated_at: createdAtStr, createdAt: createdAtStr };
+    } catch (error) {
+      console.error('Server: Error creating contact message:', error);
+      throw error;
+    }
+  },
+
+  createHireRequest: async (requestData: Record<string, any>) => {
+    try {
+      console.log('Server: Creating hire request');
+      const db = getAdminDb();
+      const now = new Date();
+      const createdAtStr = now.toISOString();
+
+      const docRef = await db.collection('hire_requests').add({
+        ...requestData,
+        read: false,
+        status: requestData.status || 'new',
+        created_at: createdAtStr,
+        updated_at: createdAtStr,
+        createdAt: createdAtStr,
+      });
+
+      console.log('Server: Hire request created with ID:', docRef.id);
+      return { id: docRef.id, ...requestData, read: false, status: requestData.status || 'new', created_at: createdAtStr, updated_at: createdAtStr, createdAt: createdAtStr };
+    } catch (error) {
+      console.error('Server: Error creating hire request:', error);
+      throw error;
+    }
+  },
+
   getAllMessages: async (unreadOnly: boolean = false) => {
     try {
       console.log('Server: Getting messages, unreadOnly:', unreadOnly);
@@ -431,6 +495,53 @@ const serverFirebaseHelpers = {
       console.log('Server: Message deleted');
     } catch (error) {
       console.error('Server: Error deleting message:', error);
+      throw error;
+    }
+  },
+
+  getAllHireRequests: async (unreadOnly: boolean = false) => {
+    try {
+      console.log('Server: Getting hire requests, unreadOnly:', unreadOnly);
+      const db = getAdminDb();
+      let query: any = db.collection('hire_requests');
+
+      if (unreadOnly) {
+        query = query.where('read', '==', false);
+      }
+
+      const snapshot = await query.orderBy('created_at', 'desc').get();
+      const requests = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      console.log('Server: Found', requests.length, 'hire requests');
+      return requests;
+    } catch (error) {
+      console.error('Server: Error getting hire requests:', error);
+      throw error;
+    }
+  },
+
+  updateHireRequest: async (requestId: string, isRead: boolean) => {
+    try {
+      console.log('Server: Updating hire request:', requestId, 'isRead:', isRead);
+      const db = getAdminDb();
+      await db.collection('hire_requests').doc(requestId).update({
+        read: isRead,
+        updated_at: new Date(),
+      });
+      console.log('Server: Hire request updated');
+    } catch (error) {
+      console.error('Server: Error updating hire request:', error);
+      throw error;
+    }
+  },
+
+  deleteHireRequest: async (requestId: string) => {
+    try {
+      console.log('Server: Deleting hire request:', requestId);
+      const db = getAdminDb();
+      await db.collection('hire_requests').doc(requestId).delete();
+      console.log('Server: Hire request deleted');
+    } catch (error) {
+      console.error('Server: Error deleting hire request:', error);
       throw error;
     }
   },
