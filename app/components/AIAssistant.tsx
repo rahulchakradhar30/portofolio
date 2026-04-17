@@ -126,7 +126,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
           setIsOpen(!isOpen);
           setIsMinimized(false);
         }}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-violet-600 to-pink-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow z-40"
+        className="fixed bottom-4 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-pink-600 text-white shadow-lg transition-shadow hover:shadow-xl sm:bottom-6 sm:right-6 sm:h-14 sm:w-14"
       >
         <Sparkles className="w-6 h-6" />
       </motion.button>
@@ -139,10 +139,10 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-24 right-6 w-96 h-[550px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden"
+            className="fixed inset-x-3 bottom-3 top-3 z-50 flex h-[calc(100vh-1.5rem)] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[550px] sm:w-96"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-violet-600 to-pink-600 text-white px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center justify-between bg-gradient-to-r from-violet-600 to-pink-600 px-4 py-4 text-white sm:px-6">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5" />
                 <div>
@@ -176,7 +176,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
             {!isMinimized && (
               <>
                 {/* Type Selector */}
-                <div className="px-4 py-3 bg-gray-50 border-b border-gray-200 flex gap-2">
+                <div className="flex gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3 overflow-x-auto">
                   <button
                     onClick={() => setSelectedType('description')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
@@ -206,7 +206,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                 )}
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white">
+                <div className="flex-1 space-y-4 overflow-y-auto bg-white p-4">
                   {messages.length === 0 && (
                     <div className="h-full flex items-center justify-center text-center">
                       <div>
@@ -262,7 +262,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                       animate={{ opacity: 1 }}
                       className="flex justify-start"
                     >
-                      <div className="bg-gray-100 text-gray-700 rounded-lg px-4 py-2 rounded-bl-none">
+                      <div className="max-w-[85%] rounded-lg rounded-bl-none bg-gray-100 px-4 py-2 text-gray-700 sm:max-w-xs">
                         <div className="flex gap-1">
                           <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
                           <div
@@ -281,7 +281,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-gray-200 p-4 bg-white">
+                <div className="border-t border-gray-200 bg-white p-4">
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -294,12 +294,12 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                         }
                       }}
                       placeholder="Describe what you need..."
-                      className="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
+                      className="min-w-0 flex-1 rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black placeholder-gray-400 transition focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200"
                     />
                     <button
                       onClick={handleGenerate}
                       disabled={loading || !input.trim()}
-                      className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2"
+                      className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
                       title={loading ? 'Generating...' : 'Send'}
                     >
                       {loading ? <span className="text-xs font-semibold">...</span> : <Send className="w-4 h-4" />}

@@ -2,9 +2,28 @@
 
 import { motion } from "framer-motion";
 import { Heart, Code, Link, Hash, Mail } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getSiteCopy } from "@/app/lib/siteCopy";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
+
+  useEffect(() => {
+    const loadCopy = async () => {
+      try {
+        const res = await fetch("/api/admin/content");
+        const data = await res.json();
+        if (data.content) {
+          setSiteCopy(getSiteCopy(data.content));
+        }
+      } catch {
+        // Keep defaults.
+      }
+    };
+
+    loadCopy();
+  }, []);
 
   return (
     <footer className="relative overflow-hidden bg-gradient-to-r from-[#07101a] via-[#0b1f2e] to-[#07101a] text-white">
@@ -26,11 +45,10 @@ export default function Footer() {
               className="md:col-span-2"
             >
               <h3 className="mb-4 bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-2xl font-black text-transparent">
-                RAHUL CHAKRADHAR PEREPOGU
+                {siteCopy.footerBrand}
               </h3>
               <p className="text-gray-400 leading-relaxed mb-6 max-w-md">
-                Full Stack Developer & Creative Designer passionate about crafting exceptional digital experiences
-                that blend innovation with functionality.
+                {siteCopy.footerLead}
               </p>
               <div className="flex space-x-4">
                 <motion.a
@@ -74,13 +92,14 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
             >
-              <h4 className="text-lg font-semibold mb-4 text-white">Quick Links</h4>
+              <h4 className="text-lg font-semibold mb-4 text-white">{siteCopy.footerQuickLinksTitle}</h4>
               <ul className="space-y-2">
-                <li><a href="#about" className="text-gray-400 transition-colors hover:text-cyan-300">About</a></li>
-                <li><a href="#skills" className="text-gray-400 transition-colors hover:text-cyan-300">Skills</a></li>
-                <li><a href="#projects" className="text-gray-400 transition-colors hover:text-cyan-300">Projects</a></li>
-                <li><a href="/hire" className="text-gray-400 transition-colors hover:text-cyan-300">Hire</a></li>
-                <li><a href="#contact" className="text-gray-400 transition-colors hover:text-cyan-300">Contact</a></li>
+                <li><a href="#about" className="text-gray-400 transition-colors hover:text-cyan-300">{siteCopy.navAbout}</a></li>
+                <li><a href="#radar" className="text-gray-400 transition-colors hover:text-cyan-300">{siteCopy.navRadar}</a></li>
+                <li><a href="#skills" className="text-gray-400 transition-colors hover:text-cyan-300">{siteCopy.navSkills}</a></li>
+                <li><a href="#projects" className="text-gray-400 transition-colors hover:text-cyan-300">{siteCopy.navProjects}</a></li>
+                <li><a href="/hire" className="text-gray-400 transition-colors hover:text-cyan-300">{siteCopy.navHire}</a></li>
+                <li><a href="#contact" className="text-gray-400 transition-colors hover:text-cyan-300">{siteCopy.navContact}</a></li>
               </ul>
             </motion.div>
 
@@ -90,12 +109,11 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h4 className="text-lg font-semibold mb-4 text-white">Services</h4>
+              <h4 className="text-lg font-semibold mb-4 text-white">{siteCopy.footerServicesTitle}</h4>
               <ul className="space-y-2">
-                <li><span className="text-gray-400">Web Development</span></li>
-                <li><span className="text-gray-400">UI/UX Design</span></li>
-                <li><span className="text-gray-400">Mobile Apps</span></li>
-                <li><span className="text-gray-400">Consulting</span></li>
+                {siteCopy.footerServices.map((service) => (
+                  <li key={service}><span className="text-gray-400">{service}</span></li>
+                ))}
               </ul>
             </motion.div>
           </div>
@@ -108,10 +126,10 @@ export default function Footer() {
             className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center"
           >
             <p className="text-gray-400 text-sm mb-4 md:mb-0">
-              © {currentYear} PEREPOGU RAHUL CHAKRADHAR. All rights reserved.
+              {siteCopy.footerCopyright.replace("{year}", String(currentYear))}
             </p>
             <p className="text-gray-400 text-sm flex items-center">
-              Made with <Heart className="w-4 h-4 text-red-500 mx-1" /> and lots of coffee
+              {siteCopy.footerMadeWith} <Heart className="w-4 h-4 text-red-500 mx-1" />
             </p>
           </motion.div>
         </div>

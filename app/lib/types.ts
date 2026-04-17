@@ -108,6 +108,83 @@ export interface PortfolioContent {
   instagram?: string;
   linkedin?: string;
   github?: string;
+  siteCopy?: SiteCopy;
+  radarConfig?: RadarConfig;
+}
+
+export type RadarKind = 'skill' | 'project' | 'certification';
+
+export interface RadarConfig {
+  enabledKinds: RadarKind[];
+  skillIds: string[];
+  projectIds: string[];
+  certificationIds: string[];
+  maxSkills: number;
+  maxProjects: number;
+  maxCertifications: number;
+}
+
+export interface SiteCopy {
+  headerBrand: string;
+  navHome: string;
+  navAbout: string;
+  navRadar: string;
+  navSkills: string;
+  navProjects: string;
+  navHire: string;
+  navContact: string;
+  headerHireCta: string;
+  footerBrand: string;
+  footerLead: string;
+  footerQuickLinksTitle: string;
+  footerServicesTitle: string;
+  footerServices: string[];
+  footerCopyright: string;
+  footerMadeWith: string;
+  heroBadge: string;
+  heroEditorialBadge: string;
+  heroCTA1: string;
+  heroCTA2: string;
+  heroCurrentFocusLabel: string;
+  heroCurrentFocusText: string;
+  heroSpotlights: { title: string; copy: string }[];
+  aboutBadge: string;
+  aboutHeading: string;
+  aboutShortTitle: string;
+  aboutShortCopy: string;
+  aboutBody1: string;
+  aboutBody2: string;
+  aboutTags: string[];
+  aboutFooter: string;
+  skillsHeading: string;
+  skillsSubtitle: string;
+  skillsViewMore: string;
+  skillsEmpty: string;
+  projectsHeading: string;
+  projectsSubtitle: string;
+  projectsViewMore: string;
+  projectsEmpty: string;
+  certificationsHeading: string;
+  certificationsSubtitle: string;
+  certificationsViewMore: string;
+  certificationsEmpty: string;
+  contactHeading: string;
+  contactSubtitle: string;
+  contactIntroTitle: string;
+  contactIntroBody: string;
+  contactSocialPrompt: string;
+  contactFormTitle: string;
+  contactSuccess: string;
+  contactError: string;
+  radarBadge: string;
+  radarHeading: string;
+  radarSubtitle: string;
+  radarFeatureTitle: string;
+  radarFeatureCopy: string;
+  radarCommandCopy: string;
+  radarExploreSkills: string;
+  radarSeeProjects: string;
+  radarViewCredentials: string;
 }
 
 export interface Certification {

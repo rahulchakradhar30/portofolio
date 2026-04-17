@@ -3,6 +3,17 @@ import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { assertAdminSession } from '@/app/lib/adminAuth';
 import { logAdminAudit } from '@/app/lib/adminAudit';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
+import { DEFAULT_SITE_COPY } from '@/app/lib/siteCopy';
+
+const DEFAULT_RADAR_CONFIG = {
+  enabledKinds: ['skill', 'project', 'certification'],
+  skillIds: [],
+  projectIds: [],
+  certificationIds: [],
+  maxSkills: 5,
+  maxProjects: 3,
+  maxCertifications: 3,
+};
 
 // GET - Get portfolio content
 export async function GET() {
@@ -25,6 +36,8 @@ export async function GET() {
             instagram: 'https://www.instagram.com/rahul_chakradhar_30/?hl=en',
             linkedin: 'https://www.linkedin.com/in/perepogu-rahul-chakradhar-721017379/',
             github: 'https://github.com/rahulchakradhar30',
+            siteCopy: DEFAULT_SITE_COPY,
+            radarConfig: DEFAULT_RADAR_CONFIG,
             aboutStats: [
               { label: 'Major Projects', value: '3+' },
               { label: 'Certifications', value: '5+' },
@@ -70,6 +83,8 @@ export async function PUT(request: NextRequest) {
       linkedin,
       github,
       aboutStats,
+      siteCopy,
+      radarConfig,
     } = await request.json();
 
     const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({
@@ -86,6 +101,8 @@ export async function PUT(request: NextRequest) {
       linkedin,
       github,
       aboutStats,
+      siteCopy,
+      radarConfig,
     });
 
     await logAdminAudit({

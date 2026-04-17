@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Mail, MapPin, Send, Camera, Briefcase, Code } from "lucide-react";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
+import { getSiteCopy } from "@/app/lib/siteCopy";
 
 const DEFAULT_CONTACT = {
   email: "rahulchakradharperepogu@gmail.com",
@@ -26,6 +27,7 @@ export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [contactData, setContactData] = useState(DEFAULT_CONTACT);
+  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
   const [loadingContact, setLoadingContact] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -36,6 +38,7 @@ export default function Contact() {
         if (!res.ok) throw new Error('Failed to load contact content');
         const data = await res.json();
         if (data.content) {
+          setSiteCopy(getSiteCopy(data.content));
           setContactData({
             email: data.content.email || DEFAULT_CONTACT.email,
             location: data.content.location || DEFAULT_CONTACT.location,
@@ -80,7 +83,7 @@ export default function Contact() {
       if (response.ok) {
         setSubmitStatus({
           type: "success",
-          message: result.message || "Message sent successfully! I&apos;ll get back to you soon.",
+          message: result.message || siteCopy.contactSuccess,
         });
         setFormData({
           firstName: "",
@@ -92,13 +95,13 @@ export default function Contact() {
       } else {
         setSubmitStatus({
           type: "error",
-          message: result.error || "Failed to send message. Please try again.",
+          message: result.error || siteCopy.contactError,
         });
       }
     } catch {
       setSubmitStatus({
         type: "error",
-        message: "Network error. Please try again later.",
+        message: siteCopy.contactError,
       });
     } finally {
       setIsSubmitting(false);
@@ -129,11 +132,11 @@ export default function Contact() {
           viewport={{ once: true, amount: 0.2 }}
           className="text-center mb-12 md:mb-16"
         >
-          <h2 className="mb-4 bg-gradient-to-r from-[#0d1b2d] to-[#0f766e] bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-5xl lg:text-6xl">
-            Get In Touch
+          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-emerald-100 to-amber-100 bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-5xl lg:text-6xl">
+            {siteCopy.contactHeading}
           </h2>
-          <p className="mx-auto max-w-2xl px-2 text-sm text-slate-700 sm:text-base md:text-xl">
-            Ready to bring your ideas to life? Let&apos;s create something amazing together
+          <p className="mx-auto max-w-2xl px-2 text-sm text-slate-300 sm:text-base md:text-xl">
+            {siteCopy.contactSubtitle}
           </p>
           <div className="mx-auto mt-4 h-1 w-16 bg-gradient-to-r from-amber-300 to-cyan-300 md:mt-6 md:w-24"></div>
         </motion.div>
@@ -147,43 +150,42 @@ export default function Contact() {
             className="space-y-6 md:space-y-8"
           >
             <div>
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Let&apos;s Connect</h3>
-              <p className="text-base md:text-lg text-gray-600 leading-relaxed mb-6 md:mb-8">
-                I&apos;m always excited to discuss new opportunities, share ideas, or collaborate on innovative projects.
-                Whether you have a question or just want to say hello, I&apos;d love to hear from you.
+              <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6">{siteCopy.contactIntroTitle}</h3>
+              <p className="text-base md:text-lg text-slate-300 leading-relaxed mb-6 md:mb-8">
+                {siteCopy.contactIntroBody}
               </p>
             </div>
 
             <div className="space-y-4 md:space-y-6">
               <motion.div
                 whileHover={reducedMotion ? undefined : { scale: 1.02 }}
-                className="flex items-center rounded-xl border border-cyan-100/80 bg-white p-3 shadow-md transition-shadow hover:shadow-lg md:rounded-2xl md:p-4"
+                className="flex items-center rounded-xl border border-cyan-300/15 bg-slate-950/60 p-3 shadow-md transition-shadow hover:shadow-lg md:rounded-2xl md:p-4 backdrop-blur-xl"
               >
                 <div className="mr-3 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-emerald-400 md:mr-4 md:h-12 md:w-12 md:rounded-xl">
                   <Mail className="w-5 md:w-6 h-5 md:h-6 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-gray-800 text-sm md:text-base">Email</div>
-                  <div className="text-gray-600 text-xs md:text-sm truncate">{contactData.email}</div>
+                  <div className="font-semibold text-white text-sm md:text-base">Email</div>
+                  <div className="text-slate-300 text-xs md:text-sm truncate">{contactData.email}</div>
                 </div>
               </motion.div>
 
               <motion.div
                 whileHover={reducedMotion ? undefined : { scale: 1.02 }}
-                className="flex items-center rounded-xl border border-cyan-100/80 bg-white p-3 shadow-md transition-shadow hover:shadow-lg md:rounded-2xl md:p-4"
+                className="flex items-center rounded-xl border border-cyan-300/15 bg-slate-950/60 p-3 shadow-md transition-shadow hover:shadow-lg md:rounded-2xl md:p-4 backdrop-blur-xl"
               >
                 <div className="mr-3 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-400 md:mr-4 md:h-12 md:w-12 md:rounded-xl">
                   <MapPin className="w-5 md:w-6 h-5 md:h-6 text-white" />
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-800 text-sm md:text-base">Location</div>
-                  <div className="text-gray-600 text-xs md:text-sm">{contactData.location}</div>
+                  <div className="font-semibold text-white text-sm md:text-base">Location</div>
+                  <div className="text-slate-300 text-xs md:text-sm">{contactData.location}</div>
                 </div>
               </motion.div>
             </div>
 
             <div className="pt-6 md:pt-8">
-              <p className="text-gray-600 text-sm md:text-base mb-4">Follow me on social media</p>
+              <p className="text-slate-300 text-sm md:text-base mb-4">{siteCopy.contactSocialPrompt}</p>
               <div className="flex gap-3 md:gap-4">
                 <motion.a
                   whileHover={reducedMotion ? undefined : { scale: 1.1, y: -2 }}
@@ -228,9 +230,9 @@ export default function Contact() {
             transition={reducedMotion ? undefined : { duration: 0.8 }}
             viewport={{ once: true, amount: 0.2 }}
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-lg md:rounded-3xl md:p-8 md:shadow-2xl"
+            className="rounded-2xl border border-cyan-300/15 bg-slate-950/60 p-4 text-white shadow-[0_20px_50px_rgba(0,0,0,0.25)] md:rounded-3xl md:p-8 md:shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl"
           >
-            <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">Send a Message</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">{siteCopy.contactFormTitle}</h3>
 
             {submitStatus && (
               <motion.div
@@ -238,8 +240,8 @@ export default function Contact() {
                 animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
                 className={`p-3 md:p-4 rounded-lg md:rounded-xl mb-4 md:mb-6 text-sm md:text-base ${
                   submitStatus.type === "success"
-                    ? "bg-green-50 text-green-700 border border-green-200"
-                    : "bg-red-50 text-red-700 border border-red-200"
+                    ? "bg-emerald-400/10 text-emerald-200 border border-emerald-300/20"
+                    : "bg-rose-400/10 text-rose-200 border border-rose-300/20"
                 }`}
               >
                 {submitStatus.message}
@@ -249,7 +251,7 @@ export default function Contact() {
             <div className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
                 <div>
-                  <label htmlFor="firstName" className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="firstName" className="block text-xs md:text-sm font-medium text-slate-200 mb-2">
                     First Name
                   </label>
                   <input
@@ -258,12 +260,12 @@ export default function Contact() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500 md:rounded-xl md:px-4 md:py-3 md:text-base"
+                    className="w-full rounded-lg border border-white/10 bg-slate-950/70 px-3 py-2 text-sm text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20 md:rounded-xl md:px-4 md:py-3 md:text-base"
                     placeholder="John"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-xs md:text-sm font-medium text-gray-700 mb-2">
+                  <label htmlFor="lastName" className="block text-xs md:text-sm font-medium text-slate-200 mb-2">
                     Last Name
                   </label>
                   <input
@@ -272,14 +274,14 @@ export default function Contact() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                    className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
                     placeholder="Doe"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
                   Email
                 </label>
                 <input
@@ -288,13 +290,13 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="subject" className="block text-sm font-medium text-slate-200 mb-2">
                   Subject
                 </label>
                 <input
@@ -303,13 +305,13 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
                   placeholder="Project Discussion"
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="message" className="block text-sm font-medium text-slate-200 mb-2">
                   Message
                 </label>
                 <textarea
@@ -318,7 +320,7 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleInputChange}
                   required
-                  className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 transition-all duration-200 focus:border-transparent focus:bg-white focus:ring-2 focus:ring-cyan-500"
+                  className="w-full resize-none rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
                   placeholder="Tell me about your project..."
                 ></textarea>
               </div>

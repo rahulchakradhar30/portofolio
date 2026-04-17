@@ -50,7 +50,7 @@ export default function AllProjects() {
   }, [projects, filter]);
 
   return (
-    <section className="section-surface relative min-h-screen px-4 pt-28 pb-20 sm:px-6 md:pt-32 lg:px-10">
+    <section className="section-surface relative min-h-screen px-4 pb-20 pt-24 sm:px-6 sm:pt-28 md:pt-32 lg:px-10">
       <div className="absolute top-0 right-0 h-1 w-full bg-gradient-to-l from-emerald-300 via-cyan-300 to-amber-300"></div>
       <div className="mx-auto max-w-[1600px]">
         {/* Header */}
@@ -58,35 +58,35 @@ export default function AllProjects() {
           initial={reducedMotion ? false : { opacity: 0, y: 50 }}
           animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={reducedMotion ? undefined : { duration: 0.8 }}
-          className="mb-16"
+          className="mb-12 sm:mb-16"
         >
           <Link
             href="/"
-            className="mb-8 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-4 py-2 font-semibold text-cyan-700 transition hover:border-cyan-300 hover:text-cyan-900"
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-4 py-2 text-sm font-semibold text-cyan-700 transition hover:border-cyan-300 hover:text-cyan-900 sm:mb-8"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="h-5 w-5" />
             Back to Home
           </Link>
 
-          <div className="text-center mb-12">
-            <h1 className="mb-6 bg-gradient-to-r from-[#0d1b2d] to-[#0e7490] bg-clip-text text-5xl font-black text-transparent md:text-6xl">
+          <div className="mb-10 text-center sm:mb-12">
+            <h1 className="mb-4 bg-gradient-to-r from-[#0d1b2d] to-[#0e7490] bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:mb-6 md:text-6xl">
               All Projects
             </h1>
-            <p className="mx-auto max-w-2xl text-base text-slate-700 md:text-xl">
+            <p className="mx-auto max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base md:text-xl">
               Explore my complete portfolio of innovative projects spanning AI, technology, content creation, and entrepreneurship
             </p>
-            <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-amber-300 to-cyan-300"></div>
+            <div className="mx-auto mt-5 h-1 w-20 bg-gradient-to-r from-amber-300 to-cyan-300 sm:mt-6 sm:w-24"></div>
           </div>
 
           {/* Filter Buttons */}
-          <div className="flex flex-wrap gap-3 justify-center mb-12">
+          <div className="mb-12 flex flex-wrap justify-center gap-2 sm:gap-3">
             {filterOptions.map((item) => (
               <motion.button
                 key={item}
                 whileHover={reducedMotion ? undefined : { scale: 1.05 }}
                 whileTap={reducedMotion ? undefined : { scale: 0.95 }}
                 onClick={() => setFilter(item)}
-                className={`px-4 py-2 rounded-full font-semibold transition-all ${
+                className={`rounded-full px-3 py-2 text-sm font-semibold transition-all sm:px-4 ${
                   filter === item
                     ? "bg-gradient-to-r from-cyan-600 to-emerald-600 text-white shadow-md"
                     : "border border-cyan-200 bg-white text-slate-700 hover:border-cyan-400"
@@ -110,7 +110,7 @@ export default function AllProjects() {
             No projects found for this filter.
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 sm:gap-8">
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id || index}
@@ -118,10 +118,10 @@ export default function AllProjects() {
                 whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
                 transition={reducedMotion ? undefined : { duration: 0.8, delay: index * 0.1 }}
                 whileHover={reducedMotion ? undefined : { y: -10 }}
-                className="group overflow-hidden rounded-3xl border border-cyan-100 bg-white shadow-lg transition-all duration-300 hover:shadow-2xl"
+                className="group overflow-hidden rounded-2xl border border-cyan-100 bg-white shadow-lg transition-all duration-300 hover:shadow-2xl sm:rounded-3xl"
               >
                 {/* Project Image */}
-                <div className="relative h-48 overflow-hidden bg-gradient-to-br from-cyan-100 to-emerald-100">
+                <div className="relative h-44 overflow-hidden bg-gradient-to-br from-cyan-100 to-emerald-100 sm:h-48">
                   {project.image ? (
                     <Image
                       src={project.image}
@@ -150,9 +150,9 @@ export default function AllProjects() {
                 </div>
 
                 {/* Project Content */}
-                <div className="p-6">
+                  <div className="p-5 sm:p-6">
                   <Link href={`/projects/${project.id}`}>
-                    <h3 className="mb-2 cursor-pointer text-xl font-bold text-slate-800 transition-colors group-hover:text-cyan-700">
+                    <h3 className="mb-2 cursor-pointer text-lg font-bold text-slate-800 transition-colors group-hover:text-cyan-700 sm:text-xl">
                       {project.title}
                     </h3>
                   </Link>
@@ -193,21 +193,21 @@ export default function AllProjects() {
         )}
 
         {/* CTA Section */}
-        <motion.section
+          <motion.section
           initial={reducedMotion ? false : { opacity: 0, y: 50 }}
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={reducedMotion ? undefined : { duration: 0.8 }}
-          className="mt-20 border-t border-cyan-100 pt-20 text-center"
+          className="mt-16 border-t border-cyan-100 pt-16 text-center sm:mt-20 sm:pt-20"
         >
-          <h2 className="mb-6 text-3xl font-black text-slate-900">Interested in Collaboration?</h2>
-          <p className="mx-auto mb-8 max-w-2xl text-xl text-slate-600">
+          <h2 className="mb-4 text-2xl font-black text-slate-900 sm:mb-6 sm:text-3xl">Interested in Collaboration?</h2>
+          <p className="mx-auto mb-8 max-w-2xl text-base text-slate-600 sm:text-xl">
             I&apos;m always open to discussing new opportunities and innovative projects. Let&apos;s create something amazing together!
           </p>
           <motion.a
             whileHover={reducedMotion ? undefined : { scale: 1.05 }}
             whileTap={reducedMotion ? undefined : { scale: 0.95 }}
             href="/#contact"
-            className="inline-block rounded-full bg-gradient-to-r from-cyan-600 to-emerald-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl"
+            className="inline-block rounded-full bg-gradient-to-r from-cyan-600 to-emerald-600 px-7 py-3 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl sm:px-8 sm:py-4 sm:text-base"
           >
             Get In Touch
           </motion.a>

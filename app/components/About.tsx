@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
+import { getSiteCopy } from "@/app/lib/siteCopy";
 
 const DEFAULT_ABOUT = {
   aboutText:
@@ -19,6 +20,7 @@ const DEFAULT_ABOUT = {
 export default function About() {
   const { reducedMotion } = useMotionPreferences();
   const [aboutData, setAboutData] = useState(DEFAULT_ABOUT);
+  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -29,6 +31,7 @@ export default function About() {
         if (!res.ok) throw new Error('Failed to load about content');
         const data = await res.json();
         if (data.content) {
+          setSiteCopy(getSiteCopy(data.content));
           setAboutData({
             aboutText: data.content.aboutText || DEFAULT_ABOUT.aboutText,
             aboutStats:
@@ -66,10 +69,13 @@ export default function About() {
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={reducedMotion ? undefined : { duration: 0.8 }}
           viewport={{ once: true, amount: 0.2 }}
-          className="text-center mb-16"
+          className="mb-12 text-center sm:mb-16"
         >
-          <h2 className="mb-6 bg-gradient-to-r from-[#0d1b2d] to-[#0e7490] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
-            About Me
+          <div className="mx-auto mb-4 inline-flex rounded-full border border-cyan-200 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-700 shadow-sm">
+            {siteCopy.aboutBadge}
+          </div>
+          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-emerald-100 to-amber-100 bg-clip-text text-4xl font-black text-transparent md:text-6xl">
+            {siteCopy.aboutHeading}
           </h2>
           <div className="mx-auto h-1 w-24 bg-gradient-to-r from-amber-300 to-cyan-300"></div>
         </motion.div>
@@ -82,19 +88,22 @@ export default function About() {
             viewport={{ once: true, amount: 0.25 }}
             className="space-y-6"
           >
-            <p className="text-lg leading-relaxed text-slate-600">
+            <div className="rounded-3xl border border-cyan-300/15 bg-slate-950/65 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.25)] sm:p-6 backdrop-blur-xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200/80">A short version</p>
+              <p className="mt-2 text-xl font-bold text-white sm:text-2xl">
+                {siteCopy.aboutShortCopy}
+              </p>
+            </div>
+            <p className="text-lg leading-relaxed text-slate-300">
               {aboutData.aboutText}
             </p>
-            <p className="text-lg leading-relaxed text-slate-600">
-              My focus lies in AI, technology, and content creation. I excel in problem-solving and logical reasoning, and I&apos;m comfortable working across various fields - from software to hardware, irrespective of the domain. I prefer partnerships and entrepreneurship over traditional salaried jobs, seeking opportunities where I can generate revenue while doing what I love.
+            <p className="text-lg leading-relaxed text-slate-300">
+              {siteCopy.aboutBody2}
             </p>
-            <div className="flex flex-wrap gap-4 pt-4">
-              <span className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">AI Enthusiast</span>
-              <span className="rounded-full bg-cyan-100 px-4 py-2 text-sm font-medium text-cyan-700">Tech Learner</span>
-              <span className="rounded-full bg-amber-100 px-4 py-2 text-sm font-medium text-amber-700">Content Creator</span>
-              <span className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Director</span>
-              <span className="rounded-full bg-yellow-100 px-4 py-2 text-sm font-medium text-yellow-700">Problem Solver</span>
-              <span className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">Innovator</span>
+            <div className="flex flex-wrap gap-3 pt-2">
+              {siteCopy.aboutTags.map((tag) => (
+                <span key={tag} className="rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">{tag}</span>
+              ))}
             </div>
           </motion.div>
 
@@ -105,8 +114,8 @@ export default function About() {
             viewport={{ once: true, amount: 0.25 }}
             className="relative"
           >
-            <div className="rounded-3xl bg-gradient-to-br from-cyan-100 to-emerald-100 p-8 shadow-2xl">
-              <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <div className="rounded-3xl bg-gradient-to-br from-cyan-100 to-emerald-100 p-6 shadow-2xl sm:p-8">
+              <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.25)] sm:p-6 backdrop-blur-xl">
                 <div className="grid grid-cols-2 gap-6">
                   {aboutData.aboutStats.slice(0, 4).map((stat, index) => (
                     <motion.div
@@ -117,11 +126,14 @@ export default function About() {
                       transition={reducedMotion ? undefined : { duration: 0.4, delay: index * 0.08 }}
                       viewport={{ once: true, amount: 0.35 }}
                     >
-                      <div className="text-3xl font-bold text-cyan-700 mb-2">{stat.value}</div>
-                      <div className="text-sm text-gray-600">{stat.label}</div>
+                      <div className="text-3xl font-bold text-cyan-200 mb-2">{stat.value}</div>
+                      <div className="text-sm text-slate-300">{stat.label}</div>
                     </motion.div>
                   ))}
                 </div>
+              </div>
+              <div className="mt-4 rounded-2xl border border-slate-700/60 bg-slate-950/80 p-4 text-sm text-cyan-50 backdrop-blur-xl">
+                {siteCopy.aboutFooter}
               </div>
             </div>
           </motion.div>

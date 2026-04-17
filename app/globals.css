@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --background: #08111c;
-  --foreground: #edf7ff;
-  --surface: #f4fbff;
-  --surface-strong: #d7f2ff;
+  --background: #050b12;
+  --foreground: #ecfeff;
+  --surface: #08141f;
+  --surface-strong: #0d1b2c;
 }
 
 @theme inline {
@@ -30,27 +30,33 @@ h6 {
 }
 
 .section-surface {
-  background: linear-gradient(140deg, #f8feff 0%, #e8f6ff 46%, #fff7ef 100%);
-  color: #132030;
+  background: linear-gradient(145deg, #07101a 0%, #0b1c2c 52%, #07101a 100%);
+  color: #e5f7ff;
 }
 
 .section-soft {
-  background: radial-gradient(circle at 10% 20%, #d7ffef 0%, transparent 40%),
-    radial-gradient(circle at 85% 10%, #ffe5cc 0%, transparent 34%),
-    linear-gradient(130deg, #f3fbff 0%, #eef5ff 55%, #f6f6ff 100%);
-  color: #132030;
+  background: radial-gradient(circle at 10% 20%, rgba(34, 211, 238, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 85% 10%, rgba(52, 211, 153, 0.14) 0%, transparent 34%),
+    linear-gradient(130deg, #06101a 0%, #0a1724 55%, #050b12 100%);
+  color: #e5f7ff;
 }
 
 @keyframes floatSlow {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-  100% { transform: translateY(0px); }
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
 }
 
 @keyframes glowPulse {
-  0% { box-shadow: 0 0 0 rgba(56, 189, 248, 0.25); }
-  50% { box-shadow: 0 0 36px rgba(56, 189, 248, 0.45); }
-  100% { box-shadow: 0 0 0 rgba(56, 189, 248, 0.25); }
+  0% { box-shadow: 0 0 0 rgba(34, 211, 238, 0.16); }
+  50% { box-shadow: 0 0 36px rgba(34, 211, 238, 0.42); }
+  100% { box-shadow: 0 0 0 rgba(34, 211, 238, 0.16); }
+}
+
+@keyframes orbitDrift {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(180deg); }
+  100% { transform: translate3d(0, 0, 0) rotate(360deg); }
 }
 
 .animate-float-slow {
@@ -59,6 +65,10 @@ h6 {
 
 .animate-glow-pulse {
   animation: glowPulse 3.6s ease-in-out infinite;
+}
+
+.animate-orbit-drift {
+  animation: orbitDrift 18s linear infinite;
 }
 
 html[data-motion='reduced'] *,

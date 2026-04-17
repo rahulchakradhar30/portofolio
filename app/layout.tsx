@@ -4,6 +4,8 @@ import "./globals.css";
 import Chatbot from "./components/Chatbot";
 import CookieConsent from "./components/CookieConsent";
 import { MotionProvider } from "./components/MotionProvider";
+import AppShell from "./components/AppShell";
+import DevtoolsGuard from "./components/DevtoolsGuard";
 
 const sora = Sora({
   variable: "--font-sora",
@@ -32,7 +34,8 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <MotionProvider>
-          {children}
+          <DevtoolsGuard />
+          <AppShell>{children}</AppShell>
           <CookieConsent />
           <Chatbot />
         </MotionProvider>

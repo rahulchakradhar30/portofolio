@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Project } from "@/app/lib/types";
 import ImageLightbox from "@/app/components/ImageLightbox";
+import { getYouTubeEmbedUrl, getYouTubeId } from "@/app/lib/youtube";
 
 export default function ProjectDetail() {
   const params = useParams();
@@ -67,20 +68,17 @@ export default function ProjectDetail() {
     );
   }
 
-  // Extract YouTube video ID from URL
-  const getYouTubeId = (url: string) => {
-    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
   const youtubeId = project.youtubeUrl ? getYouTubeId(project.youtubeUrl) : null;
+  const youtubeEmbedUrl = project.youtubeUrl ? getYouTubeEmbedUrl(project.youtubeUrl) : null;
   const extraYoutubeIds = (project.youtubeLinks || [])
     .map((link) => getYouTubeId(link))
     .filter((id): id is string => Boolean(id));
+  const extraYouTubeEmbedUrls = (project.youtubeLinks || [])
+    .map((link) => getYouTubeEmbedUrl(link))
+    .filter((embedUrl): embedUrl is string => Boolean(embedUrl));
 
   return (
-    <div className="min-h-screen pt-20 md:pt-28 pb-20 bg-gradient-to-br from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 pb-20 pt-20 md:pt-28">
       {/* Decorative background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl"></div>
@@ -91,7 +89,7 @@ export default function ProjectDetail() {
         {/* Header */}
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 mb-8 font-semibold transition group"
+          className="mb-6 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-white/5 px-3 py-2 text-sm font-semibold text-violet-300 transition group hover:text-violet-200 sm:mb-8"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" />
           Back to Home
@@ -102,9 +100,9 @@ export default function ProjectDetail() {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="mb-20"
+          className="mb-16 sm:mb-20"
         >
-          <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12 2xl:gap-16">
+          <div className="grid items-center gap-6 md:grid-cols-2 md:gap-12 2xl:gap-16">
             {/* Image */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -118,7 +116,7 @@ export default function ProjectDetail() {
                   <button
                     type="button"
                     onClick={() => openLightbox([project.image], 0)}
-                    className="relative block w-full overflow-hidden rounded-3xl"
+                    className="relative block w-full overflow-hidden rounded-2xl sm:rounded-3xl"
                     title="Click to view full image"
                   >
                     <Image
@@ -126,13 +124,13 @@ export default function ProjectDetail() {
                       alt={project.title}
                       width={600}
                       height={400}
-                      className="relative rounded-3xl w-full h-auto object-cover shadow-2xl"
+                      className="relative h-auto w-full rounded-2xl object-cover shadow-2xl sm:rounded-3xl"
                     />
                   </button>
                 </div>
               ) : (
-                <div className="bg-gradient-to-br from-violet-600 to-pink-600 rounded-3xl overflow-hidden aspect-video flex items-center justify-center shadow-2xl">
-                  <div className="text-2xl md:text-6xl font-bold text-white opacity-30">
+                <div className="flex aspect-video items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-pink-600 shadow-2xl sm:rounded-3xl">
+                  <div className="text-2xl font-bold text-white opacity-30 md:text-6xl">
                     {project.category}
                   </div>
                 </div>
@@ -144,37 +142,37 @@ export default function ProjectDetail() {
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
-              className="space-y-6"
+              className="space-y-5 sm:space-y-6"
             >
               <div>
                 <motion.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="inline-block px-4 py-2 bg-gradient-to-r from-violet-600/20 to-pink-600/20 border border-violet-500/50 text-violet-300 rounded-full text-sm font-semibold mb-4"
+                  className="mb-4 inline-block rounded-full border border-violet-500/50 bg-gradient-to-r from-violet-600/20 to-pink-600/20 px-4 py-2 text-sm font-semibold text-violet-300"
                 >
                   {project.category}
                 </motion.span>
-                <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-white sm:text-4xl md:mb-6 md:text-6xl">
                   {project.title}
                 </h1>
               </div>
 
-              <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+              <p className="text-base leading-relaxed text-gray-300 sm:text-lg md:text-xl">
                 {project.description}
               </p>
 
               {/* Tech Stack */}
               {project.tech && project.tech.length > 0 && (
                 <div>
-                  <div className="text-sm text-gray-400 mb-3 font-semibold uppercase tracking-wider">Technologies</div>
+                  <div className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-400">Technologies</div>
                   <div className="flex flex-wrap gap-2">
                     {project.tech.map((tech: string) => (
                       <motion.span
                         key={tech}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="px-4 py-2 bg-violet-600/20 border border-violet-500/50 text-violet-300 rounded-full text-sm font-medium hover:bg-violet-600/30 transition"
+                        className="rounded-full border border-violet-500/50 bg-violet-600/20 px-3 py-2 text-sm font-medium text-violet-300 transition hover:bg-violet-600/30"
                       >
                         {tech}
                       </motion.span>
@@ -184,7 +182,7 @@ export default function ProjectDetail() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3 pt-6">
+              <div className="flex flex-wrap gap-3 pt-4 sm:pt-6">
                 {project.demo && (
                   <motion.a
                     href={project.demo}
@@ -192,7 +190,7 @@ export default function ProjectDetail() {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold"
+                    className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-3 font-semibold text-white transition-all hover:shadow-lg sm:px-6"
                   >
                     <ExternalLink className="w-5 h-5" />
                     Live Demo
@@ -205,7 +203,7 @@ export default function ProjectDetail() {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-slate-700/50 border border-slate-600 text-gray-200 rounded-lg hover:bg-slate-700 transition-all font-semibold"
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-700/50 px-5 py-3 font-semibold text-gray-200 transition-all hover:bg-slate-700 sm:px-6"
                   >
                     <GitBranch className="w-5 h-5" />
                     GitHub
@@ -217,34 +215,59 @@ export default function ProjectDetail() {
         </motion.section>
 
         {/* YouTube Video Section */}
-        {youtubeId && (
+        {project.youtubeUrl ? (
           <motion.section
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="mb-20"
+            className="mb-16 sm:mb-20"
           >
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
-              <div className="bg-gradient-to-r from-violet-600 to-pink-600 px-6 md:px-8 py-6">
-                <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
-                  <Play className="w-7 h-7 bg-white/20 p-1.5 rounded-full" />
+            <div className="overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-800/50 shadow-2xl backdrop-blur">
+              <div className="bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-5 sm:px-6 md:px-8 md:py-6">
+                <h2 className="flex items-center gap-3 text-xl font-bold text-white sm:text-2xl md:text-3xl">
+                  <Play className="h-6 w-6 rounded-full bg-white/20 p-1 sm:h-7 sm:w-7 sm:p-1.5" />
                   {project.youtubeTitle || "Project Video"}
                 </h2>
               </div>
-              <div className="aspect-video w-full">
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${youtubeId}`}
-                  title={project.youtubeTitle || "Project Video"}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+
+              {youtubeEmbedUrl ? (
+                <div className="aspect-video w-full bg-black">
+                  <iframe
+                    className="h-full w-full"
+                    src={youtubeEmbedUrl}
+                    title={project.youtubeTitle || "Project Video"}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="flex min-h-[280px] items-center justify-center px-6 py-10 text-center sm:min-h-[360px]">
+                  <div className="max-w-lg space-y-4">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-white">
+                      <Play className="h-7 w-7" />
+                    </div>
+                    <p className="text-base text-slate-200 sm:text-lg">
+                      The YouTube link is present, but the video preview could not be embedded from this URL format.
+                    </p>
+                    <a
+                      href={project.youtubeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Open Video on YouTube
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.section>
-        )}
+        ) : null}
 
         {project.galleryImages && project.galleryImages.length > 0 && (
           <motion.section
@@ -252,17 +275,17 @@ export default function ProjectDetail() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="mb-20"
+            className="mb-16 sm:mb-20"
           >
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Project Gallery</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-800/50 p-5 shadow-2xl backdrop-blur sm:p-6 md:p-8">
+              <h2 className="mb-5 text-xl font-bold text-white sm:mb-6 sm:text-2xl md:text-3xl">Project Gallery</h2>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
                 {project.galleryImages.map((image, index) => (
                   <button
                     key={`${image}-${index}`}
                     type="button"
                     onClick={() => openLightbox(project.galleryImages || [], index)}
-                    className="relative h-48 overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900"
+                    className="relative h-40 overflow-hidden rounded-2xl border border-slate-700/60 bg-slate-900 sm:h-48"
                     title="Click to open and zoom"
                   >
                     <Image src={image} alt={`${project.title} gallery ${index + 1}`} fill className="object-cover" />
@@ -273,25 +296,27 @@ export default function ProjectDetail() {
           </motion.section>
         )}
 
-        {extraYoutubeIds.length > 0 && (
+        {extraYouTubeEmbedUrls.length > 0 && (
           <motion.section
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="mb-20"
+            className="mb-16 sm:mb-20"
           >
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl p-6 md:p-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">More Videos</h2>
-              <div className="grid gap-6 md:grid-cols-2">
-                {extraYoutubeIds.map((id, index) => (
-                  <div key={`${id}-${index}`} className="aspect-video overflow-hidden rounded-2xl border border-slate-700/60">
+            <div className="overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-800/50 p-5 shadow-2xl backdrop-blur sm:p-6 md:p-8">
+              <h2 className="mb-5 text-xl font-bold text-white sm:mb-6 sm:text-2xl md:text-3xl">More Videos</h2>
+              <div className="grid gap-4 md:grid-cols-2 sm:gap-6">
+                {extraYouTubeEmbedUrls.map((embedUrl, index) => (
+                  <div key={`${embedUrl}-${index}`} className="aspect-video overflow-hidden rounded-2xl border border-slate-700/60 bg-black">
                     <iframe
-                      className="w-full h-full"
-                      src={`https://www.youtube.com/embed/${id}`}
+                      className="h-full w-full"
+                      src={embedUrl}
                       title={`${project.title} extra video ${index + 1}`}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      loading="lazy"
+                      referrerPolicy="strict-origin-when-cross-origin"
                       allowFullScreen
                     />
                   </div>
@@ -317,15 +342,15 @@ export default function ProjectDetail() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="mb-20"
+            className="mb-16 sm:mb-20"
           >
-            <div className="bg-slate-800/50 backdrop-blur border border-slate-700/50 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-800/50 shadow-2xl backdrop-blur">
               {/* Tabs */}
-              <div className="flex border-b border-slate-700/50 bg-slate-800/70 backdrop-blur">
+              <div className="flex flex-col border-b border-slate-700/50 bg-slate-800/70 backdrop-blur sm:flex-row">
                 {project.showDetails && (
                   <motion.button
                     onClick={() => setActiveTab("details")}
-                    className={`flex-1 px-6 py-4 font-semibold transition relative ${
+                    className={`flex-1 px-4 py-4 text-sm font-semibold transition relative sm:px-6 ${
                       activeTab === "details"
                         ? "text-violet-400"
                         : "text-gray-400 hover:text-gray-300"
@@ -344,7 +369,7 @@ export default function ProjectDetail() {
                 {project.showCode && (
                   <motion.button
                     onClick={() => setActiveTab("code")}
-                    className={`flex-1 px-6 py-4 font-semibold transition relative ${
+                    className={`flex-1 px-4 py-4 text-sm font-semibold transition relative sm:px-6 ${
                       activeTab === "code"
                         ? "text-violet-400"
                         : "text-gray-400 hover:text-gray-300"
@@ -363,7 +388,7 @@ export default function ProjectDetail() {
               </div>
 
               {/* Tab Content */}
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <AnimatePresence mode="wait">
                   {activeTab === "details" && project.longDescription && (
                     <motion.div

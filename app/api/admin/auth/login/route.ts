@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       maxAge: Math.floor(expiresIn / 1000),
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       path: '/',
     });
 

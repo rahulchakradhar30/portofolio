@@ -1,5 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
+// Temporary emergency bypass. Set to true only during critical maintenance.
+// SHOULD BE FALSE FOR PRODUCTION
+const TEMP_DISABLE_ADMIN_AUTH = false;
+
 function buildCsp(request: NextRequest) {
   const isDev = process.env.NODE_ENV !== 'production';
   const siteOrigin = request.nextUrl.origin;
@@ -12,9 +16,10 @@ function buildCsp(request: NextRequest) {
     "img-src 'self' data: blob: https://res.cloudinary.com https://cdn.simpleicons.org",
     "media-src 'self' blob: https://res.cloudinary.com",
     "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' ${siteOrigin} https://api.groq.com https://api-inference.huggingface.co https://api.cloudinary.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com`,
+    `connect-src 'self' ${siteOrigin} https://api.groq.com https://api-inference.huggingface.co https://api.cloudinary.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://www.gstatic.com`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+    `script-src 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com https://www.gstatic.com${isDev ? " 'unsafe-eval'" : ''}`,
+    "frame-src 'self' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://rahul-portofolio.firebaseapp.com https://*.firebaseapp.com",
     "upgrade-insecure-requests",
   ];
 
@@ -54,6 +59,13 @@ export function proxy(request: NextRequest) {
       pathname.startsWith('/api/admin/certifications') ||
       pathname.startsWith('/api/admin/content')
     );
+
+  if (TEMP_DISABLE_ADMIN_AUTH) {
+    if (isAdminLoginPage) {
+      return applySecurityHeaders(request, NextResponse.redirect(new URL('/admin/dashboard', request.url)));
+    }
+    return applySecurityHeaders(request, NextResponse.next());
+  }
 
   if (isAdminLoginPage && token) {
     return applySecurityHeaders(request, NextResponse.redirect(new URL('/admin/dashboard', request.url)));

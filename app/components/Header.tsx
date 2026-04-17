@@ -2,19 +2,38 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Command, Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getSiteCopy } from "@/app/lib/siteCopy";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
+
+  useEffect(() => {
+    const loadCopy = async () => {
+      try {
+        const res = await fetch("/api/admin/content");
+        const data = await res.json();
+        if (data.content) {
+          setSiteCopy(getSiteCopy(data.content));
+        }
+      } catch {
+        // Keep defaults if the content endpoint is unavailable.
+      }
+    };
+
+    loadCopy();
+  }, []);
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Skills", href: "#skills" },
-    { name: "Projects", href: "#projects" },
-    { name: "Hire", href: "/hire" },
-    { name: "Contact", href: "#contact" },
+    { name: siteCopy.navHome, href: "#home" },
+    { name: siteCopy.navAbout, href: "#about" },
+    { name: siteCopy.navRadar, href: "#radar" },
+    { name: siteCopy.navSkills, href: "#skills" },
+    { name: siteCopy.navProjects, href: "#projects" },
+    { name: siteCopy.navHire, href: "/hire" },
+    { name: siteCopy.navContact, href: "#contact" },
   ];
 
   return (
@@ -31,7 +50,7 @@ export default function Header() {
             whileHover={{ scale: 1.05 }}
             className="text-2xl font-black tracking-widest bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent"
           >
-            PRC
+            {siteCopy.headerBrand}
           </motion.div>
 
           {/* Desktop Navigation */}
@@ -49,10 +68,20 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <Link href="/hire" className="hidden rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 px-6 py-2 font-semibold text-[#0c1c2d] shadow-lg shadow-emerald-300/30 transition-all duration-300 hover:shadow-xl md:block">
-            Hire Me
-          </Link>
+          <div className="hidden items-center gap-3 md:flex">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+              className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-white/5 px-4 py-2 text-xs font-semibold text-cyan-100 transition hover:bg-white/10"
+            >
+              <Command className="h-4 w-4" />
+              Quick Search
+              <span className="rounded border border-white/15 px-1.5 py-0.5 text-[10px] text-slate-300">Ctrl K</span>
+            </button>
+            <Link href="/hire" className="rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 px-6 py-2 font-semibold text-[#0c1c2d] shadow-lg shadow-emerald-300/30 transition-all duration-300 hover:shadow-xl">
+              {siteCopy.headerHireCta}
+            </Link>
+          </div>
 
           {/* Mobile Menu Button */}
           <motion.button
@@ -84,7 +113,7 @@ export default function Header() {
                 </a>
               ))}
               <Link href="/hire" className="mt-4 rounded-full bg-gradient-to-r from-cyan-300 to-emerald-300 px-6 py-2 font-semibold text-[#0c1c2d] shadow-lg shadow-emerald-300/30">
-                Hire Me
+                {siteCopy.headerHireCta}
               </Link>
             </nav>
           </motion.div>

@@ -7,8 +7,10 @@ import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Menu, X, LogOut, Users, Activity, Settings as SettingsIcon, BarChart3, Award, Download, RefreshCw, ShieldCheck, Mail, Search, BadgeCheck, CalendarDays, Link2, Globe, Briefcase } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import { SKILL_LOGO_PRESETS, SKILL_LOGO_CATEGORIES, resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
+import { normalizeYouTubeUrl, normalizeYouTubeUrlList } from "@/app/lib/youtube";
+import { DEFAULT_SITE_COPY, getSiteCopy } from "@/app/lib/siteCopy";
 import AIAssistant from "@/app/components/AIAssistant";
-import type { Project, Skill, ContactMessage, HireRequest, PortfolioContent, AdminUser, Certification } from "@/app/lib/types";
+import type { Project, Skill, ContactMessage, HireRequest, PortfolioContent, AdminUser, Certification, RadarConfig, RadarKind } from "@/app/lib/types";
 
 const DEFAULT_CONTENT_STATS = [
   { label: 'Major Projects', value: '3+' },
@@ -17,6 +19,16 @@ const DEFAULT_CONTENT_STATS = [
   { label: 'Success Rate', value: '90%' },
 ];
 
+const DEFAULT_RADAR_CONFIG: RadarConfig = {
+  enabledKinds: ['skill', 'project', 'certification'],
+  skillIds: [],
+  projectIds: [],
+  certificationIds: [],
+  maxSkills: 5,
+  maxProjects: 3,
+  maxCertifications: 3,
+};
+
 const parseUrlList = (input: string) => {
   const values = input
     .split(/\r?\n|,/)
@@ -24,6 +36,8 @@ const parseUrlList = (input: string) => {
     .filter(Boolean);
   return Array.from(new Set(values));
 };
+
+const removeAtIndex = (values: string[], indexToRemove: number) => values.filter((_, index) => index !== indexToRemove);
 
 const normalizeSkillIcon = (iconValue?: string) => {
   const resolved = resolveSkillIconUrl(iconValue);
@@ -100,9 +114,9 @@ export default function AdminDashboard() {
 
       {/* Sidebar */}
       <motion.div
-        className={`fixed left-0 top-0 h-screen bg-gray-900 text-white transition-all duration-300 z-40 ${
-          sidebarOpen ? "w-64" : "w-20"
-        } md:w-64`}
+        className={`fixed inset-y-0 left-0 z-40 h-screen w-64 bg-gray-900 text-white transition-transform duration-300 md:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
         initial={false}
       >
         <div className="p-4 border-b border-gray-700">
@@ -133,7 +147,7 @@ export default function AdminDashboard() {
                 whileTap={{ scale: 0.95 }}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="hidden md:inline">{tab.label}</span>
+                <span className={`${sidebarOpen ? "inline" : "hidden"} md:inline`}>{tab.label}</span>
               </motion.button>
             );
           })}
@@ -149,9 +163,9 @@ export default function AdminDashboard() {
       </motion.div>
 
       {/* Main Content */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? "md:ml-64" : "md:ml-64"} ml-20`}>
+      <div className="ml-0 transition-all duration-300 md:ml-64">
         {/* Top Bar */}
-        <div className="bg-white border-b border-gray-200 p-3 md:p-4 flex items-center justify-between sticky top-0 z-30 gap-4">
+        <div className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-gray-200 bg-white p-3 md:p-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-2 hover:bg-gray-100 rounded-lg md:hidden"
@@ -172,7 +186,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Content Area */}
-        <div className="p-3 md:p-6 overflow-x-hidden">
+        <div className="overflow-x-hidden p-3 md:p-6">
           {activeTab === "overview" && <OverviewTab />}
           {activeTab === "content" && <ContentTab />}
           {activeTab === "projects" && <ProjectsTab />}
@@ -252,14 +266,49 @@ function OverviewTab() {
 
 function ContentTab() {
   const [content, setContent] = useState<PortfolioContent | null>(null);
+  const [siteCopyForm, setSiteCopyForm] = useState(DEFAULT_SITE_COPY);
+  const [radarConfigForm, setRadarConfigForm] = useState<RadarConfig>(DEFAULT_RADAR_CONFIG);
+  const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
+  const [availableProjects, setAvailableProjects] = useState<Project[]>([]);
+  const [availableCertifications, setAvailableCertifications] = useState<Certification[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
+  const normalizeRadarConfig = (input?: Partial<RadarConfig> | null): RadarConfig => ({
+    enabledKinds:
+      Array.isArray(input?.enabledKinds) && input!.enabledKinds.length > 0
+        ? (input!.enabledKinds.filter((kind): kind is RadarKind => kind === 'skill' || kind === 'project' || kind === 'certification'))
+        : DEFAULT_RADAR_CONFIG.enabledKinds,
+    skillIds: Array.isArray(input?.skillIds) ? input!.skillIds.filter(Boolean) : [],
+    projectIds: Array.isArray(input?.projectIds) ? input!.projectIds.filter(Boolean) : [],
+    certificationIds: Array.isArray(input?.certificationIds) ? input!.certificationIds.filter(Boolean) : [],
+    maxSkills: Math.min(12, Math.max(1, Number(input?.maxSkills) || DEFAULT_RADAR_CONFIG.maxSkills)),
+    maxProjects: Math.min(12, Math.max(1, Number(input?.maxProjects) || DEFAULT_RADAR_CONFIG.maxProjects)),
+    maxCertifications: Math.min(12, Math.max(1, Number(input?.maxCertifications) || DEFAULT_RADAR_CONFIG.maxCertifications)),
+  });
+
+  const updateSiteCopyField = <K extends keyof typeof DEFAULT_SITE_COPY>(
+    key: K,
+    value: (typeof DEFAULT_SITE_COPY)[K]
+  ) => {
+    setSiteCopyForm((prev) => ({ ...prev, [key]: value }));
+  };
+
   const loadContent = useCallback(async () => {
     try {
-      const res = await adminAPI.getPortfolioContent();
+      const [res, skillsRes, projectsRes, certsRes] = await Promise.all([
+        adminAPI.getPortfolioContent(),
+        adminAPI.getSkills(),
+        adminAPI.getProjects(),
+        adminAPI.getCertifications(),
+      ]);
+
+      if (skillsRes.success) setAvailableSkills((skillsRes.skills as Skill[]) || []);
+      if (projectsRes.success) setAvailableProjects((projectsRes.projects as Project[]) || []);
+      if (certsRes.success) setAvailableCertifications((certsRes.certifications as Certification[]) || []);
+
       if (res.success && res.content) {
         setContent({
           ...res.content,
@@ -271,6 +320,8 @@ function ContentTab() {
               ? res.content.aboutStats
               : DEFAULT_CONTENT_STATS,
         });
+        setSiteCopyForm(getSiteCopy(res.content));
+        setRadarConfigForm(normalizeRadarConfig((res.content as PortfolioContent).radarConfig));
       }
     } catch (error) {
       console.error('Error loading content:', error);
@@ -288,9 +339,14 @@ function ContentTab() {
       alert('No content to save');
       return;
     }
+
     setSaving(true);
     try {
-      const res = await adminAPI.updatePortfolioContent(content as unknown as Record<string, unknown>);
+      const res = await adminAPI.updatePortfolioContent({
+        ...(content as unknown as Record<string, unknown>),
+        siteCopy: siteCopyForm,
+        radarConfig: radarConfigForm,
+      });
       if (res.success) {
         alert('Content updated successfully!');
         setEditMode(false);
@@ -595,6 +651,295 @@ function ContentTab() {
             />
           </div>
 
+          <div className="space-y-3 rounded-xl border border-gray-200 p-4">
+            <div className="mb-1 flex items-center justify-between gap-3">
+              <label className="block text-sm font-semibold text-gray-700">Homepage Copy Controls</label>
+              <span className="text-xs text-gray-500">Grouped for mobile editing</span>
+            </div>
+
+            <details open className="rounded-lg border border-gray-200 bg-gray-50/70">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-800">Header & Navigation</summary>
+              <div className="grid grid-cols-1 gap-3 p-4 pt-0 md:grid-cols-3">
+                <input type="text" value={siteCopyForm.headerBrand} onChange={(e) => updateSiteCopyField('headerBrand', e.target.value)} disabled={!editMode} placeholder="Header Brand" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.headerHireCta} onChange={(e) => updateSiteCopyField('headerHireCta', e.target.value)} disabled={!editMode} placeholder="Header CTA" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navHome} onChange={(e) => updateSiteCopyField('navHome', e.target.value)} disabled={!editMode} placeholder="Nav Home" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navAbout} onChange={(e) => updateSiteCopyField('navAbout', e.target.value)} disabled={!editMode} placeholder="Nav About" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navRadar} onChange={(e) => updateSiteCopyField('navRadar', e.target.value)} disabled={!editMode} placeholder="Nav Radar" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navSkills} onChange={(e) => updateSiteCopyField('navSkills', e.target.value)} disabled={!editMode} placeholder="Nav Skills" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navProjects} onChange={(e) => updateSiteCopyField('navProjects', e.target.value)} disabled={!editMode} placeholder="Nav Projects" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navHire} onChange={(e) => updateSiteCopyField('navHire', e.target.value)} disabled={!editMode} placeholder="Nav Hire" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navContact} onChange={(e) => updateSiteCopyField('navContact', e.target.value)} disabled={!editMode} placeholder="Nav Contact" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+              </div>
+            </details>
+
+            <details className="rounded-lg border border-gray-200 bg-gray-50/70">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-800">Hero</summary>
+              <div className="grid grid-cols-1 gap-3 p-4 pt-0 md:grid-cols-2">
+                <input type="text" value={siteCopyForm.heroBadge} onChange={(e) => updateSiteCopyField('heroBadge', e.target.value)} disabled={!editMode} placeholder="Hero Badge" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.heroEditorialBadge} onChange={(e) => updateSiteCopyField('heroEditorialBadge', e.target.value)} disabled={!editMode} placeholder="Hero Secondary Badge" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.heroCTA1} onChange={(e) => updateSiteCopyField('heroCTA1', e.target.value)} disabled={!editMode} placeholder="Hero CTA 1" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.heroCTA2} onChange={(e) => updateSiteCopyField('heroCTA2', e.target.value)} disabled={!editMode} placeholder="Hero CTA 2" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.heroCurrentFocusLabel} onChange={(e) => updateSiteCopyField('heroCurrentFocusLabel', e.target.value)} disabled={!editMode} placeholder="Hero Focus Label" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+                <textarea rows={2} value={siteCopyForm.heroCurrentFocusText} onChange={(e) => updateSiteCopyField('heroCurrentFocusText', e.target.value)} disabled={!editMode} placeholder="Hero focus text" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+              </div>
+            </details>
+
+            <details className="rounded-lg border border-gray-200 bg-gray-50/70">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-800">About</summary>
+              <div className="grid grid-cols-1 gap-3 p-4 pt-0 md:grid-cols-2">
+                <input type="text" value={siteCopyForm.aboutBadge} onChange={(e) => updateSiteCopyField('aboutBadge', e.target.value)} disabled={!editMode} placeholder="About Badge" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.aboutHeading} onChange={(e) => updateSiteCopyField('aboutHeading', e.target.value)} disabled={!editMode} placeholder="About Heading" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.aboutShortCopy} onChange={(e) => updateSiteCopyField('aboutShortCopy', e.target.value)} disabled={!editMode} placeholder="About Short Copy" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+                <textarea rows={4} value={siteCopyForm.aboutBody2} onChange={(e) => updateSiteCopyField('aboutBody2', e.target.value)} disabled={!editMode} placeholder="About secondary paragraph" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+                <textarea rows={2} value={siteCopyForm.aboutFooter} onChange={(e) => updateSiteCopyField('aboutFooter', e.target.value)} disabled={!editMode} placeholder="About footer note" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+                <div className="rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <label className="text-sm font-semibold text-gray-700">About Highlight Tags</label>
+                    <button
+                      type="button"
+                      onClick={() => updateSiteCopyField('aboutTags', [...siteCopyForm.aboutTags, 'New Tag'])}
+                      disabled={!editMode}
+                      className="inline-flex items-center gap-1 rounded-md border border-violet-300 px-2 py-1 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add Tag
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {siteCopyForm.aboutTags.map((tag, idx) => (
+                      <div key={`about-tag-${idx}`} className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={tag}
+                          onChange={(e) => {
+                            const nextTags = [...siteCopyForm.aboutTags];
+                            nextTags[idx] = e.target.value;
+                            updateSiteCopyField('aboutTags', nextTags);
+                          }}
+                          disabled={!editMode}
+                          placeholder={`Tag ${idx + 1}`}
+                          className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const nextTags = siteCopyForm.aboutTags.filter((_, index) => index !== idx);
+                            updateSiteCopyField('aboutTags', nextTags);
+                          }}
+                          disabled={!editMode || siteCopyForm.aboutTags.length <= 1}
+                          className="rounded-md border border-red-300 p-2 text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                          title="Remove tag"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details className="rounded-lg border border-gray-200 bg-gray-50/70">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-800">Sections & Radar</summary>
+              <div className="grid grid-cols-1 gap-3 p-4 pt-0 md:grid-cols-2">
+                <input type="text" value={siteCopyForm.skillsHeading} onChange={(e) => updateSiteCopyField('skillsHeading', e.target.value)} disabled={!editMode} placeholder="Skills Heading" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.projectsHeading} onChange={(e) => updateSiteCopyField('projectsHeading', e.target.value)} disabled={!editMode} placeholder="Projects Heading" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.certificationsHeading} onChange={(e) => updateSiteCopyField('certificationsHeading', e.target.value)} disabled={!editMode} placeholder="Certifications Heading" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.contactHeading} onChange={(e) => updateSiteCopyField('contactHeading', e.target.value)} disabled={!editMode} placeholder="Contact Heading" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <textarea rows={2} value={siteCopyForm.skillsSubtitle} onChange={(e) => updateSiteCopyField('skillsSubtitle', e.target.value)} disabled={!editMode} placeholder="Skills subtitle" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <textarea rows={2} value={siteCopyForm.projectsSubtitle} onChange={(e) => updateSiteCopyField('projectsSubtitle', e.target.value)} disabled={!editMode} placeholder="Projects subtitle" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <textarea rows={2} value={siteCopyForm.certificationsSubtitle} onChange={(e) => updateSiteCopyField('certificationsSubtitle', e.target.value)} disabled={!editMode} placeholder="Certifications subtitle" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <textarea rows={2} value={siteCopyForm.contactSubtitle} onChange={(e) => updateSiteCopyField('contactSubtitle', e.target.value)} disabled={!editMode} placeholder="Contact subtitle" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.radarBadge} onChange={(e) => updateSiteCopyField('radarBadge', e.target.value)} disabled={!editMode} placeholder="Radar Badge" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.radarHeading} onChange={(e) => updateSiteCopyField('radarHeading', e.target.value)} disabled={!editMode} placeholder="Radar Heading" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <textarea rows={2} value={siteCopyForm.radarSubtitle} onChange={(e) => updateSiteCopyField('radarSubtitle', e.target.value)} disabled={!editMode} placeholder="Radar subtitle" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+                <input type="text" value={siteCopyForm.radarExploreSkills} onChange={(e) => updateSiteCopyField('radarExploreSkills', e.target.value)} disabled={!editMode} placeholder="Radar Skills CTA" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.radarSeeProjects} onChange={(e) => updateSiteCopyField('radarSeeProjects', e.target.value)} disabled={!editMode} placeholder="Radar Projects CTA" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.radarViewCredentials} onChange={(e) => updateSiteCopyField('radarViewCredentials', e.target.value)} disabled={!editMode} placeholder="Radar Credentials CTA" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+
+                <div className="rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
+                  <p className="mb-2 text-sm font-semibold text-gray-800">Radar Visibility</p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {[
+                      { key: 'skill', label: 'Show Skills' },
+                      { key: 'project', label: 'Show Projects' },
+                      { key: 'certification', label: 'Show Certifications' },
+                    ].map((item) => (
+                      <label key={item.key} className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          disabled={!editMode}
+                          checked={radarConfigForm.enabledKinds.includes(item.key as RadarKind)}
+                          onChange={(e) => {
+                            const kind = item.key as RadarKind;
+                            const nextKinds = e.target.checked
+                              ? Array.from(new Set([...radarConfigForm.enabledKinds, kind]))
+                              : radarConfigForm.enabledKinds.filter((value) => value !== kind);
+                            setRadarConfigForm((prev) => ({ ...prev, enabledKinds: nextKinds }));
+                          }}
+                          className="h-4 w-4"
+                        />
+                        {item.label}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
+                  <p className="mb-2 text-sm font-semibold text-gray-800">Radar Item Limits</p>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    <label className="text-xs font-semibold text-gray-700">
+                      Max Skills
+                      <input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={radarConfigForm.maxSkills}
+                        disabled={!editMode}
+                        onChange={(e) => setRadarConfigForm((prev) => ({ ...prev, maxSkills: Math.min(12, Math.max(1, Number(e.target.value) || 1)) }))}
+                        className="mt-1 w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-black"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold text-gray-700">
+                      Max Projects
+                      <input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={radarConfigForm.maxProjects}
+                        disabled={!editMode}
+                        onChange={(e) => setRadarConfigForm((prev) => ({ ...prev, maxProjects: Math.min(12, Math.max(1, Number(e.target.value) || 1)) }))}
+                        className="mt-1 w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-black"
+                      />
+                    </label>
+                    <label className="text-xs font-semibold text-gray-700">
+                      Max Certifications
+                      <input
+                        type="number"
+                        min={1}
+                        max={12}
+                        value={radarConfigForm.maxCertifications}
+                        disabled={!editMode}
+                        onChange={(e) => setRadarConfigForm((prev) => ({ ...prev, maxCertifications: Math.min(12, Math.max(1, Number(e.target.value) || 1)) }))}
+                        className="mt-1 w-full rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-black"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-gray-800">Select Skills For Radar</p>
+                    <button
+                      type="button"
+                      disabled={!editMode}
+                      onClick={() => setRadarConfigForm((prev) => ({ ...prev, skillIds: [] }))}
+                      className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Auto Select
+                    </button>
+                  </div>
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 p-2">
+                    {availableSkills.map((item) => (
+                      <label key={item.id} className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          disabled={!editMode}
+                          checked={radarConfigForm.skillIds.includes(item.id)}
+                          onChange={(e) => {
+                            const nextIds = e.target.checked
+                              ? [...radarConfigForm.skillIds, item.id]
+                              : radarConfigForm.skillIds.filter((id) => id !== item.id);
+                            setRadarConfigForm((prev) => ({ ...prev, skillIds: nextIds }));
+                          }}
+                          className="h-4 w-4"
+                        />
+                        {item.title}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-gray-800">Select Projects For Radar</p>
+                    <button
+                      type="button"
+                      disabled={!editMode}
+                      onClick={() => setRadarConfigForm((prev) => ({ ...prev, projectIds: [] }))}
+                      className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Auto Select
+                    </button>
+                  </div>
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 p-2">
+                    {availableProjects.map((item) => (
+                      <label key={item.id} className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          disabled={!editMode}
+                          checked={radarConfigForm.projectIds.includes(item.id)}
+                          onChange={(e) => {
+                            const nextIds = e.target.checked
+                              ? [...radarConfigForm.projectIds, item.id]
+                              : radarConfigForm.projectIds.filter((id) => id !== item.id);
+                            setRadarConfigForm((prev) => ({ ...prev, projectIds: nextIds }));
+                          }}
+                          className="h-4 w-4"
+                        />
+                        {item.title}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-gray-200 bg-white p-3 md:col-span-2">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-gray-800">Select Certifications For Radar</p>
+                    <button
+                      type="button"
+                      disabled={!editMode}
+                      onClick={() => setRadarConfigForm((prev) => ({ ...prev, certificationIds: [] }))}
+                      className="rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                      Auto Select
+                    </button>
+                  </div>
+                  <div className="max-h-40 overflow-y-auto rounded-lg border border-gray-200 p-2">
+                    {availableCertifications.map((item) => (
+                      <label key={item.id} className="flex items-center gap-2 px-2 py-1.5 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          disabled={!editMode}
+                          checked={radarConfigForm.certificationIds.includes(item.id)}
+                          onChange={(e) => {
+                            const nextIds = e.target.checked
+                              ? [...radarConfigForm.certificationIds, item.id]
+                              : radarConfigForm.certificationIds.filter((id) => id !== item.id);
+                            setRadarConfigForm((prev) => ({ ...prev, certificationIds: nextIds }));
+                          }}
+                          className="h-4 w-4"
+                        />
+                        {item.title}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </details>
+
+            <details className="rounded-lg border border-gray-200 bg-gray-50/70">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-gray-800">Footer</summary>
+              <div className="grid grid-cols-1 gap-3 p-4 pt-0 md:grid-cols-2">
+                <input type="text" value={siteCopyForm.footerBrand} onChange={(e) => updateSiteCopyField('footerBrand', e.target.value)} disabled={!editMode} placeholder="Footer Brand" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.footerQuickLinksTitle} onChange={(e) => updateSiteCopyField('footerQuickLinksTitle', e.target.value)} disabled={!editMode} placeholder="Footer Quick Links Title" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.footerServicesTitle} onChange={(e) => updateSiteCopyField('footerServicesTitle', e.target.value)} disabled={!editMode} placeholder="Footer Services Title" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.footerMadeWith} onChange={(e) => updateSiteCopyField('footerMadeWith', e.target.value)} disabled={!editMode} placeholder="Footer Made With" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <textarea rows={2} value={siteCopyForm.footerLead} onChange={(e) => updateSiteCopyField('footerLead', e.target.value)} disabled={!editMode} placeholder="Footer lead paragraph" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+                <input type="text" value={siteCopyForm.footerCopyright} onChange={(e) => updateSiteCopyField('footerCopyright', e.target.value)} disabled={!editMode} placeholder="Footer copyright line" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black md:col-span-2" />
+              </div>
+            </details>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">About Stats</label>
             <div className="grid gap-3">
@@ -722,6 +1067,10 @@ function ProjectsTab() {
       return;
     }
 
+    const galleryImages = parseUrlList(formData.galleryImagesText);
+    const youtubeLinks = normalizeYouTubeUrlList(parseUrlList(formData.youtubeLinksText));
+    const youtubeUrl = normalizeYouTubeUrl(formData.youtubeUrl);
+
     const newProject = {
       title: formData.title,
       description: formData.description,
@@ -732,14 +1081,14 @@ function ProjectsTab() {
       featured: formData.featured,
       category: formData.category,
       image: formData.imageUrl,
-      youtubeUrl: formData.youtubeUrl,
+      youtubeUrl,
       youtubeTitle: formData.youtubeTitle,
       codeUrl: formData.codeUrl,
       codeName: formData.codeName,
       showCode: formData.showCode,
       showDetails: formData.showDetails,
-      galleryImages: parseUrlList(formData.galleryImagesText),
-      youtubeLinks: parseUrlList(formData.youtubeLinksText),
+      galleryImages,
+      youtubeLinks,
     };
 
     try {
@@ -754,14 +1103,14 @@ function ProjectsTab() {
             demoUrl: formData.demo,
             category: formData.category,
             featured: formData.featured,
-            youtubeUrl: formData.youtubeUrl,
+            youtubeUrl,
             youtubeTitle: formData.youtubeTitle,
             codeUrl: formData.codeUrl,
             codeName: formData.codeName,
             showCode: formData.showCode,
             showDetails: formData.showDetails,
-            galleryImages: parseUrlList(formData.galleryImagesText),
-            youtubeLinks: parseUrlList(formData.youtubeLinksText),
+            galleryImages,
+            youtubeLinks,
           })
         : await adminAPI.createProject(newProject);
       if (res.success) {
@@ -827,20 +1176,24 @@ function ProjectsTab() {
   };
 
   const handleGalleryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
     setUploading(true);
     try {
-      const res = await adminAPI.uploadToCloudinary(file);
-      if (res.success) {
-        const uploadedUrl = res.fileUrl || res.imageUrl;
+      const uploads = await Promise.all(files.map((file) => adminAPI.uploadToCloudinary(file)));
+      const uploadedUrls = uploads
+        .filter((res) => res.success)
+        .map((res) => res.fileUrl || res.imageUrl)
+        .filter((url): url is string => Boolean(url));
+
+      if (uploadedUrls.length > 0) {
         const currentGallery = parseUrlList(formData.galleryImagesText);
-        const nextGallery = Array.from(new Set([...currentGallery, uploadedUrl]));
+        const nextGallery = Array.from(new Set([...currentGallery, ...uploadedUrls]));
         setFormData({ ...formData, galleryImagesText: nextGallery.join('\n') });
-        alert('Gallery image uploaded successfully!');
+        alert(`Uploaded ${uploadedUrls.length} gallery image(s) successfully!`);
       } else {
-        alert('Failed to upload gallery image');
+        alert('Failed to upload gallery image(s)');
       }
     } catch (error) {
       console.error('Gallery upload error:', error);
@@ -849,6 +1202,11 @@ function ProjectsTab() {
       setUploading(false);
       e.target.value = '';
     }
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove: number) => {
+    const nextGallery = removeAtIndex(parseUrlList(formData.galleryImagesText), indexToRemove);
+    setFormData({ ...formData, galleryImagesText: nextGallery.join('\n') });
   };
 
   const handleDeleteProject = async (projectId: string) => {
@@ -976,8 +1334,13 @@ function ProjectsTab() {
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <div className="space-y-2 rounded-lg border border-violet-100 bg-violet-50/50 p-3">
-            <label className="block text-sm font-medium text-gray-700">Gallery Images (optional)</label>
-            <p className="text-xs text-gray-500">Paste one URL per line or upload images and they will be appended.</p>
+            <div className="flex items-center justify-between gap-3">
+              <label className="block text-sm font-medium text-gray-700">Gallery Images (optional)</label>
+              <span className="rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-violet-700">
+                {parseUrlList(formData.galleryImagesText).length} selected
+              </span>
+            </div>
+            <p className="text-xs text-gray-500">Paste one URL per line or upload multiple images and they will be appended.</p>
             <textarea
               placeholder="https://...\nhttps://..."
               value={formData.galleryImagesText}
@@ -988,22 +1351,37 @@ function ProjectsTab() {
             <input
               type="file"
               accept="image/*"
+              multiple
               onChange={handleGalleryImageUpload}
               disabled={uploading}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
             />
-            <p className="text-xs text-gray-600">{parseUrlList(formData.galleryImagesText).length} gallery image(s) ready</p>
+            <div className="flex flex-wrap gap-2">
+              {parseUrlList(formData.galleryImagesText).map((imageUrl, index) => (
+                <span key={`${imageUrl}-${index}`} className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white px-3 py-1 text-xs text-violet-700">
+                  <span className="max-w-32 truncate">Image {index + 1}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveGalleryImage(index)}
+                    className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold hover:bg-violet-100"
+                    title="Remove image"
+                  >
+                    Remove
+                  </button>
+                </span>
+              ))}
+            </div>
           </div>
           <div className="space-y-2 rounded-lg border border-violet-100 bg-violet-50/50 p-3">
             <label className="block text-sm font-medium text-gray-700">More YouTube Links (optional)</label>
             <textarea
-              placeholder="https://www.youtube.com/watch?v=..."
+              placeholder="Paste any YouTube link: watch, youtu.be, embed, or shorts"
               value={formData.youtubeLinksText}
               onChange={(e) => setFormData({ ...formData, youtubeLinksText: e.target.value })}
               rows={3}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition resize-none"
             />
-            <p className="text-xs text-gray-600">{parseUrlList(formData.youtubeLinksText).length} extra video link(s) ready</p>
+            <p className="text-xs text-gray-600">{normalizeYouTubeUrlList(parseUrlList(formData.youtubeLinksText)).length} extra video link(s) ready</p>
           </div>
           <input
             type="text"
@@ -2233,8 +2611,13 @@ function CertificationsTab() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-4 space-y-2">
-                <label className="block text-sm font-semibold text-slate-800">Gallery Images (optional)</label>
+              <div className="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-4 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <label className="block text-sm font-semibold text-slate-800">Gallery Images (optional)</label>
+                  <span className="rounded-full bg-white px-2 py-1 text-[11px] font-semibold text-cyan-700">
+                    {parseUrlList(formData.galleryImagesText).length} selected
+                  </span>
+                </div>
                 <textarea
                   placeholder="Paste one image URL per line"
                   value={formData.galleryImagesText}
@@ -2245,11 +2628,26 @@ function CertificationsTab() {
                 <input
                   type="file"
                   accept="image/*"
+                  multiple
                   onChange={handleGalleryUpload}
                   disabled={uploading}
                   className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm"
                 />
-                <p className="text-xs text-slate-600">{parseUrlList(formData.galleryImagesText).length} gallery image(s) ready</p>
+                <div className="flex flex-wrap gap-2">
+                  {parseUrlList(formData.galleryImagesText).map((imageUrl, index) => (
+                    <span key={`${imageUrl}-${index}`} className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-white px-3 py-1 text-xs text-cyan-700 shadow-sm">
+                      <span className="max-w-32 truncate">Gallery {index + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, galleryImagesText: removeAtIndex(parseUrlList(formData.galleryImagesText), index).join('\n') })}
+                        className="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-semibold hover:bg-cyan-100"
+                        title="Remove image"
+                      >
+                        Remove
+                      </button>
+                    </span>
+                  ))}
+                </div>
               </div>
 
               <div className="rounded-2xl border border-cyan-100 bg-white p-4 space-y-2">

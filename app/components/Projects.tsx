@@ -6,24 +6,37 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Eye, Star } from "lucide-react";
 import type { Project } from "@/app/lib/types";
+import { prioritizeFeatured } from "@/app/lib/contentOrdering";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
+import { getSiteCopy } from "@/app/lib/siteCopy";
 
 export default function Projects() {
   const { reducedMotion } = useMotionPreferences();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch('/api/admin/projects');
-        if (res.ok) {
-          const data = await res.json();
+        const [projectsRes, contentRes] = await Promise.all([
+          fetch('/api/admin/projects'),
+          fetch('/api/admin/content'),
+        ]);
+        if (projectsRes.ok) {
+          const data = await projectsRes.json();
           setProjects(data.projects || []);
         } else {
           throw new Error('Failed to fetch projects');
+        }
+
+        if (contentRes.ok) {
+          const data = await contentRes.json();
+          if (data.content) {
+            setSiteCopy(getSiteCopy(data.content));
+          }
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
@@ -38,9 +51,9 @@ export default function Projects() {
 
   if (error) throw error;
 
-  const featuredProjects = projects.filter((project) => project.featured);
-  const visibleProjects = (featuredProjects.length > 0 ? featuredProjects : projects).slice(0, 6);
-  const hasMore = (featuredProjects.length > 0 ? featuredProjects.length : projects.length) > visibleProjects.length;
+  const orderedProjects = prioritizeFeatured(projects);
+  const visibleProjects = orderedProjects.slice(0, 6);
+  const hasMore = orderedProjects.length > visibleProjects.length;
 
   return (
     <section className="section-surface relative px-4 py-16 sm:px-6 md:py-24 lg:px-10">
@@ -52,21 +65,21 @@ export default function Projects() {
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={reducedMotion ? undefined : { duration: 0.8 }}
           viewport={{ once: true, amount: 0.2 }}
-          className="text-center mb-16"
+          className="mb-12 text-center md:mb-16"
         >
-          <h2 className="mb-6 bg-gradient-to-r from-[#0d1b2d] to-[#0e7490] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
-            Featured Projects
+          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-emerald-100 to-amber-100 bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-6xl">
+            {siteCopy.projectsHeading}
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-slate-700 md:text-xl">
-            A showcase of my recent work, blending creativity with cutting-edge technology
+          <p className="mx-auto max-w-2xl px-2 text-sm text-slate-300 sm:text-base md:text-xl">
+            {siteCopy.projectsSubtitle}
           </p>
-          <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-amber-300 to-cyan-300"></div>
+          <div className="mx-auto mt-4 h-1 w-16 bg-gradient-to-r from-amber-300 to-cyan-300 md:mt-6 md:w-24"></div>
         </motion.div>
 
         {loading ? (
           <LoadingSkeleton variant="cards" count={6} />
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:gap-8">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6 2xl:gap-8">
             {visibleProjects.length === 0 ? (
               <div className="col-span-full text-center text-gray-500">No projects found.</div>
             ) : (
@@ -78,10 +91,10 @@ export default function Projects() {
                   transition={reducedMotion ? undefined : { duration: 0.55, delay: index * 0.08 }}
                   whileHover={reducedMotion ? undefined : { y: -10 }}
                   viewport={{ once: true, amount: 0.25 }}
-                  className="group overflow-hidden rounded-3xl border border-cyan-100 bg-white shadow-lg transition-all duration-300 hover:shadow-2xl"
+                  className="group overflow-hidden rounded-3xl border border-cyan-300/15 bg-slate-950/60 text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-cyan-300/35 hover:shadow-[0_20px_60px_rgba(0,0,0,0.42)]"
                 >
                   {/* Project Image */}
-                  <div className="relative h-52 overflow-hidden bg-gradient-to-br from-cyan-100 to-emerald-100">
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-cyan-400/10 to-emerald-400/10 sm:h-52">
                     {project.image ? (
                       <Image 
                         src={project.image} 
@@ -102,7 +115,7 @@ export default function Projects() {
                       )}
                     </div>
                     <div className="absolute top-4 right-4">
-                      <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-700">
+                      <span className="rounded-full bg-slate-950/70 px-3 py-1 text-xs font-medium text-cyan-100">
                         {project.category || "Project"}
                       </span>
                     </div>
@@ -112,15 +125,15 @@ export default function Projects() {
                   </div>
 
                   {/* Project Content */}
-                  <div className="p-6">
-                    <h3 className="mb-2 text-xl font-bold text-slate-800 transition-colors group-hover:text-cyan-700">
+                  <div className="p-5 sm:p-6">
+                    <h3 className="mb-2 text-lg font-bold text-white transition-colors group-hover:text-cyan-200 sm:text-xl">
                       {project.title}
                     </h3>
-                    <p className="mb-4 leading-relaxed text-slate-600">{project.description}</p>
+                    <p className="mb-4 text-sm leading-relaxed text-slate-300 sm:text-base">{project.description}</p>
 
                     <div className="flex flex-wrap gap-2 mb-6">
                       {Array.isArray(project.tech) && project.tech.map((tech: string) => (
-                        <span key={tech} className="rounded-full bg-cyan-50 px-3 py-1 text-sm text-cyan-800">
+                          <span key={tech} className="rounded-full bg-cyan-300/10 px-3 py-1 text-xs text-cyan-100 sm:text-sm">
                           {tech}
                         </span>
                       ))}
@@ -129,7 +142,7 @@ export default function Projects() {
                     <div className="flex">
                       <Link
                         href={`/projects/${project.id}`}
-                        className="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-800 transition hover:bg-cyan-100"
+                        className="inline-flex items-center rounded-full border border-cyan-300/20 bg-white/5 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-white/10"
                       >
                         Details
                       </Link>
@@ -145,9 +158,9 @@ export default function Projects() {
           <div className="mt-10 text-center">
             <Link
               href="/projects"
-              className="inline-flex items-center rounded-full border border-cyan-200 bg-white px-6 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+              className="inline-flex items-center rounded-full border border-cyan-300/20 bg-white/5 px-6 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-white/10"
             >
-              View More Projects
+              {siteCopy.projectsViewMore}
             </Link>
           </div>
         ) : null}

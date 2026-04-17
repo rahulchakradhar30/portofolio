@@ -6,12 +6,15 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ExternalLink, Award, X } from "lucide-react";
 import type { Certification } from "@/app/lib/types";
+import { prioritizeFeatured } from "@/app/lib/contentOrdering";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
+import { getSiteCopy } from "@/app/lib/siteCopy";
 
 export default function Certifications() {
   const { reducedMotion } = useMotionPreferences();
   const [certifications, setCertifications] = useState<Certification[]>([]);
+  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
   const [loading, setLoading] = useState(true);
   const [selectedCert, setSelectedCert] = useState<Certification | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -19,12 +22,22 @@ export default function Certifications() {
   useEffect(() => {
     const fetchCertifications = async () => {
       try {
-        const res = await fetch('/api/admin/certifications');
-        if (res.ok) {
-          const data = await res.json();
+        const [certificationsRes, contentRes] = await Promise.all([
+          fetch('/api/admin/certifications'),
+          fetch('/api/admin/content'),
+        ]);
+        if (certificationsRes.ok) {
+          const data = await certificationsRes.json();
           setCertifications(data.certifications || []);
         } else {
           throw new Error('Failed to fetch certifications');
+        }
+
+        if (contentRes.ok) {
+          const data = await contentRes.json();
+          if (data.content) {
+            setSiteCopy(getSiteCopy(data.content));
+          }
         }
       } catch (error) {
         console.error('Error fetching certifications:', error);
@@ -39,9 +52,9 @@ export default function Certifications() {
 
   if (error) throw error;
 
-  const featuredCertifications = certifications.filter((cert) => cert.featured);
-  const visibleCertifications = (featuredCertifications.length > 0 ? featuredCertifications : certifications).slice(0, 6);
-  const hasMore = (featuredCertifications.length > 0 ? featuredCertifications.length : certifications.length) > visibleCertifications.length;
+  const orderedCertifications = prioritizeFeatured(certifications);
+  const visibleCertifications = orderedCertifications.slice(0, 6);
+  const hasMore = orderedCertifications.length > visibleCertifications.length;
 
   return (
     <section className="section-surface relative overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
@@ -53,21 +66,21 @@ export default function Certifications() {
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={reducedMotion ? undefined : { duration: 0.8 }}
           viewport={{ once: true, amount: 0.2 }}
-          className="text-center mb-16"
+          className="mb-12 text-center md:mb-16"
         >
-          <h2 className="mb-6 bg-gradient-to-r from-[#0d1b2d] to-[#0f766e] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
-            Certifications
+          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-emerald-100 to-amber-100 bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-6xl">
+            {siteCopy.certificationsHeading}
           </h2>
-          <p className="mx-auto max-w-2xl text-base text-slate-700 md:text-xl">
-            Professional certifications and credentials validating my expertise
+          <p className="mx-auto max-w-2xl px-2 text-sm text-slate-300 sm:text-base md:text-xl">
+            {siteCopy.certificationsSubtitle}
           </p>
-          <div className="mx-auto mt-6 h-1 w-24 bg-gradient-to-r from-amber-300 to-cyan-300"></div>
+          <div className="mx-auto mt-4 h-1 w-16 bg-gradient-to-r from-amber-300 to-cyan-300 md:mt-6 md:w-24"></div>
         </motion.div>
 
         {loading ? (
           <LoadingSkeleton variant="cards" count={6} />
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3 2xl:gap-8">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6 2xl:gap-8">
             {visibleCertifications.length === 0 ? (
               <div className="col-span-full text-center text-gray-500">No certifications found.</div>
             ) : (
@@ -79,11 +92,11 @@ export default function Certifications() {
                   transition={reducedMotion ? undefined : { duration: 0.55, delay: index * 0.08 }}
                   whileHover={reducedMotion ? undefined : { y: -10 }}
                   viewport={{ once: true, amount: 0.25 }}
-                  className="group cursor-pointer overflow-hidden rounded-3xl border border-cyan-100 bg-white shadow-lg transition-all duration-300 hover:shadow-2xl"
+                  className="group cursor-pointer overflow-hidden rounded-3xl border border-cyan-300/15 bg-slate-950/60 text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-cyan-300/35 hover:shadow-[0_20px_60px_rgba(0,0,0,0.42)]"
                   onClick={() => setSelectedCert(cert)}
                 >
                   {/* Certificate Image */}
-                  <div className="relative flex h-56 items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-100 to-emerald-100">
+                  <div className="relative flex h-56 items-center justify-center overflow-hidden bg-gradient-to-br from-cyan-400/10 to-emerald-400/10">
                     {cert.image ? (
                       <Image
                         src={cert.image}
@@ -95,7 +108,7 @@ export default function Certifications() {
                     ) : (
                       <div className="flex flex-col items-center justify-center">
                         <Award className="mb-2 h-16 w-16 text-cyan-500" />
-                        <span className="text-gray-500">Certificate</span>
+                        <span className="text-slate-300">Certificate</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -111,14 +124,14 @@ export default function Certifications() {
                   </div>
 
                   {/* Certificate Info */}
-                  <div className="p-6">
-                    <h3 className="mb-2 text-xl font-bold text-slate-800 transition-colors group-hover:text-cyan-700">
+                  <div className="p-5 sm:p-6">
+                    <h3 className="mb-2 text-lg font-bold text-white transition-colors group-hover:text-cyan-200 sm:text-xl">
                       {cert.title}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-1">
+                    <p className="mb-1 text-sm text-slate-300">
                       <span className="font-semibold">Issuer:</span> {cert.issuer}
                     </p>
-                    <p className="text-gray-500 text-sm mb-4">
+                    <p className="mb-4 text-sm text-slate-400">
                       Issued: {new Date(cert.issuedDate).toLocaleDateString()}
                     </p>
                     <button
@@ -141,9 +154,9 @@ export default function Certifications() {
           <div className="mt-10 text-center">
             <Link
               href="/certifications"
-              className="inline-flex items-center rounded-full border border-cyan-200 bg-white px-6 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-50"
+              className="inline-flex items-center rounded-full border border-cyan-300/20 bg-white/5 px-6 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-white/10"
             >
-              View More Certifications
+              {siteCopy.certificationsViewMore}
             </Link>
           </div>
         ) : null}
@@ -156,17 +169,17 @@ export default function Certifications() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setSelectedCert(null)}
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-3 sm:p-4"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl sm:rounded-3xl"
           >
-            <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800">{selectedCert.title}</h2>
+            <div className="sticky top-0 flex items-center justify-between border-b border-gray-200 bg-white p-4 sm:p-6">
+              <h2 className="pr-3 text-lg font-bold text-gray-800 sm:text-2xl">{selectedCert.title}</h2>
               <button
                 onClick={() => setSelectedCert(null)}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -175,7 +188,7 @@ export default function Certifications() {
               </button>
             </div>
 
-            <div className="p-8 space-y-6">
+            <div className="space-y-6 p-4 sm:p-8">
               {/* Certificate Image */}
               {selectedCert.image && (
                 <div className="relative flex h-64 w-full items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-cyan-100 to-emerald-100">
@@ -190,7 +203,7 @@ export default function Certifications() {
               )}
 
               {/* Basic Info */}
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid gap-4 md:grid-cols-2 md:gap-6">
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">Issuer</p>
                   <p className="text-lg font-semibold text-gray-800">{selectedCert.issuer}</p>

@@ -12,6 +12,30 @@ const logo = (name: string, slug: string, category: string, keywords: string[] =
   url: `https://cdn.simpleicons.org/${slug}`,
 });
 
+const svgLogo = (name: string, accent: string, subtitle: string, keywords: string[] = []): SkillLogoPreset => {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="${name}">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${accent}" />
+          <stop offset="100%" stop-color="#0f172a" />
+        </linearGradient>
+      </defs>
+      <rect width="128" height="128" rx="28" fill="url(#g)" />
+      <circle cx="64" cy="52" r="26" fill="rgba(255,255,255,0.14)" />
+      <path d="M36 80C44 70 53 66 64 66s20 4 28 14" stroke="rgba(255,255,255,0.85)" stroke-width="8" stroke-linecap="round" fill="none" />
+      <text x="64" y="58" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#ffffff">${subtitle}</text>
+    </svg>
+  `;
+
+  return {
+    name,
+    category: 'Personal',
+    keywords: [...keywords, 'personal', subtitle.toLowerCase(), name.toLowerCase()],
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`,
+  };
+};
+
 const CORE_LOGOS: SkillLogoPreset[] = [
   logo('React', 'react', 'Frontend'),
   logo('Next.js', 'nextdotjs', 'Frontend'),
@@ -141,6 +165,14 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('Pinterest', 'pinterest', 'Content'),
   logo('Discord', 'discord', 'Content'),
   logo('Slack', 'slack', 'Content'),
+  svgLogo('AI Thinking', 'AI', 'AI', ['ai', 'prompting', 'generative', 'assistant']),
+  svgLogo('Content Studio', 'CW', 'CW', ['content writing', 'writing', 'blogging', 'storytelling']),
+  svgLogo('Leadership Lens', 'LD', 'LD', ['leadership', 'team lead', 'mentoring', 'management']),
+  svgLogo('Creative Strategy', 'CS', 'CS', ['strategy', 'branding', 'planning', 'creative']),
+  svgLogo('Research Notes', 'RN', 'RN', ['research', 'analysis', 'learning', 'study']),
+  svgLogo('Voice Design', 'VD', 'VD', ['communication', 'public speaking', 'presentation']),
+  svgLogo('Problem Solving', 'PS', 'PS', ['problem solving', 'critical thinking', 'logic']),
+  svgLogo('Personal Growth', 'PG', 'PG', ['growth', 'learning', 'self improvement']),
   logo('Notion', 'notion', 'Productivity'),
   logo('Trello', 'trello', 'Productivity'),
   logo('Asana', 'asana', 'Productivity'),
@@ -513,7 +545,7 @@ export function resolveSkillIconUrl(iconValue?: string) {
   if (!iconValue) return '';
   const value = iconValue.trim();
   if (!value) return '';
-  if (value.startsWith('http://') || value.startsWith('https://')) return value;
+  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/')) return value;
   const mapped = SKILL_LOGO_LOOKUP[value.toLowerCase()];
   return mapped || '';
 }

@@ -12,20 +12,25 @@ interface Message {
   timestamp: Date;
 }
 
+const CHAT_STORAGE_KEY = 'portfolio-chat-messages-v1';
+
+const DEFAULT_MESSAGE: Message = {
+  id: '1',
+  role: 'assistant',
+  content: "Hi! 👋 I'm your AI assistant. Ask me anything about the portfolio, projects, web development, or any topic you'd like to know about!",
+  timestamp: new Date(),
+};
+
 export default function Chatbot() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      role: 'assistant',
-      content: 'Hi! 👋 I\'m your AI assistant. Ask me anything about the portfolio, projects, web development, or any topic you\'d like to know about!',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([DEFAULT_MESSAGE]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
+  const [lastPrompt, setLastPrompt] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -37,40 +42,111 @@ export default function Chatbot() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!input.trim() || loading) return;
+  useEffect(() => {
+    const saved = window.localStorage.getItem(CHAT_STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved) as Array<{
+        id: string;
+        role: 'user' | 'assistant';
+        content: string;
+        timestamp: string;
+      }>;
+
+      if (!Array.isArray(parsed) || parsed.length === 0) return;
+
+      const restored = parsed
+        .filter((message) => message && typeof message.content === 'string' && (message.role === 'user' || message.role === 'assistant'))
+        .map((message) => ({
+          ...message,
+          timestamp: new Date(message.timestamp),
+        }));
+
+      if (restored.length > 0) {
+        setMessages(restored.slice(-30));
+      }
+    } catch {
+      // Ignore invalid persisted chat payload.
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify(messages.map((message) => ({ ...message, timestamp: message.timestamp.toISOString() })))
+    );
+  }, [messages]);
+
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
+
+  const handleSendMessage = async (promptOverride?: string) => {
+    const prompt = (promptOverride ?? input).trim();
+    if (!prompt || loading) return;
+    if (!isOnline) {
+      setError('You appear to be offline. Reconnect and try again.');
+      return;
+    }
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user',
-      content: input,
+      content: prompt,
       timestamp: new Date(),
     };
 
+    const conversation = messages.concat(userMessage).slice(-14);
+
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
+    setError(null);
+    setLastPrompt(prompt);
     setLoading(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), 20000);
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: messages
-            .concat(userMessage)
+          messages: conversation
             .map((msg) => ({
               role: msg.role,
               content: msg.content,
             })),
         }),
+        signal: controller.signal,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get response');
+      window.clearTimeout(timeoutId);
+
+      const raw = await response.text();
+      let data: { content?: string; message?: string; error?: string } = {};
+      try {
+        data = raw ? JSON.parse(raw) as { content?: string; message?: string; error?: string } : {};
+      } catch {
+        data = {};
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response');
+      }
+
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
@@ -81,7 +157,12 @@ export default function Chatbot() {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error: unknown) {
       console.error('Chat error:', error);
-      const errorMessageText = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessageText = error instanceof Error
+        ? error.name === 'AbortError'
+          ? 'Request timed out'
+          : error.message
+        : 'Unknown error';
+      setError(errorMessageText);
       const errorMessage: Message = {
         id: `error-${Date.now()}`,
         role: 'assistant',
@@ -101,14 +182,9 @@ export default function Chatbot() {
   };
 
   const handleClearChat = () => {
-    setMessages([
-      {
-        id: '1',
-        role: 'assistant',
-        content: 'Hi! 👋 I\'m your AI assistant. Ask me anything about the portfolio, projects, web development, or any topic you\'d like to know about!',
-        timestamp: new Date(),
-      },
-    ]);
+    setMessages([{ ...DEFAULT_MESSAGE, timestamp: new Date() }]);
+    setError(null);
+    setLastPrompt('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -149,7 +225,9 @@ export default function Chatbot() {
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ duration: 0.3 }}
             className={`fixed ${
-              isMinimized ? 'bottom-24 right-6 w-96 h-16' : 'bottom-24 right-6 w-96 h-[600px]'
+              isMinimized
+                ? 'bottom-24 right-3 h-16 w-[calc(100vw-1.5rem)] sm:right-6 sm:w-96'
+                : 'inset-x-3 bottom-3 top-3 h-[calc(100vh-1.5rem)] w-auto sm:inset-auto sm:bottom-24 sm:right-6 sm:h-[600px] sm:w-96'
             } bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden transition-all duration-300`}
           >
             {/* Header */}
@@ -198,6 +276,21 @@ export default function Chatbot() {
             {/* Messages Container */}
             {!isMinimized && (
               <>
+                {(!isOnline || error) && (
+                  <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
+                    {!isOnline ? 'You are offline. Responses will resume once your connection is back.' : error}
+                    {isOnline && lastPrompt ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSendMessage(lastPrompt)}
+                        disabled={loading}
+                        className="ml-2 rounded bg-amber-100 px-2 py-0.5 font-medium text-amber-900 hover:bg-amber-200 disabled:opacity-60"
+                      >
+                        Retry
+                      </button>
+                    ) : null}
+                  </div>
+                )}
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-blue-50 to-white">
                   {messages.map((message) => (
                     <motion.div
@@ -265,16 +358,16 @@ export default function Chatbot() {
                       type="text"
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
+                      onKeyDown={handleKeyPress}
                       placeholder="Type a message..."
-                      disabled={loading}
+                      disabled={loading || !isOnline}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed text-sm"
                     />
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={handleSendMessage}
-                      disabled={loading || !input.trim()}
+                      onClick={() => handleSendMessage()}
+                      disabled={loading || !input.trim() || !isOnline}
                       className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition flex items-center gap-1"
                     >
                       {loading ? (

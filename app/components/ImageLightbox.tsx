@@ -60,7 +60,7 @@ export default function ImageLightbox({
         exit={{ opacity: 0 }}
         onClick={onClose}
       >
-        <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+        <div className="absolute right-3 top-3 z-20 flex max-w-[calc(100vw-1.5rem)] flex-wrap items-center justify-end gap-2 sm:right-4 sm:top-4">
           <button
             type="button"
             onClick={(event) => {
@@ -111,7 +111,7 @@ export default function ImageLightbox({
           <>
             <button
               type="button"
-              className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-2 text-white hover:bg-white/25"
+              className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-2 text-white hover:bg-white/25 sm:left-4"
               onClick={(event) => {
                 event.stopPropagation();
                 setIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length);
@@ -122,7 +122,7 @@ export default function ImageLightbox({
             </button>
             <button
               type="button"
-              className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-2 text-white hover:bg-white/25"
+              className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full bg-white/15 p-2 text-white hover:bg-white/25 sm:right-4"
               onClick={(event) => {
                 event.stopPropagation();
                 setIndex((prev) => (prev + 1) % safeImages.length);
@@ -143,7 +143,7 @@ export default function ImageLightbox({
             initial={{ opacity: 0.4, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.2 }}
-            className="relative h-[82vh] w-full max-w-[95vw]"
+            className="relative h-[72vh] w-full max-w-[95vw] sm:h-[82vh]"
             style={{ transform: `scale(${zoom})`, transformOrigin: "center center" }}
           >
             <Image
