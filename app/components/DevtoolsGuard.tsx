@@ -14,7 +14,7 @@ export function DevtoolsGuard() {
     initializeDevtoolsBlocker({
       enabled: process.env.NODE_ENV === 'production',
       checkInterval: 1000, // Check every second
-      methods: ['console', 'timing', 'size', 'toString', 'regex'],
+      methods: ['console', 'size', 'debugger'],
       logDetection: false,
       blockMessage: '🔒 Developer tools are disabled for security reasons. Please close DevTools to continue.',
     });

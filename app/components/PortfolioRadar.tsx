@@ -20,7 +20,7 @@ type RadarNode = {
   iconUrl?: string;
 };
 
-const ACCENTS = ["#22d3ee", "#34d399", "#fbbf24", "#a78bfa", "#fb7185", "#60a5fa"];
+const ACCENTS = ["#22d3ee", "#6366f1", "#38bdf8", "#818cf8", "#67e8f9", "#a5b4fc"];
 
 const DEFAULT_RADAR_CONFIG: RadarConfig = {
   enabledKinds: ["skill", "project", "certification"],
@@ -186,7 +186,7 @@ export default function PortfolioRadar() {
 
   return (
     <section className="relative overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.12)_0%,transparent_28%),radial-gradient(circle_at_80%_30%,rgba(52,211,153,0.12)_0%,transparent_26%),linear-gradient(180deg,#07101a_0%,#081621_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.12)_0%,transparent_28%),radial-gradient(circle_at_80%_30%,rgba(99,102,241,0.12)_0%,transparent_26%),linear-gradient(180deg,#0b0f19_0%,#08121d_100%)]" />
       <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:44px_44px]" />
       {!reducedMotion ? (
         <motion.div
@@ -208,7 +208,7 @@ export default function PortfolioRadar() {
             <Sparkles className="h-4 w-4" />
             {siteCopy.radarBadge}
           </div>
-          <h2 className="mt-5 bg-gradient-to-r from-cyan-200 via-emerald-200 to-amber-200 bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:text-6xl">
+          <h2 className="mt-5 bg-gradient-to-r from-cyan-200 via-white to-indigo-200 bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:text-6xl">
             {siteCopy.radarHeading}
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg">
@@ -232,7 +232,7 @@ export default function PortfolioRadar() {
                     <div className="mt-1 text-2xl font-black text-white">{stats.reduce((total, item) => total + item.value, 0)}</div>
                     <div className="text-xs text-slate-300/80">active portfolio signals</div>
                   </div>
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-300/40 to-emerald-300/35 blur-[1px]" />
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-300/40 to-indigo-300/35 blur-[1px]" />
                 </div>
 
                 {!loading ? (
@@ -285,7 +285,7 @@ export default function PortfolioRadar() {
               >
               <div className="absolute inset-4 rounded-[1.75rem] border border-cyan-200/10" />
               <div className="absolute inset-[12%] rounded-full border border-cyan-200/10" />
-              <div className="absolute inset-[24%] rounded-full border border-emerald-200/15" />
+              <div className="absolute inset-[24%] rounded-full border border-indigo-200/15" />
               <div className="absolute inset-[7%] rounded-full border border-white/5" style={{ transform: "translateZ(18px)" }} />
 
               <motion.div
@@ -294,15 +294,15 @@ export default function PortfolioRadar() {
                 className="absolute inset-0"
               >
                 <div className="absolute left-1/2 top-[9%] h-[82%] w-[1px] bg-gradient-to-b from-cyan-200/0 via-cyan-200/30 to-cyan-200/0" />
-                <div className="absolute left-[9%] top-1/2 h-[1px] w-[82%] bg-gradient-to-r from-emerald-200/0 via-emerald-200/30 to-emerald-200/0" />
+                <div className="absolute left-[9%] top-1/2 h-[1px] w-[82%] bg-gradient-to-r from-indigo-200/0 via-indigo-200/30 to-indigo-200/0" />
                 <div className="absolute left-1/2 top-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5" />
               </motion.div>
 
               <div className="absolute left-1/2 top-1/2 flex h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-200/20 bg-slate-950/60 text-center shadow-[0_0_80px_rgba(34,211,238,0.2)] backdrop-blur-md">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">Signal Core</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">Interactive Work Map</div>
                   <div className="mt-2 text-2xl font-black text-white">{stats.reduce((total, item) => total + item.value, 0)}</div>
-                  <div className="mt-1 text-xs text-slate-300/80">active portfolio signals</div>
+                  <div className="mt-1 text-xs text-slate-300/80">connected portfolio signals</div>
                 </div>
               </div>
 
@@ -383,7 +383,7 @@ export default function PortfolioRadar() {
                 Live portfolio metrics
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
-                {stats.map((stat, index) => (
+                {stats.map((stat) => (
                   <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
                     <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300/70">{stat.label}</div>
                     <div className="mt-2 text-3xl font-black text-white">{stat.value}</div>
@@ -391,9 +391,9 @@ export default function PortfolioRadar() {
                 ))}
               </div>
 
-              <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-r from-cyan-500/10 via-white/5 to-emerald-500/10 p-4">
+              <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-r from-cyan-500/10 via-white/5 to-indigo-500/10 p-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <Star className="h-4 w-4 text-amber-200" />
+                  <Star className="h-4 w-4 text-cyan-200" />
                   {siteCopy.radarFeatureTitle}
                 </div>
                 <p className="mt-2 text-sm leading-relaxed text-slate-200/80">

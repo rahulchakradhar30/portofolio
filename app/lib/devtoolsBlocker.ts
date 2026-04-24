@@ -8,7 +8,7 @@ export interface DevtoolsConfig {
   enabled: boolean;
   blockMessage: string;
   checkInterval: number;
-  methods: ('console' | 'timing' | 'size' | 'toString' | 'regex')[];
+  methods: ('console' | 'timing' | 'size' | 'debugger')[];
   logDetection: boolean;
 }
 
@@ -16,7 +16,7 @@ const DEFAULT_CONFIG: DevtoolsConfig = {
   enabled: typeof window !== 'undefined' && process.env.NODE_ENV === 'production',
   blockMessage: '🔒 Developer tools are disabled for security reasons. Please close DevTools to continue.',
   checkInterval: 500,
-  methods: ['console', 'timing', 'size', 'toString', 'regex'],
+  methods: ['console', 'size', 'debugger'],
   logDetection: false,
 };
 
@@ -82,22 +82,7 @@ function detectViaWindowSize(): boolean {
 }
 
 /**
- * Method 4: Object toString Override Detection
- * Checks if toString has been overridden (indicator of devtools manipulation)
- */
-function detectViaToString(): boolean {
-  try {
-    const isDebugging = /^function\s*constructor\s*\(\)\s*{\s*\[native code\]\s*}/.test(
-      Function.prototype.constructor.toString()
-    );
-    return !isDebugging; // If native code is missing, devtools is likely open
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Method 5: Debugger Statement Detection
+ * Method 4: Debugger Statement Detection
  * Check for breakpoints or debugger statement interruption
  */
 function detectViaDebuggerStatement(): boolean {
@@ -115,7 +100,7 @@ function detectViaDebuggerStatement(): boolean {
 }
 
 /**
- * Method 6: Error Stack Analysis
+ * Method 5: Error Stack Analysis
  * Analyzes error stack for debugging indicators
  */
 function detectViaErrorStack(): boolean {
@@ -145,36 +130,16 @@ function detectViaErrorStack(): boolean {
 function checkDevtoolsOpen(config: DevtoolsConfig): boolean {
   if (!config.enabled) return false;
 
-  let detectionResult = false;
+  const detections = {
+    console: config.methods.includes('console') ? detectViaConsole() : false,
+    timing: config.methods.includes('timing') ? detectViaTiming() : false,
+    size: config.methods.includes('size') ? detectViaWindowSize() : false,
+    debugger: config.methods.includes('debugger') ? detectViaDebuggerStatement() : false,
+  };
 
-  // Try each detection method
-  for (const method of config.methods) {
-    try {
-      switch (method) {
-        case 'console':
-          detectionResult ||= detectViaConsole();
-          break;
-        case 'timing':
-          detectionResult ||= detectViaTiming();
-          break;
-        case 'size':
-          detectionResult ||= detectViaWindowSize();
-          break;
-        case 'toString':
-          detectionResult ||= detectViaToString();
-          break;
-        case 'regex':
-          detectionResult ||= detectViaErrorStack();
-          break;
-      }
-    } catch (error) {
-      if (config.logDetection) {
-        console.error(`Error in ${method} detection:`, error);
-      }
-    }
-  }
-
-  return detectionResult;
+  // Require a stronger signal than window size alone to avoid false positives
+  // from browser chrome, responsive layouts, and mobile viewport variations.
+  return detections.debugger || (detections.size && (detections.console || detections.timing));
 }
 
 /**

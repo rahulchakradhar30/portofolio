@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Command, Search, Sparkles } from "lucide-react";
@@ -18,6 +19,11 @@ export default function CommandPalette() {
   const [query, setQuery] = useState("");
   const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
 
+  const closePalette = useCallback(() => {
+    setOpen(false);
+    setQuery("");
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -26,7 +32,7 @@ export default function CommandPalette() {
       }
 
       if (event.key === "Escape") {
-        setOpen(false);
+        closePalette();
       }
     };
 
@@ -39,7 +45,7 @@ export default function CommandPalette() {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("open-command-palette", onOpenEvent);
     };
-  }, []);
+  }, [closePalette]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -59,12 +65,6 @@ export default function CommandPalette() {
 
     loadData();
   }, [router]);
-
-  useEffect(() => {
-    if (!open) {
-      setQuery("");
-    }
-  }, [open]);
 
   const staticActions = useMemo<PaletteAction[]>(
     () => [
@@ -142,7 +142,7 @@ export default function CommandPalette() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[90] bg-slate-950/70 backdrop-blur-md"
-          onClick={() => setOpen(false)}
+          onClick={closePalette}
         >
           <motion.div
             initial={{ opacity: 0, y: -24, scale: 0.98 }}
@@ -168,7 +168,7 @@ export default function CommandPalette() {
 
             <div className="mt-3 max-h-[56vh] overflow-y-auto rounded-2xl border border-white/10 bg-black/20 p-2">
               {filtered.length === 0 ? (
-                <div className="px-3 py-5 text-center text-sm text-slate-400">No actions found for "{query}"</div>
+                <div className="px-3 py-5 text-center text-sm text-slate-400">No actions found for &quot;{query}&quot;</div>
               ) : (
                 filtered.map((action) => (
                   <button

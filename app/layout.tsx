@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Sora, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Chatbot from "./components/Chatbot";
 import CookieConsent from "./components/CookieConsent";
@@ -7,19 +6,9 @@ import { MotionProvider } from "./components/MotionProvider";
 import AppShell from "./components/AppShell";
 import DevtoolsGuard from "./components/DevtoolsGuard";
 
-const sora = Sora({
-  variable: "--font-sora",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "PEREPOGU RAHUL CHAKRADHAR - AI Enthusiast | Tech Creator | Director",
-  description: "Portfolio of PEREPOGU RAHUL CHAKRADHAR - AI enthusiast, tech learner, content creator, and director. Explore innovative projects in AI, IoT, filmmaking, and entrepreneurship.",
+  title: "Rahul Chakradhar | AI Systems, Storytelling & Impact",
+  description: "Premium portfolio for Rahul Chakradhar, focused on AI-powered systems, product thinking, storytelling, and high-trust digital experiences.",
 };
 
 export default function RootLayout({
@@ -28,11 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${sora.variable} ${spaceGrotesk.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <MotionProvider>
           <DevtoolsGuard />
           <AppShell>{children}</AppShell>

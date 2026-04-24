@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Send, Camera, Briefcase, Code } from "lucide-react";
+import { Camera, Code2, Link2, Mail, MapPin, Send, Clock3, ShieldCheck, Briefcase } from "lucide-react";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
@@ -53,10 +53,11 @@ export default function Contact() {
         setLoadingContact(false);
       }
     };
+
     fetchContactData();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -64,7 +65,7 @@ export default function Contact() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus(null);
@@ -119,10 +120,7 @@ export default function Contact() {
 
   return (
     <section className="section-soft relative overflow-hidden px-4 py-16 md:py-24" id="contact">
-      <div className="absolute inset-0 opacity-5 md:opacity-10">
-        <div className="absolute top-10 md:top-20 right-10 md:right-20 w-24 md:w-32 h-24 md:h-32 bg-green-200 rounded-full blur-xl"></div>
-        <div className="absolute bottom-10 md:bottom-20 left-10 md:left-20 w-28 md:w-40 h-28 md:h-40 bg-violet-200 rounded-full blur-xl"></div>
-      </div>
+      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:46px_46px]" />
 
       <div className="relative z-10 mx-auto max-w-[1600px] px-0 sm:px-2 lg:px-6">
         <motion.div
@@ -130,95 +128,116 @@ export default function Contact() {
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
           transition={reducedMotion ? undefined : { duration: 0.8 }}
           viewport={{ once: true, amount: 0.2 }}
-          className="text-center mb-12 md:mb-16"
+          className="mb-12 text-center md:mb-16"
         >
-          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-emerald-100 to-amber-100 bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-5xl lg:text-6xl">
+          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-100">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            Fast response, clear scope
+          </div>
+          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-white to-indigo-200 bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-5xl lg:text-6xl">
             {siteCopy.contactHeading}
           </h2>
-          <p className="mx-auto max-w-2xl px-2 text-sm text-slate-300 sm:text-base md:text-xl">
+          <p className="mx-auto max-w-2xl px-2 text-sm leading-relaxed text-slate-300 sm:text-base md:text-xl">
             {siteCopy.contactSubtitle}
           </p>
-          <div className="mx-auto mt-4 h-1 w-16 bg-gradient-to-r from-amber-300 to-cyan-300 md:mt-6 md:w-24"></div>
+          <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-cyan-300 to-indigo-300 md:mt-6 md:w-24" />
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, x: -50 }}
             whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.8 }}
             viewport={{ once: true, amount: 0.2 }}
-            className="space-y-6 md:space-y-8"
+            className="space-y-5 md:space-y-6"
           >
-            <div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6">{siteCopy.contactIntroTitle}</h3>
-              <p className="text-base md:text-lg text-slate-300 leading-relaxed mb-6 md:mb-8">
+            <div className="premium-card rounded-[1.75rem] p-5 sm:p-6">
+              <h3 className="text-2xl font-bold text-white md:text-3xl">{siteCopy.contactIntroTitle}</h3>
+              <p className="mt-4 text-base leading-relaxed text-slate-300 md:text-lg">
                 {siteCopy.contactIntroBody}
               </p>
             </div>
 
-            <div className="space-y-4 md:space-y-6">
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                { icon: Clock3, label: "Response", value: "1-2 business days" },
+                { icon: Briefcase, label: "Best for", value: "Product briefs" },
+                { icon: ShieldCheck, label: "Approach", value: "Clear scope first" },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="premium-card rounded-2xl p-4">
+                    <Icon className="h-5 w-5 text-cyan-200" />
+                    <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">{item.label}</p>
+                    <p className="mt-1 text-sm font-medium text-slate-200">{item.value}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
               <motion.div
-                whileHover={reducedMotion ? undefined : { scale: 1.02 }}
-                className="flex items-center rounded-xl border border-cyan-300/15 bg-slate-950/60 p-3 shadow-md transition-shadow hover:shadow-lg md:rounded-2xl md:p-4 backdrop-blur-xl"
+                whileHover={reducedMotion ? undefined : { scale: 1.01 }}
+                className="premium-card flex items-center gap-3 rounded-2xl p-4"
               >
-                <div className="mr-3 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-emerald-400 md:mr-4 md:h-12 md:w-12 md:rounded-xl">
-                  <Mail className="w-5 md:w-6 h-5 md:h-6 text-white" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,rgba(34,211,238,0.22)_0%,rgba(99,102,241,0.22)_100%)]">
+                  <Mail className="h-5 w-5 text-white" />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-white text-sm md:text-base">Email</div>
-                  <div className="text-slate-300 text-xs md:text-sm truncate">{contactData.email}</div>
+                  <div className="text-sm font-semibold text-white">Email</div>
+                  <div className="truncate text-sm text-slate-300">{contactData.email}</div>
                 </div>
               </motion.div>
 
               <motion.div
-                whileHover={reducedMotion ? undefined : { scale: 1.02 }}
-                className="flex items-center rounded-xl border border-cyan-300/15 bg-slate-950/60 p-3 shadow-md transition-shadow hover:shadow-lg md:rounded-2xl md:p-4 backdrop-blur-xl"
+                whileHover={reducedMotion ? undefined : { scale: 1.01 }}
+                className="premium-card flex items-center gap-3 rounded-2xl p-4"
               >
-                <div className="mr-3 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-amber-400 to-orange-400 md:mr-4 md:h-12 md:w-12 md:rounded-xl">
-                  <MapPin className="w-5 md:w-6 h-5 md:h-6 text-white" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,rgba(34,211,238,0.22)_0%,rgba(99,102,241,0.22)_100%)]">
+                  <MapPin className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <div className="font-semibold text-white text-sm md:text-base">Location</div>
-                  <div className="text-slate-300 text-xs md:text-sm">{contactData.location}</div>
+                  <div className="text-sm font-semibold text-white">Location</div>
+                  <div className="text-sm text-slate-300">{contactData.location}</div>
                 </div>
               </motion.div>
             </div>
 
-            <div className="pt-6 md:pt-8">
-              <p className="text-slate-300 text-sm md:text-base mb-4">{siteCopy.contactSocialPrompt}</p>
-              <div className="flex gap-3 md:gap-4">
+            <div className="premium-card rounded-[1.75rem] p-5 sm:p-6">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400">{siteCopy.contactSocialPrompt}</p>
+              <div className="mt-4 flex flex-wrap gap-3">
                 <motion.a
-                  whileHover={reducedMotion ? undefined : { scale: 1.1, y: -2 }}
-                  whileTap={reducedMotion ? undefined : { scale: 0.9 }}
+                  whileHover={reducedMotion ? undefined : { scale: 1.05, y: -2 }}
+                  whileTap={reducedMotion ? undefined : { scale: 0.95 }}
                   href={contactData.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-lg transition-all duration-300 hover:shadow-xl md:h-12 md:w-12 md:rounded-xl"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
                   title="Instagram"
                 >
-                  <Camera className="w-5 md:w-6 h-5 md:h-6" />
+                  <Camera className="h-5 w-5" />
                 </motion.a>
                 <motion.a
-                  whileHover={reducedMotion ? undefined : { scale: 1.1, y: -2 }}
-                  whileTap={reducedMotion ? undefined : { scale: 0.9 }}
+                  whileHover={reducedMotion ? undefined : { scale: 1.05, y: -2 }}
+                  whileTap={reducedMotion ? undefined : { scale: 0.95 }}
                   href={contactData.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg transition-all duration-300 hover:shadow-xl md:h-12 md:w-12 md:rounded-xl"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
                   title="LinkedIn"
                 >
-                  <Briefcase className="w-5 md:w-6 h-5 md:h-6" />
+                  <Link2 className="h-5 w-5" />
                 </motion.a>
                 <motion.a
-                  whileHover={reducedMotion ? undefined : { scale: 1.1, y: -2 }}
-                  whileTap={reducedMotion ? undefined : { scale: 0.9 }}
+                  whileHover={reducedMotion ? undefined : { scale: 1.05, y: -2 }}
+                  whileTap={reducedMotion ? undefined : { scale: 0.95 }}
                   href={contactData.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 text-white shadow-lg transition-all duration-300 hover:shadow-xl md:h-12 md:w-12 md:rounded-xl"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
                   title="GitHub"
                 >
-                  <Code className="w-5 md:w-6 h-5 md:h-6" />
+                  <Code2 className="h-5 w-5" />
                 </motion.a>
               </div>
             </div>
@@ -230,28 +249,31 @@ export default function Contact() {
             transition={reducedMotion ? undefined : { duration: 0.8 }}
             viewport={{ once: true, amount: 0.2 }}
             onSubmit={handleSubmit}
-            className="rounded-2xl border border-cyan-300/15 bg-slate-950/60 p-4 text-white shadow-[0_20px_50px_rgba(0,0,0,0.25)] md:rounded-3xl md:p-8 md:shadow-[0_24px_70px_rgba(0,0,0,0.32)] backdrop-blur-xl"
+            className="premium-card rounded-[1.75rem] p-5 text-white md:p-8"
           >
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">{siteCopy.contactFormTitle}</h3>
+            <h3 className="text-xl font-bold text-white md:text-2xl">{siteCopy.contactFormTitle}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-slate-300">
+              Share the scope, goals, and timeline. I’ll reply with a clear next step.
+            </p>
 
             {submitStatus && (
               <motion.div
                 initial={reducedMotion ? false : { opacity: 0, y: -10 }}
                 animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                className={`p-3 md:p-4 rounded-lg md:rounded-xl mb-4 md:mb-6 text-sm md:text-base ${
+                className={`mt-5 rounded-2xl border p-4 text-sm md:text-base ${
                   submitStatus.type === "success"
-                    ? "bg-emerald-400/10 text-emerald-200 border border-emerald-300/20"
-                    : "bg-rose-400/10 text-rose-200 border border-rose-300/20"
+                    ? "border-cyan-300/20 bg-cyan-300/8 text-cyan-100"
+                    : "border-rose-300/20 bg-rose-300/8 text-rose-100"
                 }`}
               >
                 {submitStatus.message}
               </motion.div>
             )}
 
-            <div className="space-y-4 md:space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
+            <div className="mt-6 space-y-4 md:space-y-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="firstName" className="block text-xs md:text-sm font-medium text-slate-200 mb-2">
+                  <label htmlFor="firstName" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                     First Name
                   </label>
                   <input
@@ -260,12 +282,12 @@ export default function Contact() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-lg border border-white/10 bg-slate-950/70 px-3 py-2 text-sm text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20 md:rounded-xl md:px-4 md:py-3 md:text-base"
+                    className="w-full rounded-2xl border border-white/10 bg-[#0b0f19] px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-cyan-300/40 focus:outline-none focus:ring-2 focus:ring-cyan-200/20"
                     placeholder="John"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="block text-xs md:text-sm font-medium text-slate-200 mb-2">
+                  <label htmlFor="lastName" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                     Last Name
                   </label>
                   <input
@@ -274,14 +296,14 @@ export default function Contact() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
+                    className="w-full rounded-2xl border border-white/10 bg-[#0b0f19] px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-cyan-300/40 focus:outline-none focus:ring-2 focus:ring-cyan-200/20"
                     placeholder="Doe"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
+                <label htmlFor="email" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Email
                 </label>
                 <input
@@ -290,13 +312,13 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
+                  className="w-full rounded-2xl border border-white/10 bg-[#0b0f19] px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-cyan-300/40 focus:outline-none focus:ring-2 focus:ring-cyan-200/20"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-slate-200 mb-2">
+                <label htmlFor="subject" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Subject
                 </label>
                 <input
@@ -305,13 +327,13 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
+                  className="w-full rounded-2xl border border-white/10 bg-[#0b0f19] px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-cyan-300/40 focus:outline-none focus:ring-2 focus:ring-cyan-200/20"
                   placeholder="Project Discussion"
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="block text-sm font-medium text-slate-200 mb-2">
+                <label htmlFor="message" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Message
                 </label>
                 <textarea
@@ -320,9 +342,14 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleInputChange}
                   required
-                  className="w-full resize-none rounded-xl border border-white/10 bg-slate-950/70 px-4 py-3 text-white transition-all duration-200 placeholder-slate-500 focus:border-cyan-300/40 focus:bg-slate-950/90 focus:ring-2 focus:ring-cyan-200/20"
+                  className="w-full resize-none rounded-2xl border border-white/10 bg-[#0b0f19] px-4 py-3 text-sm text-white placeholder-slate-500 transition focus:border-cyan-300/40 focus:outline-none focus:ring-2 focus:ring-cyan-200/20"
                   placeholder="Tell me about your project..."
                 ></textarea>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-slate-300">
+                <ShieldCheck className="h-4 w-4 text-cyan-200" />
+                Your message goes straight to the inbox. No noise, no clutter.
               </div>
 
               <motion.button
@@ -330,9 +357,9 @@ export default function Contact() {
                 whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                 type="submit"
                 disabled={isSubmitting}
-                className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 px-6 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center rounded-2xl bg-cyan-300 px-6 py-4 font-semibold text-[#0b0f19] shadow-[0_18px_36px_rgba(34,211,238,0.18)] transition-all duration-300 hover:shadow-[0_22px_48px_rgba(34,211,238,0.24)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Send className="w-5 h-5 mr-2" />
+                <Send className="mr-2 h-5 w-5" />
                 {isSubmitting ? "Sending..." : "Send Message"}
               </motion.button>
             </div>

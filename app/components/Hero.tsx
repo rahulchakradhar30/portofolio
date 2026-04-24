@@ -3,15 +3,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
+import { ArrowRight, Sparkles, Layers3, ShieldCheck } from "lucide-react";
 
 const DEFAULT_HERO_DATA = {
-  heroTitle: "RAHUL CHAKRADHAR PEREPOGU",
-  heroSubtitle: "AI ENTHUSIAST | TECH LEARNER | CONTENT CREATOR | DIRECTOR",
-  heroTagline: "Student at GITAM University, Bengaluru.",
+  heroTitle: "Rahul Chakradhar",
+  heroSubtitle: "I build AI-powered digital systems that combine technology, storytelling, and real-world impact.",
+  heroTagline: "Focused on scalable platforms, intelligent tools, and impactful digital experiences.",
   profileImage: "",
   bannerImage: "",
   resumeUrl: "",
@@ -65,31 +65,25 @@ export default function Hero() {
   if (loading) return <LoadingSkeleton variant="hero" />;
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_10%,rgba(34,211,238,0.18)_0%,transparent_35%),radial-gradient(circle_at_85%_20%,rgba(251,191,36,0.14)_0%,transparent_32%),linear-gradient(140deg,#07101a_5%,#0b1c2c_52%,#07101a_100%)] pt-24 pb-16 sm:pt-28 lg:pt-36 lg:pb-20">
-      <div className="pointer-events-none absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:48px_48px]"></div>
+    <section className="relative min-h-screen overflow-hidden pt-24 pb-16 sm:pt-28 lg:pt-36 lg:pb-20">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_12%,rgba(34,211,238,0.12)_0%,transparent_28%),radial-gradient(circle_at_82%_18%,rgba(99,102,241,0.1)_0%,transparent_26%),linear-gradient(180deg,#0b0f19_0%,#090d16_100%)]" />
+      <div className="absolute inset-0 opacity-[0.14] [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:52px_52px]" />
 
-      {heroData.bannerImage ? (
-        <div className="absolute inset-0 opacity-20">
-          <Image src={heroData.bannerImage} alt="Hero backdrop" fill className="object-cover" priority />
-        </div>
-      ) : null}
+      {heroData.bannerImage ? <div className="absolute inset-0 opacity-[0.08]"><Image src={heroData.bannerImage} alt="Hero backdrop" fill className="object-cover" priority /></div> : null}
 
-      {/* Animated gradient orbs for premium feel */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-full blur-3xl opacity-0 animate-pulse"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-l from-violet-500/10 to-pink-500/10 rounded-full blur-3xl opacity-0 animate-pulse" style={{ animationDelay: "1s" }}></div>
-
-      <div className="relative z-10 mx-auto grid max-w-[1600px] grid-cols-1 items-center gap-10 px-4 sm:px-6 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-14 2xl:px-24">
+      <div className="relative z-10 mx-auto grid max-w-[1600px] grid-cols-1 items-center gap-10 px-4 sm:px-6 md:px-10 lg:grid-cols-[1.08fr_0.92fr] lg:px-14 2xl:px-24">
         <div className="order-2 lg:order-1">
           <motion.span
             initial={reducedMotion ? false : { opacity: 0, y: 24 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.6 }}
-            className="inline-block rounded-full border border-cyan-200/30 bg-cyan-100/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100 backdrop-blur-sm hover:border-cyan-200/50 hover:bg-cyan-100/15 transition-all"
+            className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/8 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100 backdrop-blur-sm"
           >
+            <Sparkles className="h-3.5 w-3.5" />
             {siteCopy.heroBadge}
           </motion.span>
 
-          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100/80 backdrop-blur-sm hover:border-white/20 hover:bg-white/10 transition-all">
+          <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200/80 backdrop-blur-sm">
             {siteCopy.heroEditorialBadge}
           </div>
 
@@ -97,7 +91,7 @@ export default function Hero() {
             initial={reducedMotion ? false : { opacity: 0, y: 34 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.75, delay: 0.1 }}
-            className="mt-6 text-4xl font-black leading-[1.04] text-white sm:text-5xl md:text-6xl xl:text-7xl 2xl:text-8xl drop-shadow-lg"
+            className="mt-6 max-w-4xl text-4xl font-black leading-[1.02] text-white sm:text-5xl md:text-6xl xl:text-7xl 2xl:text-8xl"
           >
             {heroData.heroTitle}
           </motion.h1>
@@ -106,7 +100,7 @@ export default function Hero() {
             initial={reducedMotion ? false : { opacity: 0, y: 30 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.7, delay: 0.2 }}
-            className="mt-5 text-lg font-semibold text-cyan-100/90 sm:text-xl md:text-2xl lg:text-2xl drop-shadow-md"
+            className="mt-6 max-w-3xl text-lg font-semibold leading-relaxed text-cyan-100 sm:text-xl md:text-2xl"
           >
             {heroData.heroSubtitle}
           </motion.p>
@@ -115,36 +109,31 @@ export default function Hero() {
             initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.6, delay: 0.3 }}
-            className="mt-3 text-base font-medium text-cyan-200/70 sm:text-lg md:text-xl"
+            className="mt-4 max-w-2xl text-base font-medium leading-relaxed text-slate-300 sm:text-lg md:text-xl"
           >
             {heroData.heroTagline}
           </motion.p>
 
-          {/* CTA Buttons */}
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 24 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.6, delay: 0.4 }}
-            className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center md:mt-12"
+            className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center md:mt-12"
           >
             <a
               href="#projects"
-              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 px-8 py-4 font-bold text-slate-950 transition-all hover:shadow-[0_20px_40px_rgba(34,211,238,0.4)] hover:scale-105 active:scale-95 group"
+              className="premium-button-primary group inline-flex items-center justify-center rounded-full px-8 py-4 font-semibold transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
             >
               <span>{siteCopy.heroCTA1}</span>
-              <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
 
             <a
               href="#contact"
-              className="inline-flex items-center justify-center rounded-full border-2 border-cyan-300/50 px-8 py-4 font-bold text-cyan-100 transition-all hover:bg-cyan-500/10 hover:border-cyan-300 active:scale-95 group backdrop-blur-sm"
+              className="premium-button-secondary group inline-flex items-center justify-center rounded-full px-8 py-4 font-semibold transition-all duration-300 hover:border-cyan-300/30 hover:bg-white/8 active:scale-[0.98]"
             >
               <span>{siteCopy.heroCTA2}</span>
-              <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
 
             {heroData.resumeUrl && (
@@ -152,30 +141,27 @@ export default function Hero() {
                 href={heroData.resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-full border border-white/20 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10 backdrop-blur-sm"
+                className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-slate-100 transition-all hover:border-cyan-300/25 hover:bg-white/10 backdrop-blur-sm"
               >
-                📄 Resume
+                Resume
               </a>
             )}
           </motion.div>
 
-          {/* Social Links */}
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, y: 20 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.6, delay: 0.5 }}
-            className="mt-10 flex items-center gap-6"
+            className="mt-10 flex flex-wrap items-center gap-3"
           >
             {heroData.github && (
               <a
                 href={heroData.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm font-semibold text-cyan-100/70 hover:text-cyan-100 transition-colors group"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-cyan-300/30 hover:bg-white/10"
               >
-                <span className="h-10 w-10 rounded-full border border-cyan-300/20 flex items-center justify-center group-hover:border-cyan-300/50 group-hover:bg-cyan-500/10 transition-all">
-                  GitHub
-                </span>
+                GitHub
               </a>
             )}
             {heroData.linkedin && (
@@ -183,11 +169,9 @@ export default function Hero() {
                 href={heroData.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm font-semibold text-cyan-100/70 hover:text-cyan-100 transition-colors group"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-cyan-300/30 hover:bg-white/10"
               >
-                <span className="h-10 w-10 rounded-full border border-cyan-300/20 flex items-center justify-center group-hover:border-cyan-300/50 group-hover:bg-cyan-500/10 transition-all">
-                  LinkedIn
-                </span>
+                LinkedIn
               </a>
             )}
             {heroData.instagram && (
@@ -195,14 +179,24 @@ export default function Hero() {
                 href={heroData.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm font-semibold text-cyan-100/70 hover:text-cyan-100 transition-colors group"
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-cyan-300/30 hover:bg-white/10"
               >
-                <span className="h-10 w-10 rounded-full border border-cyan-300/20 flex items-center justify-center group-hover:border-cyan-300/50 group-hover:bg-cyan-500/10 transition-all">
-                  IG
-                </span>
+                Instagram
               </a>
             )}
           </motion.div>
+
+          <div className="mt-10 grid gap-3 sm:grid-cols-3">
+            {siteCopy.heroSpotlights.map((item) => (
+              <div key={item.title} className="premium-card rounded-3xl p-4">
+                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+                  <Layers3 className="h-3.5 w-3.5" />
+                  {item.title}
+                </div>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{item.copy}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <motion.div
@@ -211,35 +205,42 @@ export default function Hero() {
           transition={reducedMotion ? undefined : { duration: 0.85, delay: 0.2 }}
           className="order-1 flex justify-center lg:order-2 lg:justify-end"
         >
-          <div className="relative h-[290px] w-[290px] sm:h-[360px] sm:w-[360px] xl:h-[430px] xl:w-[430px]">
+          <div className="relative h-[300px] w-[300px] sm:h-[380px] sm:w-[380px] xl:h-[460px] xl:w-[460px]">
+            <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.28)_0%,rgba(34,211,238,0.08)_34%,transparent_70%)] blur-2xl" />
             <motion.div
-              className="absolute inset-0 rounded-full border-2 border-emerald-200/70"
+              className="absolute inset-[6%] rounded-full border border-cyan-300/30"
               animate={reducedMotion ? undefined : { rotate: 360 }}
-              transition={reducedMotion ? undefined : { duration: 14, ease: 'linear', repeat: Infinity }}
+              transition={reducedMotion ? undefined : { duration: 18, ease: "linear", repeat: Infinity }}
             />
             <motion.div
-              className="absolute inset-[10%] rounded-full border border-cyan-200/60"
+              className="absolute inset-[14%] rounded-full border border-white/10"
               animate={reducedMotion ? undefined : { rotate: -360 }}
-              transition={reducedMotion ? undefined : { duration: 18, ease: 'linear', repeat: Infinity }}
+              transition={reducedMotion ? undefined : { duration: 24, ease: "linear", repeat: Infinity }}
             />
             <motion.div
               animate={reducedMotion ? undefined : { y: [0, -10, 0] }}
-              transition={reducedMotion ? undefined : { duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-[18%] overflow-hidden rounded-full border-4 border-white/30 bg-gradient-to-br from-slate-200 to-slate-400 shadow-[0_20px_45px_rgba(0,0,0,0.38)]"
+              transition={reducedMotion ? undefined : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute inset-[20%] overflow-hidden rounded-full border border-white/10 bg-[linear-gradient(145deg,rgba(17,24,39,0.95)_0%,rgba(15,23,42,0.9)_100%)] shadow-[0_24px_70px_rgba(0,0,0,0.4)]"
             >
               {heroData.profileImage ? (
                 <Image src={heroData.profileImage} alt="Profile photo" fill className="object-cover" priority />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_28%_24%,#dcfce7_0%,#67e8f9_35%,#0f172a_100%)]">
-                  <span className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-800">Add Profile Image</span>
+                <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_30%_24%,rgba(34,211,238,0.2)_0%,rgba(99,102,241,0.22)_38%,#0f172a_100%)]">
+                  <span className="px-6 text-center text-sm font-semibold uppercase tracking-[0.18em] text-slate-100">
+                    Add Profile Image
+                  </span>
                 </div>
               )}
             </motion.div>
-            <div className="absolute -right-5 top-14 h-12 w-12 rounded-full bg-cyan-300/80 blur-[1px] sm:h-16 sm:w-16" />
-            <div className="absolute -left-2 bottom-8 h-10 w-10 rounded-full bg-amber-300/80 blur-[1px] sm:h-14 sm:w-14" />
-            <div className="absolute -bottom-3 left-6 right-6 rounded-2xl border border-white/10 bg-slate-950/55 p-4 text-center backdrop-blur-md sm:-bottom-6 sm:left-10 sm:right-10">
-              <div className="text-[10px] font-semibold uppercase tracking-[0.28em] text-cyan-200/80">{siteCopy.heroCurrentFocusLabel}</div>
-              <div className="mt-1 text-sm font-bold text-white">{siteCopy.heroCurrentFocusText}</div>
+            <div className="absolute -right-2 top-16 h-14 w-14 rounded-full bg-cyan-300/20 blur-2xl" />
+            <div className="absolute -left-4 bottom-12 h-14 w-14 rounded-full bg-indigo-400/20 blur-2xl" />
+            <div className="absolute -bottom-2 left-6 right-6 rounded-3xl border border-white/10 bg-[#111827]/90 p-4 text-center backdrop-blur-md sm:-bottom-6 sm:left-10 sm:right-10">
+              <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-200/80">{siteCopy.heroCurrentFocusLabel}</div>
+              <div className="mt-1 text-sm font-semibold text-slate-100">{siteCopy.heroCurrentFocusText}</div>
+            </div>
+            <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200/80 backdrop-blur-md md:inline-flex">
+              <ShieldCheck className="h-4 w-4 text-cyan-200" />
+              Premium profile spotlight
             </div>
           </div>
         </motion.div>
