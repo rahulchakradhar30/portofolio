@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
-import { ArrowRight, Sparkles, Layers3, ShieldCheck } from "lucide-react";
+import { ArrowRight, Sparkles, Layers3 } from "lucide-react";
 
 const DEFAULT_HERO_DATA = {
   heroTitle: "Rahul Chakradhar",
@@ -237,10 +237,6 @@ export default function Hero() {
             <div className="absolute -bottom-2 left-6 right-6 rounded-3xl border border-white/10 bg-[#111827]/90 p-4 text-center backdrop-blur-md sm:-bottom-6 sm:left-10 sm:right-10">
               <div className="text-[10px] font-semibold uppercase tracking-[0.3em] text-cyan-200/80">{siteCopy.heroCurrentFocusLabel}</div>
               <div className="mt-1 text-sm font-semibold text-slate-100">{siteCopy.heroCurrentFocusText}</div>
-            </div>
-            <div className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200/80 backdrop-blur-md md:inline-flex">
-              <ShieldCheck className="h-4 w-4 text-cyan-200" />
-              Premium profile spotlight
             </div>
           </div>
         </motion.div>
