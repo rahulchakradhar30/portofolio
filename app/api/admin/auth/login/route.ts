@@ -14,12 +14,23 @@ export async function POST(request: NextRequest) {
     const limit = enforceRateLimit({ request, scope: 'admin-login', max: 12, windowMs: 60_000 });
     if (!limit.ok) return limit.response;
 
-    const { idToken } = await request.json();
-    if (!idToken) {
+    let payload: unknown;
+    try {
+      payload = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
+    const idToken =
+      typeof payload === 'object' && payload !== null && 'idToken' in payload
+        ? (payload as { idToken?: unknown }).idToken
+        : undefined;
+
+    if (typeof idToken !== 'string' || idToken.trim().length < 20) {
       return NextResponse.json({ error: 'Missing ID token' }, { status: 400 });
     }
 
-    const decodedIdToken = await getAdminAuth().verifyIdToken(idToken);
+    const decodedIdToken = await getAdminAuth().verifyIdToken(idToken, true);
     const email = decodedIdToken.email?.toLowerCase();
     const allowedEmail = process.env.ADMIN_GOOGLE_EMAIL?.toLowerCase();
 
@@ -57,6 +68,9 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
 
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+
     response.cookies.set(ADMIN_SESSION_COOKIE, sessionCookie, {
       maxAge: Math.floor(expiresIn / 1000),
       httpOnly: true,
@@ -67,7 +81,12 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Login failed';
-    return NextResponse.json({ error: message }, { status: 401 });
+    const message = error instanceof Error ? error.message : '';
+
+    if (message.toLowerCase().includes('revoked')) {
+      return NextResponse.json({ error: 'Google session is no longer valid. Please sign in again.' }, { status: 401 });
+    }
+
+    return NextResponse.json({ error: 'Login failed. Please try again.' }, { status: 401 });
   }
 }

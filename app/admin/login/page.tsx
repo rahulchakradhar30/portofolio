@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithRedirect, type User } from 'firebase/auth';
@@ -11,9 +11,36 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const isFinalizingRef = useRef(false);
+
+  const getReadableAuthError = useCallback((value: unknown) => {
+    if (!(value instanceof Error)) {
+      return 'Unable to complete admin login. Please try again.';
+    }
+
+    const message = value.message.toLowerCase();
+
+    if (message.includes('popup') || message.includes('cancelled')) {
+      return 'Google sign-in was cancelled. Please try again.';
+    }
+
+    if (message.includes('timed out')) {
+      return 'Login verification took too long. Please try again.';
+    }
+
+    if (message.includes('not allowed') || message.includes('forbidden')) {
+      return 'This Google account is not authorized for admin access.';
+    }
+
+    if (message.includes('missing firebase client environment')) {
+      return 'Firebase client configuration is missing. Please check environment variables.';
+    }
+
+    return value.message;
+  }, []);
 
   // Enhanced session wait with exponential backoff for Vercel compatibility
-  const waitForAdminSession = async () => {
+  const waitForAdminSession = useCallback(async () => {
     const maxAttempts = 10;
     const maxDelay = 5000;
 
@@ -38,7 +65,7 @@ export default function AdminLoginPage() {
 
         // Other error, throw
         throw new Error(`Session check failed: ${meRes.status}`);
-      } catch (err) {
+      } catch {
         const delay = Math.min(Math.pow(2, attempt) * 200, maxDelay);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
@@ -47,9 +74,12 @@ export default function AdminLoginPage() {
     throw new Error(
       'Session verification timed out. This can happen on Vercel with cold starts. Please try again.'
     );
-  };
+  }, []);
 
-  const finalizeServerLogin = async (user: User) => {
+  const finalizeServerLogin = useCallback(async (user: User) => {
+    if (isFinalizingRef.current) return;
+    isFinalizingRef.current = true;
+
     try {
       const idToken = await user.getIdToken(true);
 
@@ -72,8 +102,10 @@ export default function AdminLoginPage() {
       router.replace('/admin/dashboard');
     } catch (err) {
       throw new Error(err instanceof Error ? err.message : 'Failed to finalize login');
+    } finally {
+      isFinalizingRef.current = false;
     }
-  };
+  }, [router, waitForAdminSession]);
 
   // Check if already authenticated on mount
   useEffect(() => {
@@ -101,51 +133,51 @@ export default function AdminLoginPage() {
 
   useEffect(() => {
     if (isCheckingAuth) return;
+    if (!firebaseAuth) return;
+    const auth = firebaseAuth;
 
-    const handleRedirectResult = async () => {
-      if (!firebaseAuth) return;
+    let active = true;
+
+    const completeLogin = async (user: User) => {
+      if (!active || isFinalizingRef.current) return;
 
       try {
+        setError(null);
         setLoading(true);
-        const result = await getRedirectResult(firebaseAuth);
-        const resolvedUser = result?.user ?? firebaseAuth.currentUser;
-
-        if (resolvedUser) {
-          await finalizeServerLogin(resolvedUser);
-        }
+        await finalizeServerLogin(user);
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Unable to complete login';
-        setError(message);
+        if (!active) return;
+        setError(getReadableAuthError(err));
         setLoading(false);
       }
     };
 
-    const unsubscribe = firebaseAuth
-      ? onAuthStateChanged(firebaseAuth, async (user) => {
-          if (!user) {
-            // Trigger redirect result check if there's no current user
-            void handleRedirectResult();
-            return;
-          }
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          await completeLogin(result.user);
+        }
+      } catch (err) {
+        if (!active) return;
+        setError(getReadableAuthError(err));
+        setLoading(false);
+      }
+    };
 
-          // User is logged in via Firebase, finalize server session
-          try {
-            setLoading(true);
-            await finalizeServerLogin(user);
-          } catch (err) {
-            const message = err instanceof Error ? err.message : 'Unable to login';
-            setError(message);
-            setLoading(false);
-          }
-        })
-      : () => {};
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        void completeLogin(user);
+      }
+    });
 
     void handleRedirectResult();
 
     return () => {
+      active = false;
       unsubscribe();
     };
-  }, [router, isCheckingAuth]);
+  }, [finalizeServerLogin, getReadableAuthError, isCheckingAuth]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
@@ -153,13 +185,16 @@ export default function AdminLoginPage() {
 
     try {
       assertFirebaseClientConfig();
+      if (!firebaseAuth) {
+        throw new Error('Missing Firebase client environment variables for Google login.');
+      }
+
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
 
-      await signInWithRedirect(firebaseAuth!, provider);
+      await signInWithRedirect(firebaseAuth, provider);
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Unable to start Google login';
-      setError(message);
+      setError(getReadableAuthError(e));
       setLoading(false);
     }
   };

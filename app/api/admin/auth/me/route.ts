@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     return auth.response;
   }
 
-  return NextResponse.json(
+  const response = NextResponse.json(
     {
       authenticated: true,
       user: {
@@ -19,4 +19,8 @@ export async function GET(request: NextRequest) {
     },
     { status: 200 }
   );
+
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  return response;
 }

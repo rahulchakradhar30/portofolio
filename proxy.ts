@@ -67,10 +67,6 @@ export function proxy(request: NextRequest) {
     return applySecurityHeaders(request, NextResponse.next());
   }
 
-  if (isAdminLoginPage && token) {
-    return applySecurityHeaders(request, NextResponse.redirect(new URL('/admin/dashboard', request.url)));
-  }
-
   const requiresAuth = isAdminPage || (isAdminApi && !isPublicAdminReadApi && !isAdminAuthApi);
 
   if (requiresAuth && !token) {
