@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import type { Transition } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useMotionPreferences } from "./MotionProvider";
 import { useIsMobile } from "./useViewport";
@@ -11,9 +12,9 @@ export default function PageTransition({ children }: { children: React.ReactNode
   const isMobile = useIsMobile();
   const enterY = isMobile ? 8 : 14;
   const exitY = isMobile ? -6 : -10;
-  const transition = reducedMotion
+  const transition: Transition = reducedMotion
     ? { duration: 0.05 }
-    : { type: "spring", stiffness: isMobile ? 220 : 180, damping: isMobile ? 26 : 22, mass: 0.85 };
+    : { type: "spring" as const, stiffness: isMobile ? 220 : 180, damping: isMobile ? 26 : 22, mass: 0.85 };
 
   return (
     <>
