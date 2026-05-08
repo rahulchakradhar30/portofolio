@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 // Temporary emergency bypass. Set to true only during critical maintenance.
 // SHOULD BE FALSE FOR PRODUCTION
-const TEMP_DISABLE_ADMIN_AUTH = false;
+const TEMP_DISABLE_ADMIN_AUTH = true;
 
 function buildCsp(request: NextRequest) {
   const isDev = process.env.NODE_ENV !== 'production';

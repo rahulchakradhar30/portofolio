@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0b0f19;
-  --foreground: #e5e7eb;
-  --surface: #111827;
-  --surface-strong: #0f172a;
-  --surface-soft: #131a2a;
-  --border-subtle: rgba(148, 163, 184, 0.16);
-  --accent: #22d3ee;
-  --accent-strong: #6366f1;
+  --background: #fbf7f0;
+  --foreground: #32281f;
+  --surface: #fffaf3;
+  --surface-strong: #f4eadb;
+  --surface-soft: #f7efe4;
+  --border-subtle: rgba(122, 95, 71, 0.18);
+  --accent: #8d6b4e;
+  --accent-strong: #6e5440;
   --font-sans-stack: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono-stack: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
@@ -22,16 +22,20 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   min-height: 100%;
   background:
-    radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.1) 0%, transparent 32%),
-    radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.08) 0%, transparent 28%),
-    linear-gradient(180deg, #0b0f19 0%, #090d16 100%);
+    radial-gradient(circle at 18% 18%, rgba(196, 168, 132, 0.16) 0%, transparent 30%),
+    radial-gradient(circle at 82% 12%, rgba(235, 216, 188, 0.45) 0%, transparent 28%),
+    linear-gradient(180deg, #fbf7f0 0%, #f4ecdf 100%);
   color: var(--foreground);
   font-family: var(--font-sans-stack);
+  color-scheme: light;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -49,46 +53,46 @@ section[id] {
 }
 
 .section-shell {
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(122, 95, 71, 0.08);
 }
 
 .section-surface {
   background:
-    linear-gradient(180deg, rgba(17, 24, 39, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%),
+    linear-gradient(180deg, rgba(255, 250, 243, 0.98) 0%, rgba(244, 234, 219, 0.98) 100%),
     var(--surface);
   color: var(--foreground);
 }
 
 .section-soft {
   background:
-    radial-gradient(circle at 12% 18%, rgba(34, 211, 238, 0.12) 0%, transparent 36%),
-    radial-gradient(circle at 88% 12%, rgba(99, 102, 241, 0.1) 0%, transparent 28%),
-    linear-gradient(180deg, #0d1320 0%, #0b0f19 100%);
+    radial-gradient(circle at 12% 18%, rgba(235, 216, 188, 0.55) 0%, transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(196, 168, 132, 0.18) 0%, transparent 28%),
+    linear-gradient(180deg, #f8f1e7 0%, #f4eadb 100%);
   color: var(--foreground);
 }
 
 .premium-card {
   border: 1px solid var(--border-subtle);
-  background: linear-gradient(180deg, rgba(17, 24, 39, 0.94) 0%, rgba(15, 23, 42, 0.92) 100%);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.26);
-  backdrop-filter: blur(18px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(247, 239, 228, 0.96) 100%);
+  box-shadow: 0 18px 50px rgba(122, 95, 71, 0.1);
+  backdrop-filter: blur(14px);
 }
 
 .premium-chip {
-  border: 1px solid rgba(34, 211, 238, 0.22);
-  background: rgba(34, 211, 238, 0.08);
-  color: #cffafe;
+  border: 1px solid rgba(122, 95, 71, 0.18);
+  background: rgba(255, 250, 243, 0.92);
+  color: #6e5440;
 }
 
 .premium-button-primary {
   background: var(--accent);
-  color: #0b0f19;
-  box-shadow: 0 18px 36px rgba(34, 211, 238, 0.22);
+  color: #fffaf3;
+  box-shadow: 0 18px 36px rgba(122, 95, 71, 0.18);
 }
 
 .premium-button-secondary {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(122, 95, 71, 0.18);
+  background: rgba(255, 250, 243, 0.9);
   color: var(--foreground);
 }
 
@@ -110,6 +114,15 @@ section[id] {
   100% { transform: translate3d(0, 0, 0) rotate(360deg); }
 }
 
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .animate-float-slow {
   animation: floatSlow 5.5s ease-in-out infinite;
 }
@@ -120,6 +133,25 @@ section[id] {
 
 .animate-orbit-drift {
   animation: orbitDrift 18s linear infinite;
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(90deg, rgba(247, 239, 228, 0.85) 0%, rgba(255, 250, 243, 0.98) 50%, rgba(247, 239, 228, 0.85) 100%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 767px) {
+  section[id] {
+    scroll-margin-top: 5.25rem;
+  }
+
+  .premium-card {
+    backdrop-filter: blur(10px);
+    box-shadow: 0 12px 34px rgba(122, 95, 71, 0.08);
+  }
 }
 
 html[data-motion='reduced'] *,

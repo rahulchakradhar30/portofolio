@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     const decodedIdToken = await getAdminAuth().verifyIdToken(idToken, true);
     const email = decodedIdToken.email?.toLowerCase();
     const allowedEmail = process.env.ADMIN_GOOGLE_EMAIL?.toLowerCase();
+    const signInProvider = decodedIdToken.firebase?.sign_in_provider;
 
     if (!allowedEmail) {
       return NextResponse.json(
@@ -48,7 +49,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!decodedIdToken.email_verified) {
+    if (!signInProvider || !['google.com', 'password'].includes(signInProvider)) {
+      return NextResponse.json({ error: 'Unsupported authentication method for admin access.' }, { status: 403 });
+    }
+
+    if (!decodedIdToken.email_verified && signInProvider !== 'password') {
       return NextResponse.json({ error: 'Google email must be verified.' }, { status: 403 });
     }
 

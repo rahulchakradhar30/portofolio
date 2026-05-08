@@ -108,8 +108,44 @@ export interface PortfolioContent {
   instagram?: string;
   linkedin?: string;
   github?: string;
+  studyRoadmapEnabled?: boolean;
+  allowRoadmapExtension?: boolean;
+  studyRoadmap?: StudyRoadmapItem[];
+  studyRoadmapMetrics?: StudyRoadmapStageMetric[];
+  sectionVisibility?: SectionVisibility;
   siteCopy?: SiteCopy;
   radarConfig?: RadarConfig;
+}
+
+export interface SectionVisibility {
+  hero: boolean;
+  about: boolean;
+  roadmap: boolean;
+  radar: boolean;
+  skills: boolean;
+  projects: boolean;
+  certifications: boolean;
+  contact: boolean;
+}
+
+export type StudyRoadmapMetricType = 'cgpa' | 'ccpa' | 'percentage' | 'marks' | 'custom';
+
+export interface StudyRoadmapStageMetric {
+  roadmapItemId: string;
+  enabled: boolean;
+  metricType: StudyRoadmapMetricType;
+  label: string;
+  value: string;
+}
+
+export interface StudyRoadmapItem {
+  id: string;
+  stage: string;
+  institution: string;
+  period: string;
+  description: string;
+  tags: string[];
+  isHigherStudy: boolean;
 }
 
 export type RadarKind = 'skill' | 'project' | 'certification';

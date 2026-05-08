@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Chatbot from "./components/Chatbot";
 import CookieConsent from "./components/CookieConsent";
 import { MotionProvider } from "./components/MotionProvider";
 import AppShell from "./components/AppShell";
@@ -23,7 +22,6 @@ export default function RootLayout({
           <DevtoolsGuard />
           <AppShell>{children}</AppShell>
           <CookieConsent />
-          <Chatbot />
         </MotionProvider>
       </body>
     </html>

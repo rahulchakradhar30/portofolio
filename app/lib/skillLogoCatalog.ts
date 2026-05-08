@@ -36,7 +36,37 @@ const svgLogo = (name: string, accent: string, subtitle: string, keywords: strin
   };
 };
 
+const fallbackSkillLogo = (label: string) => {
+  const cleaned = label.trim().replace(/[^A-Za-z0-9]+/g, ' ').split(/\s+/).filter(Boolean);
+  const initials = cleaned.map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'S';
+  const hueSeed = Array.from(label).reduce((total, character) => total + character.charCodeAt(0), 0) % 360;
+  const primary = `hsl(${hueSeed}, 36%, 52%)`;
+  const secondary = `hsl(${(hueSeed + 28) % 360}, 32%, 34%)`;
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="${label}">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${primary}" />
+          <stop offset="100%" stop-color="${secondary}" />
+        </linearGradient>
+      </defs>
+      <rect width="128" height="128" rx="28" fill="url(#g)" />
+      <circle cx="64" cy="56" r="28" fill="rgba(255,255,255,0.14)" />
+      <text x="64" y="65" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" fill="#fffaf3">${initials}</text>
+    </svg>
+  `;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
+};
+
 const CORE_LOGOS: SkillLogoPreset[] = [
+  svgLogo('Code', '8d6b4e', 'CD', ['code', 'frontend', 'development']),
+  svgLogo('Layers', 'b6926d', 'LY', ['layers', 'stack', 'architecture']),
+  svgLogo('Zap', 'c4a884', 'ZP', ['zap', 'ai', 'speed']),
+  svgLogo('Film', '7a5f47', 'FM', ['film', 'video', 'production']),
+  svgLogo('Palette', '9b7a5b', 'PL', ['palette', 'design', 'ui']),
+  svgLogo('Cloud', '6e5440', 'CL', ['cloud', 'deployment', 'hosting']),
   logo('React', 'react', 'Frontend'),
   logo('Next.js', 'nextdotjs', 'Frontend'),
   logo('Vue.js', 'vuedotjs', 'Frontend'),
@@ -547,5 +577,6 @@ export function resolveSkillIconUrl(iconValue?: string) {
   if (!value) return '';
   if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/')) return value;
   const mapped = SKILL_LOGO_LOOKUP[value.toLowerCase()];
-  return mapped || '';
+  if (mapped) return mapped;
+  return fallbackSkillLogo(value);
 }

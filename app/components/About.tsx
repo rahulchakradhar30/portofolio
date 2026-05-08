@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import LoadingSkeleton from "./LoadingSkeleton";
+import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { BadgeCheck, Compass, Layers3, Sparkles } from "lucide-react";
@@ -22,6 +23,7 @@ export default function About() {
   const { reducedMotion } = useMotionPreferences();
   const [aboutData, setAboutData] = useState(DEFAULT_ABOUT);
   const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
+  const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -32,6 +34,7 @@ export default function About() {
         if (!res.ok) throw new Error('Failed to load about content');
         const data = await res.json();
         if (data.content) {
+          setIsVisible(data.content.sectionVisibility?.about !== false);
           setSiteCopy(getSiteCopy(data.content));
           setAboutData({
             aboutText: data.content.aboutText || DEFAULT_ABOUT.aboutText,
@@ -52,9 +55,10 @@ export default function About() {
   }, []);
 
   if (error) throw error;
+  if (!loading && !isVisible) return null;
   if (loading) {
     return (
-      <section className="section-surface relative px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
         <LoadingSkeleton variant="about" />
       </section>
     );
@@ -82,8 +86,8 @@ export default function About() {
   ];
 
   return (
-    <section className="section-surface relative px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute top-0 left-0 h-px w-full bg-gradient-to-r from-cyan-300 via-white/30 to-indigo-300" />
+    <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <div className="absolute top-0 left-0 h-px w-full bg-gradient-to-r from-[#8d6b4e] via-white/50 to-[#c4a884]" />
 
       <div className="mx-auto max-w-[1600px]">
         <motion.div
@@ -93,16 +97,17 @@ export default function About() {
           viewport={{ once: true, amount: 0.2 }}
           className="mb-12 text-center sm:mb-16"
         >
-          <div className="mx-auto mb-4 inline-flex rounded-full border border-cyan-300/20 bg-cyan-300/8 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100 shadow-sm">
+          <div className="mx-auto mb-4 inline-flex rounded-full border border-[#7a5f47]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7a5f47] shadow-sm">
             {siteCopy.aboutBadge}
           </div>
-          <h2 className="mb-4 bg-gradient-to-r from-cyan-100 via-white to-indigo-200 bg-clip-text text-4xl font-black text-transparent md:text-6xl">
+          <h2 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
             {siteCopy.aboutHeading}
           </h2>
-          <div className="mx-auto h-px w-24 bg-gradient-to-r from-cyan-300 to-indigo-300" />
+          <div className="mx-auto h-px w-24 bg-gradient-to-r from-[#8d6b4e] to-[#c4a884]" />
         </motion.div>
 
-        <div className="grid items-start gap-10 md:grid-cols-2 lg:gap-16">
+        <ExpandableSection collapsedMaxHeightPx={760}>
+          <div className="grid items-start gap-10 md:grid-cols-2 lg:gap-16">
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, x: -50 }}
             whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
@@ -114,19 +119,19 @@ export default function About() {
               const Icon = block.icon;
               return (
                 <div key={block.label} className="premium-card rounded-3xl p-5 sm:p-6">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">
                     <Icon className="h-4 w-4" />
                     {block.label}
                   </div>
-                  <h3 className="mt-3 text-2xl font-bold text-white">{block.title}</h3>
-                  <p className="mt-3 text-base leading-relaxed text-slate-300 sm:text-lg">{block.copy}</p>
+                  <h3 className="mt-3 text-2xl font-bold text-[#2f241b]">{block.title}</h3>
+                  <p className="mt-3 text-base leading-relaxed text-[#6a5846] sm:text-lg">{block.copy}</p>
                 </div>
               );
             })}
 
             <div className="grid gap-3 sm:grid-cols-2">
               {siteCopy.aboutTags.map((tag) => (
-                <span key={tag} className="premium-chip rounded-full px-4 py-2 text-sm font-medium text-cyan-50">
+                <span key={tag} className="premium-chip rounded-full px-4 py-2 text-sm font-medium text-[#6a5846]">
                   {tag}
                 </span>
               ))}
@@ -141,7 +146,7 @@ export default function About() {
             className="relative"
           >
             <div className="premium-card rounded-[2rem] p-6 sm:p-8">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">
                 <Layers3 className="h-4 w-4" />
                 Proof points
               </div>
@@ -149,23 +154,24 @@ export default function About() {
                 {aboutData.aboutStats.slice(0, 4).map((stat, index) => (
                   <motion.div
                     key={`${stat.label}-${index}`}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center"
+                    className="rounded-2xl border border-[#7a5f47]/10 bg-white p-4 text-center"
                     initial={reducedMotion ? false : { opacity: 0, y: 18 }}
                     whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
                     transition={reducedMotion ? undefined : { duration: 0.4, delay: index * 0.08 }}
                     viewport={{ once: true, amount: 0.35 }}
                   >
-                    <div className="text-3xl font-black text-white">{stat.value}</div>
-                    <div className="mt-2 text-sm text-slate-300">{stat.label}</div>
+                    <div className="text-3xl font-black text-[#2f241b]">{stat.value}</div>
+                    <div className="mt-2 text-sm text-[#6a5846]">{stat.label}</div>
                   </motion.div>
                 ))}
               </div>
-              <div className="mt-4 rounded-2xl border border-white/10 bg-[#0b0f19]/80 p-4 text-sm leading-relaxed text-slate-300">
+              <div className="mt-4 rounded-2xl border border-[#7a5f47]/10 bg-[#f8f1e7] p-4 text-sm leading-relaxed text-[#6a5846]">
                 {siteCopy.aboutFooter}
               </div>
             </div>
           </motion.div>
-        </div>
+          </div>
+        </ExpandableSection>
       </div>
     </section>
   );

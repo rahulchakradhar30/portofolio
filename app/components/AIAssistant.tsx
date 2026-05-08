@@ -176,13 +176,13 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
             {!isMinimized && (
               <>
                 {/* Type Selector */}
-                <div className="flex gap-2 border-b border-gray-200 bg-gray-50 px-4 py-3 overflow-x-auto">
+                <div className="flex gap-2 border-b border-[#7a5f47]/10 bg-[#fbf7f0] px-4 py-3 overflow-x-auto">
                   <button
                     onClick={() => setSelectedType('description')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                       selectedType === 'description'
-                        ? 'bg-violet-600 text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:border-violet-400'
+                        ? 'bg-[#8d6b4e] text-[#fffaf3]'
+                        : 'bg-white text-[#5f4a38] border border-[#7a5f47]/15 hover:border-[#8d6b4e]/30'
                     }`}
                   >
                     Description
@@ -191,8 +191,8 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                     onClick={() => setSelectedType('details')}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                       selectedType === 'details'
-                        ? 'bg-violet-600 text-white'
-                        : 'bg-white text-gray-700 border border-gray-300 hover:border-violet-400'
+                        ? 'bg-[#8d6b4e] text-[#fffaf3]'
+                        : 'bg-white text-[#5f4a38] border border-[#7a5f47]/15 hover:border-[#8d6b4e]/30'
                     }`}
                   >
                     Details
@@ -228,8 +228,8 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                       <div
                         className={`max-w-xs rounded-lg px-4 py-2 ${
                           msg.role === 'user'
-                            ? 'bg-violet-600 text-white rounded-br-none'
-                            : 'bg-gray-100 text-black rounded-bl-none'
+                            ? 'bg-[#8d6b4e] text-[#fffaf3] rounded-br-none'
+                            : 'bg-[#fbf7f0] text-[#2f241b] rounded-bl-none'
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
@@ -240,14 +240,14 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                               className={`text-xs px-2 py-1 rounded transition ${
                                 copiedId === msg.id
                                   ? 'bg-green-500 text-white'
-                                  : 'bg-white text-gray-700 hover:bg-gray-200'
+                                    : 'bg-white text-[#5f4a38] hover:bg-[#f4eadb]'
                               }`}
                             >
                               {copiedId === msg.id ? '✓ Copied' : <Copy className="w-3 h-3 inline" />}
                             </button>
                             <button
                               onClick={() => handleUseContent(msg.content)}
-                              className="text-xs px-2 py-1 bg-violet-600 text-white rounded hover:bg-violet-700 transition"
+                              className="text-xs px-2 py-1 bg-[#8d6b4e] text-[#fffaf3] rounded hover:bg-[#7a5f47] transition"
                             >
                               Use this
                             </button>
@@ -262,15 +262,15 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                       animate={{ opacity: 1 }}
                       className="flex justify-start"
                     >
-                      <div className="max-w-[85%] rounded-lg rounded-bl-none bg-gray-100 px-4 py-2 text-gray-700 sm:max-w-xs">
+                      <div className="max-w-[85%] rounded-lg rounded-bl-none bg-[#fbf7f0] px-4 py-2 text-[#5f4a38] sm:max-w-xs">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" />
+                          <div className="w-2 h-2 bg-[#8d6b4e] rounded-full animate-bounce" />
                           <div
-                            className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                            className="w-2 h-2 bg-[#8d6b4e] rounded-full animate-bounce"
                             style={{ animationDelay: '0.1s' }}
                           />
                           <div
-                            className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                            className="w-2 h-2 bg-[#8d6b4e] rounded-full animate-bounce"
                             style={{ animationDelay: '0.2s' }}
                           />
                         </div>
@@ -281,7 +281,7 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                 </div>
 
                 {/* Input */}
-                <div className="border-t border-gray-200 bg-white p-4">
+                <div className="border-t border-[#7a5f47]/10 bg-white p-4">
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -294,12 +294,12 @@ export default function AIAssistant({ onContentGenerated }: AIAssistantProps) {
                         }
                       }}
                       placeholder="Describe what you need..."
-                      className="min-w-0 flex-1 rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black placeholder-gray-400 transition focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200"
+                      className="min-w-0 flex-1 rounded-lg border-2 border-[#7a5f47]/15 bg-white px-4 py-2 text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
                     />
                     <button
                       onClick={handleGenerate}
                       disabled={loading || !input.trim()}
-                      className="flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex items-center gap-2 rounded-lg bg-[#8d6b4e] px-4 py-2 text-[#fffaf3] transition hover:bg-[#7a5f47] disabled:cursor-not-allowed disabled:opacity-50"
                       title={loading ? 'Generating...' : 'Send'}
                     >
                       {loading ? <span className="text-xs font-semibold">...</span> : <Send className="w-4 h-4" />}

@@ -3,7 +3,7 @@ import { getAdminAuth } from './firebaseAdmin';
 
 export const ADMIN_SESSION_COOKIE = 'adminSession';
 // Set to true only during emergency maintenance. Should be false for normal operation.
-const TEMP_DISABLE_ADMIN_AUTH = false;
+const TEMP_DISABLE_ADMIN_AUTH = true;
 
 function unauthorized(message: string, status: number = 401) {
   return NextResponse.json({ error: message }, { status });

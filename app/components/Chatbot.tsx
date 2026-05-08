@@ -194,7 +194,7 @@ export default function Chatbot() {
     }
   };
 
-  if (pathname?.startsWith('/admin')) {
+  if (!pathname?.startsWith('/admin')) {
     return null;
   }
 

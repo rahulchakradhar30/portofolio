@@ -15,6 +15,89 @@ const DEFAULT_RADAR_CONFIG = {
   maxCertifications: 3,
 };
 
+const DEFAULT_STUDY_ROADMAP = [
+  {
+    id: 'school',
+    stage: 'School',
+    institution: 'School Education',
+    period: 'Foundation Years',
+    description: 'Built academic fundamentals and consistent learning discipline.',
+    tags: ['Basics', 'Discipline', 'Curiosity'],
+    isHigherStudy: false,
+  },
+  {
+    id: 'high-school',
+    stage: 'High School',
+    institution: 'Secondary Education',
+    period: 'Higher Secondary',
+    description: 'Strengthened core subjects and developed problem-solving ability.',
+    tags: ['Science', 'Math', 'Problem Solving'],
+    isHigherStudy: false,
+  },
+  {
+    id: 'intermediate',
+    stage: 'Intermediate',
+    institution: 'Intermediate College',
+    period: 'Pre-University',
+    description: 'Prepared for advanced studies with structured technical focus.',
+    tags: ['Pre-University', 'Focus', 'Preparation'],
+    isHigherStudy: false,
+  },
+  {
+    id: 'university',
+    stage: 'Graduate / University',
+    institution: 'GITAM University, Bengaluru',
+    period: 'Current',
+    description: 'Building practical AI and software systems through applied projects.',
+    tags: ['AI', 'Engineering', 'Projects'],
+    isHigherStudy: false,
+  },
+];
+
+const DEFAULT_STUDY_ROADMAP_METRICS = () => {
+  return [
+    {
+      roadmapItemId: 'school',
+      enabled: false,
+      metricType: 'percentage',
+      label: 'Percentage',
+      value: '',
+    },
+    {
+      roadmapItemId: 'high-school',
+      enabled: false,
+      metricType: 'percentage',
+      label: 'Percentage',
+      value: '',
+    },
+    {
+      roadmapItemId: 'intermediate',
+      enabled: false,
+      metricType: 'percentage',
+      label: 'Percentage',
+      value: '',
+    },
+    {
+      roadmapItemId: 'university',
+      enabled: false,
+      metricType: 'cgpa',
+      label: 'CGPA',
+      value: '',
+    },
+  ];
+};
+
+const DEFAULT_SECTION_VISIBILITY = {
+  hero: true,
+  about: true,
+  roadmap: true,
+  radar: true,
+  skills: true,
+  projects: true,
+  certifications: true,
+  contact: true,
+};
+
 // GET - Get portfolio content
 export async function GET() {
   try {
@@ -36,6 +119,11 @@ export async function GET() {
             instagram: 'https://www.instagram.com/rahul_chakradhar_30/?hl=en',
             linkedin: 'https://www.linkedin.com/in/perepogu-rahul-chakradhar-721017379/',
             github: 'https://github.com/rahulchakradhar30',
+            studyRoadmapEnabled: true,
+            allowRoadmapExtension: false,
+            studyRoadmap: DEFAULT_STUDY_ROADMAP,
+            studyRoadmapMetrics: DEFAULT_STUDY_ROADMAP_METRICS(),
+            sectionVisibility: DEFAULT_SECTION_VISIBILITY,
             siteCopy: DEFAULT_SITE_COPY,
             radarConfig: DEFAULT_RADAR_CONFIG,
             aboutStats: [
@@ -82,6 +170,11 @@ export async function PUT(request: NextRequest) {
       instagram,
       linkedin,
       github,
+      studyRoadmapEnabled,
+      allowRoadmapExtension,
+      studyRoadmap,
+      studyRoadmapMetrics,
+      sectionVisibility,
       aboutStats,
       siteCopy,
       radarConfig,
@@ -100,6 +193,11 @@ export async function PUT(request: NextRequest) {
       instagram,
       linkedin,
       github,
+      studyRoadmapEnabled,
+      allowRoadmapExtension,
+      studyRoadmap,
+      studyRoadmapMetrics,
+      sectionVisibility,
       aboutStats,
       siteCopy,
       radarConfig,

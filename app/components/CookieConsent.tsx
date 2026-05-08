@@ -51,7 +51,7 @@ export default function CookieConsent() {
           aria-live="polite"
           aria-label="Cookie consent"
         >
-          <div className="mx-auto max-w-4xl rounded-2xl border border-cyan-200 bg-white/95 p-4 shadow-2xl backdrop-blur md:p-5">
+          <div className="mx-auto max-w-4xl rounded-2xl border border-[#7a5f47]/12 bg-white/95 p-4 shadow-2xl backdrop-blur md:p-5">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <p className="text-sm leading-relaxed text-slate-700 md:pr-6">
                 We use essential cookies to keep this site secure and reliable. You can accept or decline
@@ -68,7 +68,7 @@ export default function CookieConsent() {
                 <button
                   type="button"
                   onClick={() => saveConsent("accepted")}
-                  className="rounded-full bg-gradient-to-r from-cyan-600 to-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+                  className="rounded-full bg-gradient-to-r from-[#8d6b4e] to-[#b6926d] px-4 py-2 text-sm font-semibold text-[#fffaf3] transition hover:opacity-90"
                 >
                   Accept
                 </button>

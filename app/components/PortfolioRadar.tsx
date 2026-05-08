@@ -7,6 +7,7 @@ import { ArrowUpRight, Layers3, Sparkles, Star } from "lucide-react";
 import type { Certification, Project, RadarConfig, RadarKind, Skill } from "@/app/lib/types";
 import { prioritizeFeatured } from "@/app/lib/contentOrdering";
 import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
+import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 
@@ -64,6 +65,7 @@ export default function PortfolioRadar() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [radarConfig, setRadarConfig] = useState<RadarConfig>(DEFAULT_RADAR_CONFIG);
   const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
+  const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [pointer, setPointer] = useState({ x: 0, y: 0, active: false });
   const [isCompactViewport, setIsCompactViewport] = useState(false);
@@ -86,6 +88,7 @@ export default function PortfolioRadar() {
         ]);
 
         if (contentData?.content) {
+          setIsVisible(contentData.content.sectionVisibility?.radar !== false);
           setSiteCopy(getSiteCopy(contentData.content));
           setRadarConfig(normalizeRadarConfig(contentData.content.radarConfig));
         }
@@ -184,13 +187,15 @@ export default function PortfolioRadar() {
   const tiltX = reducedMotion ? 0 : pointer.y * -5;
   const tiltY = reducedMotion ? 0 : pointer.x * 7;
 
+  if (!loading && !isVisible) return null;
+
   return (
-    <section className="relative overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(34,211,238,0.12)_0%,transparent_28%),radial-gradient(circle_at_80%_30%,rgba(99,102,241,0.12)_0%,transparent_26%),linear-gradient(180deg,#0b0f19_0%,#08121d_100%)]" />
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:44px_44px]" />
+    <section className="relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(235,216,188,0.6)_0%,transparent_28%),radial-gradient(circle_at_80%_30%,rgba(196,168,132,0.25)_0%,transparent_26%),linear-gradient(180deg,#fbf7f0_0%,#f4eadb_100%)]" />
+      <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(to_right,rgba(122,95,71,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(122,95,71,0.08)_1px,transparent_1px)] [background-size:44px_44px]" />
       {!reducedMotion ? (
         <motion.div
-          className="pointer-events-none absolute -top-24 right-10 h-64 w-64 rounded-full bg-cyan-400/20 blur-3xl"
+          className="pointer-events-none absolute -top-24 right-10 h-64 w-64 rounded-full bg-[#c4a884]/25 blur-3xl"
           animate={{ x: [0, 18, -10, 0], y: [0, 12, -8, 0] }}
           transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -204,19 +209,20 @@ export default function PortfolioRadar() {
           viewport={{ once: true, amount: 0.2 }}
           className="mb-10 text-center sm:mb-14"
         >
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100 backdrop-blur">
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#7a5f47] backdrop-blur">
             <Sparkles className="h-4 w-4" />
             {siteCopy.radarBadge}
           </div>
-          <h2 className="mt-5 bg-gradient-to-r from-cyan-200 via-white to-indigo-200 bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:text-6xl">
+          <h2 className="mt-5 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:text-6xl">
             {siteCopy.radarHeading}
           </h2>
-          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-slate-300 sm:text-base md:text-lg">
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-[#6a5846] sm:text-base md:text-lg">
             {siteCopy.radarSubtitle}
           </p>
         </motion.div>
 
-        <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <ExpandableSection collapsedMaxHeightPx={880}>
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <motion.div
             initial={reducedMotion ? false : { opacity: 0, x: -40 }}
             whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
@@ -225,14 +231,14 @@ export default function PortfolioRadar() {
             className="relative"
           >
             {isCompactViewport ? (
-              <div className="rounded-[1.75rem] border border-cyan-300/15 bg-white/5 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-xl sm:p-5">
-                <div className="mb-4 flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/60 p-4">
+              <div className="rounded-[1.75rem] border border-[#7a5f47]/12 bg-white p-4 shadow-[0_24px_70px_rgba(122,95,71,0.12)] backdrop-blur-xl sm:p-5">
+                <div className="mb-4 flex items-center justify-between rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4">
                   <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">Signal Core</div>
-                    <div className="mt-1 text-2xl font-black text-white">{stats.reduce((total, item) => total + item.value, 0)}</div>
-                    <div className="text-xs text-slate-300/80">active portfolio signals</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8d6b4e]">Signal Core</div>
+                    <div className="mt-1 text-2xl font-black text-[#2f241b]">{stats.reduce((total, item) => total + item.value, 0)}</div>
+                    <div className="text-xs text-[#6a5846]">active portfolio signals</div>
                   </div>
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-cyan-300/40 to-indigo-300/35 blur-[1px]" />
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#c4a884]/40 to-[#eadbbf]/50 blur-[1px]" />
                 </div>
 
                 {!loading ? (
@@ -241,10 +247,10 @@ export default function PortfolioRadar() {
                       <Link
                         key={`${node.kind}-${node.id}`}
                         href={node.href}
-                        className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-950/65 px-3 py-3 transition hover:border-white/20"
+                        className="flex items-center gap-3 rounded-2xl border border-[#7a5f47]/10 bg-white px-3 py-3 transition hover:border-[#8d6b4e]/25"
                       >
                         <div
-                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-white/10"
+                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[#7a5f47]/10"
                           style={{ background: `linear-gradient(135deg, ${node.accent}33, rgba(255,255,255,0.08))` }}
                         >
                           {node.iconUrl ? (
@@ -255,12 +261,12 @@ export default function PortfolioRadar() {
                               style={{ backgroundImage: `url(${node.iconUrl})` }}
                             />
                           ) : (
-                            <span className="text-sm font-black text-white">{node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}</span>
+                            <span className="text-sm font-black text-[#5f4a38]">{node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}</span>
                           )}
                         </div>
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-bold text-white">{node.title}</div>
-                          <div className="truncate text-[10px] uppercase tracking-[0.18em]" style={{ color: node.accent }}>
+                          <div className="truncate text-sm font-bold text-[#2f241b]">{node.title}</div>
+                          <div className="truncate text-[10px] uppercase tracking-[0.18em]" style={{ color: "#8d6b4e" }}>
                             {node.subtitle}
                           </div>
                         </div>
@@ -268,7 +274,7 @@ export default function PortfolioRadar() {
                     ))}
                   </div>
                 ) : (
-                  <div className="h-52 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+                  <div className="skeleton-shimmer h-52 rounded-2xl border border-[#7a5f47]/10" />
                 )}
               </div>
             ) : (
@@ -278,31 +284,31 @@ export default function PortfolioRadar() {
               onMouseLeave={onRadarLeave}
             >
               <motion.div
-                className="relative h-full w-full rounded-[2rem] border border-cyan-300/15 bg-white/5 p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:p-6"
+                className="relative h-full w-full rounded-[2rem] border border-[#7a5f47]/12 bg-white p-4 shadow-[0_30px_80px_rgba(122,95,71,0.14)] backdrop-blur-xl sm:p-6"
                 style={{ transformStyle: "preserve-3d" }}
                 animate={reducedMotion ? undefined : { rotateX: tiltX, rotateY: tiltY }}
                 transition={{ duration: pointer.active ? 0.08 : 0.45, ease: pointer.active ? "linear" : "easeOut" }}
               >
-              <div className="absolute inset-4 rounded-[1.75rem] border border-cyan-200/10" />
-              <div className="absolute inset-[12%] rounded-full border border-cyan-200/10" />
-              <div className="absolute inset-[24%] rounded-full border border-indigo-200/15" />
-              <div className="absolute inset-[7%] rounded-full border border-white/5" style={{ transform: "translateZ(18px)" }} />
+              <div className="absolute inset-4 rounded-[1.75rem] border border-[#7a5f47]/10" />
+              <div className="absolute inset-[12%] rounded-full border border-[#7a5f47]/10" />
+              <div className="absolute inset-[24%] rounded-full border border-[#c4a884]/18" />
+              <div className="absolute inset-[7%] rounded-full border border-[#7a5f47]/5" style={{ transform: "translateZ(18px)" }} />
 
               <motion.div
                 animate={reducedMotion ? undefined : { rotate: 360 }}
                 transition={reducedMotion ? undefined : { duration: 28, ease: "linear", repeat: Infinity }}
                 className="absolute inset-0"
               >
-                <div className="absolute left-1/2 top-[9%] h-[82%] w-[1px] bg-gradient-to-b from-cyan-200/0 via-cyan-200/30 to-cyan-200/0" />
-                <div className="absolute left-[9%] top-1/2 h-[1px] w-[82%] bg-gradient-to-r from-indigo-200/0 via-indigo-200/30 to-indigo-200/0" />
-                <div className="absolute left-1/2 top-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/5" />
+                <div className="absolute left-1/2 top-[9%] h-[82%] w-[1px] bg-gradient-to-b from-[#8d6b4e]/0 via-[#8d6b4e]/30 to-[#8d6b4e]/0" />
+                <div className="absolute left-[9%] top-1/2 h-[1px] w-[82%] bg-gradient-to-r from-[#b6926d]/0 via-[#b6926d]/30 to-[#b6926d]/0" />
+                <div className="absolute left-1/2 top-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#7a5f47]/5" />
               </motion.div>
 
-              <div className="absolute left-1/2 top-1/2 flex h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-cyan-200/20 bg-slate-950/60 text-center shadow-[0_0_80px_rgba(34,211,238,0.2)] backdrop-blur-md">
+              <div className="absolute left-1/2 top-1/2 flex h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#7a5f47]/12 bg-white/85 text-center shadow-[0_0_80px_rgba(122,95,71,0.16)] backdrop-blur-md">
                 <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200/70">Interactive Work Map</div>
-                  <div className="mt-2 text-2xl font-black text-white">{stats.reduce((total, item) => total + item.value, 0)}</div>
-                  <div className="mt-1 text-xs text-slate-300/80">connected portfolio signals</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8d6b4e]">Interactive Work Map</div>
+                  <div className="mt-2 text-2xl font-black text-[#2f241b]">{stats.reduce((total, item) => total + item.value, 0)}</div>
+                  <div className="mt-1 text-xs text-[#6a5846]">connected portfolio signals</div>
                 </div>
               </div>
 
@@ -332,11 +338,11 @@ export default function PortfolioRadar() {
                       whileHover={reducedMotion ? undefined : { y: -6, scale: 1.05 }}
                       transition={reducedMotion ? undefined : { duration: 0.5, delay: index * 0.06 }}
                       viewport={{ once: true, amount: 0.2 }}
-                      className="group absolute flex min-w-[120px] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/65 px-2.5 py-3 text-center shadow-lg backdrop-blur-md transition-colors hover:border-white/20 lg:min-w-[134px] xl:min-w-[150px]"
+                      className="group absolute flex min-w-[120px] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl border border-[#7a5f47]/10 bg-white px-2.5 py-3 text-center shadow-lg backdrop-blur-md transition-colors hover:border-[#8d6b4e]/20 lg:min-w-[134px] xl:min-w-[150px]"
                       style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) translateZ(${depth}px)` }}
                     >
                       <div
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.08)]"
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#7a5f47]/10 shadow-[0_0_20px_rgba(122,95,71,0.08)]"
                         style={{ background: `linear-gradient(135deg, ${node.accent}33, rgba(255,255,255,0.08))` }}
                       >
                         {node.iconUrl ? (
@@ -347,12 +353,12 @@ export default function PortfolioRadar() {
                             style={{ backgroundImage: `url(${node.iconUrl})` }}
                           />
                         ) : (
-                          <span className="text-lg font-black text-white">{node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}</span>
+                            <span className="text-lg font-black text-[#5f4a38]">{node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}</span>
                         )}
                       </div>
                       <div className="max-w-full">
-                        <div className="truncate text-xs font-bold text-white sm:text-sm">{node.title}</div>
-                        <div className="mt-0.5 truncate text-[10px] uppercase tracking-[0.18em]" style={{ color: node.accent }}>
+                        <div className="truncate text-xs font-bold text-[#2f241b] sm:text-sm">{node.title}</div>
+                        <div className="mt-0.5 truncate text-[10px] uppercase tracking-[0.18em]" style={{ color: "#8d6b4e" }}>
                           {node.subtitle}
                         </div>
                       </div>
@@ -362,7 +368,7 @@ export default function PortfolioRadar() {
 
               {loading ? (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-52 w-52 animate-pulse rounded-full border border-white/10 bg-white/5" />
+                  <div className="skeleton-shimmer h-52 w-52 rounded-full border border-[#7a5f47]/10" />
                 </div>
               ) : null}
               </motion.div>
@@ -377,48 +383,49 @@ export default function PortfolioRadar() {
             viewport={{ once: true, amount: 0.18 }}
             className="space-y-6"
           >
-            <div className="rounded-[2rem] border border-cyan-300/15 bg-white/5 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur-xl sm:p-8">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200/80">
+            <div className="rounded-[2rem] border border-[#7a5f47]/12 bg-white p-6 shadow-[0_24px_80px_rgba(122,95,71,0.12)] backdrop-blur-xl sm:p-8">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">
                 <Layers3 className="h-4 w-4" />
                 Live portfolio metrics
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-950/50 p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300/70">{stat.label}</div>
-                    <div className="mt-2 text-3xl font-black text-white">{stat.value}</div>
+                  <div key={stat.label} className="rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8d6b4e]">{stat.label}</div>
+                    <div className="mt-2 text-3xl font-black text-[#2f241b]">{stat.value}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-6 rounded-2xl border border-white/10 bg-gradient-to-r from-cyan-500/10 via-white/5 to-indigo-500/10 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                  <Star className="h-4 w-4 text-cyan-200" />
+              <div className="mt-6 rounded-2xl border border-[#7a5f47]/10 bg-gradient-to-r from-[#f7efe4] via-white to-[#f4eadb] p-4">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#2f241b]">
+                  <Star className="h-4 w-4 text-[#8d6b4e]" />
                   {siteCopy.radarFeatureTitle}
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-slate-200/80">
+                <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">
                   {siteCopy.radarFeatureCopy}
                 </p>
               </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
-              <Link href="#skills" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-white transition hover:border-cyan-300/30 hover:bg-white/10">
+              <Link href="#skills" className="rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-4 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]">
                 {siteCopy.radarExploreSkills} <ArrowUpRight className="ml-2 inline h-4 w-4" />
               </Link>
-              <Link href="#projects" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-white transition hover:border-cyan-300/30 hover:bg-white/10">
+              <Link href="#projects" className="rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-4 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]">
                 {siteCopy.radarSeeProjects} <ArrowUpRight className="ml-2 inline h-4 w-4" />
               </Link>
-              <Link href="#certifications" className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-white transition hover:border-cyan-300/30 hover:bg-white/10">
+              <Link href="#certifications" className="rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-4 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]">
                 {siteCopy.radarViewCredentials} <ArrowUpRight className="ml-2 inline h-4 w-4" />
               </Link>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-5 text-sm leading-relaxed text-slate-300 backdrop-blur-xl sm:p-6">
+            <div className="rounded-[2rem] border border-[#7a5f47]/10 bg-white p-5 text-sm leading-relaxed text-[#6a5846] backdrop-blur-xl sm:p-6">
               {siteCopy.radarCommandCopy}
             </div>
           </motion.div>
-        </div>
+          </div>
+        </ExpandableSection>
       </div>
     </section>
   );

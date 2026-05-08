@@ -141,7 +141,7 @@ export default function CommandPalette() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[90] bg-slate-950/70 backdrop-blur-md"
+          className="fixed inset-0 z-[90] bg-[#2f241b]/35 backdrop-blur-md"
           onClick={closePalette}
         >
           <motion.div
@@ -149,36 +149,36 @@ export default function CommandPalette() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -24, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="mx-auto mt-20 w-[92%] max-w-3xl rounded-3xl border border-cyan-300/20 bg-[#07101a]/95 p-4 shadow-[0_30px_100px_rgba(0,0,0,0.5)] sm:p-5"
+            className="mx-auto mt-20 w-[92%] max-w-3xl rounded-3xl border border-[#7a5f47]/12 bg-white/95 p-4 shadow-[0_30px_100px_rgba(122,95,71,0.18)] sm:p-5"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
-              <Search className="h-5 w-5 text-cyan-200" />
+            <div className="flex items-center gap-3 rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] px-3 py-2">
+              <Search className="h-5 w-5 text-[#8d6b4e]" />
               <input
                 autoFocus
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search actions or pages..."
-                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-400 sm:text-base"
+                className="w-full bg-transparent text-sm text-[#2f241b] outline-none placeholder:text-[#b29579] sm:text-base"
               />
-              <div className="hidden items-center gap-1 rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-[11px] text-slate-300 sm:flex">
+              <div className="hidden items-center gap-1 rounded-lg border border-[#7a5f47]/10 bg-white px-2 py-1 text-[11px] text-[#6a5846] sm:flex">
                 <Command className="h-3.5 w-3.5" />K
               </div>
             </div>
 
-            <div className="mt-3 max-h-[56vh] overflow-y-auto rounded-2xl border border-white/10 bg-black/20 p-2">
+            <div className="mt-3 max-h-[56vh] overflow-y-auto rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-2">
               {filtered.length === 0 ? (
-                <div className="px-3 py-5 text-center text-sm text-slate-400">No actions found for &quot;{query}&quot;</div>
+                <div className="px-3 py-5 text-center text-sm text-[#7a5f47]">No actions found for &quot;{query}&quot;</div>
               ) : (
                 filtered.map((action) => (
                   <button
                     key={action.id}
                     type="button"
                     onClick={action.run}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-white/10"
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition hover:bg-white"
                   >
-                    <div className="flex items-center gap-2 text-sm text-cyan-50 sm:text-[15px]">
-                      <Sparkles className="h-4 w-4 text-cyan-300" />
+                    <div className="flex items-center gap-2 text-sm text-[#2f241b] sm:text-[15px]">
+                      <Sparkles className="h-4 w-4 text-[#8d6b4e]" />
                       {action.label}
                     </div>
                   </button>

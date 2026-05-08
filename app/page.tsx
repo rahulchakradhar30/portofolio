@@ -1,6 +1,7 @@
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import About from "./components/About";
+import StudyRoadmap from "./components/StudyRoadmap";
 import PortfolioRadar from "./components/PortfolioRadar";
 import Skills from "./components/Skills";
 import Projects from "./components/Projects";
@@ -21,6 +22,11 @@ export default function Home() {
       <section id="about">
         <SectionErrorBoundary sectionName="About">
           <About />
+        </SectionErrorBoundary>
+      </section>
+      <section id="roadmap">
+        <SectionErrorBoundary sectionName="StudyRoadmap">
+          <StudyRoadmap />
         </SectionErrorBoundary>
       </section>
       <section id="radar">

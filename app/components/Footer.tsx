@@ -41,8 +41,8 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/8 bg-[#0b0f19] text-white">
-      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:48px_48px]" />
+    <footer className="relative overflow-hidden border-t border-[#7a5f47]/10 bg-[#f4eadb] text-[#32281f]">
+      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,rgba(122,95,71,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(122,95,71,0.12)_1px,transparent_1px)] [background-size:48px_48px]" />
 
       <div className="relative z-10 px-4 py-16 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1600px]">
@@ -53,10 +53,10 @@ export default function Footer() {
               transition={{ duration: 0.8 }}
               className="md:col-span-2"
             >
-              <h3 className="mb-4 bg-gradient-to-r from-cyan-200 via-white to-indigo-200 bg-clip-text text-2xl font-black text-transparent">
+              <h3 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-2xl font-black text-transparent">
                 {siteCopy.footerBrand}
               </h3>
-              <p className="mb-6 max-w-md leading-relaxed text-slate-300">
+              <p className="mb-6 max-w-md leading-relaxed text-[#6a5846]">
                 {siteCopy.footerLead}
               </p>
               <div className="flex flex-wrap gap-3">
@@ -66,7 +66,7 @@ export default function Footer() {
                   href={socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
                 >
                   <Code2 className="h-5 w-5" />
                 </motion.a>
@@ -76,7 +76,7 @@ export default function Footer() {
                   href={socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
                 >
                   <Link2 className="h-5 w-5" />
                 </motion.a>
@@ -86,7 +86,7 @@ export default function Footer() {
                   href={socials.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
                 >
                   <Camera className="h-5 w-5" />
                 </motion.a>
@@ -94,7 +94,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.06, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   href={`mailto:${socials.email}`}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-100 transition hover:border-cyan-300/30 hover:bg-white/10"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
                 >
                   <Mail className="h-5 w-5" />
                 </motion.a>
@@ -106,14 +106,14 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.1 }}
             >
-              <h4 className="mb-4 text-lg font-semibold text-white">{siteCopy.footerQuickLinksTitle}</h4>
-              <ul className="space-y-2 text-slate-300">
-                <li><Link href="#about" className="transition hover:text-cyan-100">{siteCopy.navAbout}</Link></li>
-                <li><Link href="#radar" className="transition hover:text-cyan-100">{siteCopy.navRadar}</Link></li>
-                <li><Link href="#skills" className="transition hover:text-cyan-100">{siteCopy.navSkills}</Link></li>
-                <li><Link href="#projects" className="transition hover:text-cyan-100">{siteCopy.navProjects}</Link></li>
-                <li><Link href="/hire" className="transition hover:text-cyan-100">{siteCopy.navHire}</Link></li>
-                <li><Link href="#contact" className="transition hover:text-cyan-100">{siteCopy.navContact}</Link></li>
+              <h4 className="mb-4 text-lg font-semibold text-[#2f241b]">{siteCopy.footerQuickLinksTitle}</h4>
+              <ul className="space-y-2 text-[#6a5846]">
+                <li><Link href="#about" className="transition hover:text-[#8d6b4e]">{siteCopy.navAbout}</Link></li>
+                <li><Link href="#radar" className="transition hover:text-[#8d6b4e]">{siteCopy.navRadar}</Link></li>
+                <li><Link href="#skills" className="transition hover:text-[#8d6b4e]">{siteCopy.navSkills}</Link></li>
+                <li><Link href="#projects" className="transition hover:text-[#8d6b4e]">{siteCopy.navProjects}</Link></li>
+                <li><Link href="/hire" className="transition hover:text-[#8d6b4e]">{siteCopy.navHire}</Link></li>
+                <li><Link href="#contact" className="transition hover:text-[#8d6b4e]">{siteCopy.navContact}</Link></li>
               </ul>
             </motion.div>
 
@@ -122,8 +122,8 @@ export default function Footer() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              <h4 className="mb-4 text-lg font-semibold text-white">{siteCopy.footerServicesTitle}</h4>
-              <ul className="space-y-2 text-slate-300">
+              <h4 className="mb-4 text-lg font-semibold text-[#2f241b]">{siteCopy.footerServicesTitle}</h4>
+              <ul className="space-y-2 text-[#6a5846]">
                 {siteCopy.footerServices.map((service) => (
                   <li key={service}>{service}</li>
                 ))}
@@ -135,13 +135,13 @@ export default function Footer() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col items-start justify-between gap-4 border-t border-white/8 pt-8 md:flex-row md:items-center"
+            className="flex flex-col items-start justify-between gap-4 border-t border-[#7a5f47]/10 pt-8 md:flex-row md:items-center"
           >
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-[#6a5846]">
               {siteCopy.footerCopyright.replace("{year}", String(currentYear))}
             </p>
-            <p className="flex items-center text-sm text-slate-400">
-              {siteCopy.footerMadeWith} <Heart className="mx-1 h-4 w-4 text-cyan-300" />
+            <p className="flex items-center text-sm text-[#6a5846]">
+              {siteCopy.footerMadeWith} <Heart className="mx-1 h-4 w-4 text-[#8d6b4e]" />
             </p>
           </motion.div>
         </div>
