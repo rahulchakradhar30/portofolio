@@ -1,23 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from '@/app/lib/firebaseAdmin';
+import { getAdminAuth, getAdminDb } from '@/app/lib/firebaseAdmin';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 import { Resend } from 'resend';
 
-// ── In-memory OTP store ─────────────────────────────────────────────
-type OtpEntry = {
+// ── OTP types & configs ─────────────────────────────────────────────
+export type OtpEntry = {
   code: string;
   expiresAt: number;
   attempts: number;
   uid: string;
 };
 
-const OTP_STORE = new Map<string, OtpEntry>();
 const OTP_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const MAX_VERIFY_ATTEMPTS = 5;
-
-// Export for verify-otp route
-export { OTP_STORE, MAX_VERIFY_ATTEMPTS };
+export const MAX_VERIFY_ATTEMPTS = 5;
 
 function generateOtp(): string {
   const digits = '0123456789';
@@ -37,15 +33,7 @@ function generateOtp(): string {
   return otp;
 }
 
-// Cleanup expired entries periodically
-function cleanupExpiredOtps() {
-  const now = Date.now();
-  for (const [key, entry] of OTP_STORE.entries()) {
-    if (entry.expiresAt <= now) {
-      OTP_STORE.delete(key);
-    }
-  }
-}
+// Cleanup expired entries periodically is handled automatically or dynamically during check.
 
 export async function POST(request: NextRequest) {
   try {
@@ -90,15 +78,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Clean up expired OTPs
-    cleanupExpiredOtps();
-
     // Generate OTP
     const otp = generateOtp();
     const expiresAt = Date.now() + OTP_TTL_MS;
 
-    // Store OTP keyed by uid
-    OTP_STORE.set(decodedIdToken.uid, {
+    // Store OTP in Firestore keyed by uid
+    const db = getAdminDb();
+    await db.collection('admin_otps').doc(decodedIdToken.uid).set({
       code: otp,
       expiresAt,
       attempts: 0,

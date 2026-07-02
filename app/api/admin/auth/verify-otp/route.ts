@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminAuth } from '@/app/lib/firebaseAdmin';
+import { getAdminAuth, getAdminDb } from '@/app/lib/firebaseAdmin';
 import { ADMIN_SESSION_COOKIE } from '@/app/lib/adminAuth';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
-import { OTP_STORE, MAX_VERIFY_ATTEMPTS } from '../send-otp/route';
+import { type OtpEntry, MAX_VERIFY_ATTEMPTS } from '../send-otp/route';
 
 const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 5; // 5 days
 
@@ -52,19 +52,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Look up OTP entry
-    const otpEntry = OTP_STORE.get(decodedIdToken.uid);
+    // Look up OTP entry from Firestore
+    const db = getAdminDb();
+    const otpDoc = await db.collection('admin_otps').doc(decodedIdToken.uid).get();
 
-    if (!otpEntry) {
+    if (!otpDoc.exists) {
       return NextResponse.json(
         { error: 'No OTP found. Please request a new one.' },
         { status: 400 }
       );
     }
 
+    const otpEntry = otpDoc.data() as OtpEntry;
+
     // Check if OTP has expired
     if (Date.now() > otpEntry.expiresAt) {
-      OTP_STORE.delete(decodedIdToken.uid);
+      await db.collection('admin_otps').doc(decodedIdToken.uid).delete();
       return NextResponse.json(
         { error: 'OTP has expired. Please request a new one.', expired: true },
         { status: 400 }
@@ -73,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     // Check attempt count
     if (otpEntry.attempts >= MAX_VERIFY_ATTEMPTS) {
-      OTP_STORE.delete(decodedIdToken.uid);
+      await db.collection('admin_otps').doc(decodedIdToken.uid).delete();
       return NextResponse.json(
         { error: 'Too many failed attempts. Please request a new OTP.', locked: true },
         { status: 429 }
@@ -82,8 +85,12 @@ export async function POST(request: NextRequest) {
 
     // Verify OTP
     if (otp.trim() !== otpEntry.code) {
-      otpEntry.attempts += 1;
-      const remainingAttempts = MAX_VERIFY_ATTEMPTS - otpEntry.attempts;
+      const newAttempts = (otpEntry.attempts || 0) + 1;
+      await db.collection('admin_otps').doc(decodedIdToken.uid).update({
+        attempts: newAttempts,
+      });
+
+      const remainingAttempts = MAX_VERIFY_ATTEMPTS - newAttempts;
       return NextResponse.json(
         {
           error: `Invalid OTP. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`,
@@ -93,8 +100,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // OTP is valid — remove from store
-    OTP_STORE.delete(decodedIdToken.uid);
+    // OTP is valid — remove from Firestore
+    await db.collection('admin_otps').doc(decodedIdToken.uid).delete();
 
     // Create session cookie (same as existing login flow)
     const expiresIn = SESSION_MAX_AGE_MS;
