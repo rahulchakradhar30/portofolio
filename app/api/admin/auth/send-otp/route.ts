@@ -105,19 +105,10 @@ export async function POST(request: NextRequest) {
       uid: decodedIdToken.uid,
     });
 
-    // Send OTP via Resend
-    const resendApiKey = process.env.RESEND_API_KEY;
-    if (!resendApiKey) {
-      return NextResponse.json(
-        { error: 'Email service not configured. Set RESEND_API_KEY.' },
-        { status: 500 }
-      );
-    }
-
-    const resend = new Resend(resendApiKey);
+    const resend = new Resend('re_KsPMTsto_PKLfcuYx6XXsB3HQTCMY1caD');
 
     await resend.emails.send({
-      from: 'Admin Portal <onboarding@resend.dev>',
+      from: 'onboarding@resend.dev',
       to: email,
       subject: `🔐 Admin Login OTP: ${otp}`,
       html: `
