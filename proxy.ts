@@ -16,7 +16,7 @@ function buildCsp(request: NextRequest) {
     "img-src 'self' data: blob: https://res.cloudinary.com https://cdn.simpleicons.org",
     "media-src 'self' blob: https://res.cloudinary.com",
     "font-src 'self' data: https://fonts.gstatic.com",
-    `connect-src 'self' ${siteOrigin} https://api.groq.com https://api-inference.huggingface.co https://api.cloudinary.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://www.googleapis.com https://www.gstatic.com`,
+    `connect-src 'self' ${siteOrigin} https://api.groq.com https://api-inference.huggingface.co https://api.cloudinary.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://www.gstatic.com`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     `script-src 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com https://www.gstatic.com${isDev ? " 'unsafe-eval'" : ''}`,
     "frame-src 'self' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://rahul-portofolio.firebaseapp.com https://*.firebaseapp.com",
