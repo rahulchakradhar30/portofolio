@@ -4,11 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  GoogleAuthProvider,
-  getRedirectResult,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
-  signInWithRedirect,
   sendPasswordResetEmail,
   type User,
 } from 'firebase/auth';
@@ -18,7 +14,6 @@ import { assertFirebaseClientConfig, firebaseAuth } from '@/app/lib/firebaseClie
 type LoginStep = 'credentials' | 'otp' | 'forgot-password';
 type LoadingStage =
   | 'idle'
-  | 'starting-google'
   | 'starting-email'
   | 'sending-otp'
   | 'verifying-otp'
@@ -217,17 +212,6 @@ function EyeIcon({ open }: { open: boolean }) {
   );
 }
 
-// ── Google Icon ─────────────────────────────────────────────────────
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 48 48">
-      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-      <path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.4 24.4 0 0 0 0 21.56l7.98-6.19z"/>
-      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-    </svg>
-  );
-}
 
 // ── Spinner ─────────────────────────────────────────────────────────
 function Spinner({ size = 16, light = false }: { size?: number; light?: boolean }) {
@@ -254,7 +238,6 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const isFinalizingRef = useRef(false);
 
   // Form state
   const [step, setStep] = useState<LoginStep>('credentials');
@@ -333,34 +316,6 @@ export default function AdminLoginPage() {
     throw new Error('Session verification timed out. Please try again.');
   }, []);
 
-  const finalizeServerLogin = useCallback(async (user: User) => {
-    if (isFinalizingRef.current) return;
-    isFinalizingRef.current = true;
-
-    try {
-      setLoadingStage('verifying');
-      const idToken = await user.getIdToken(true);
-
-      const res = await fetch('/api/admin/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ idToken }),
-        credentials: 'include',
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login request failed');
-
-      await waitForAdminSession();
-      setLoadingStage('redirecting');
-      await new Promise((resolve) => setTimeout(resolve, 220));
-      router.replace('/admin/dashboard');
-    } catch (err) {
-      throw new Error(err instanceof Error ? err.message : 'Failed to finalize login');
-    } finally {
-      isFinalizingRef.current = false;
-    }
-  }, [router, waitForAdminSession]);
 
   // ── Check existing auth on mount ──────────────────────────────────
   useEffect(() => {
@@ -383,57 +338,6 @@ export default function AdminLoginPage() {
     checkExistingAuth();
   }, [router]);
 
-  // ── Google redirect result handler ────────────────────────────────
-  useEffect(() => {
-    if (isCheckingAuth) return;
-    if (!firebaseAuth) return;
-    const auth = firebaseAuth;
-
-    let active = true;
-
-    const completeLogin = async (user: User) => {
-      if (!active || isFinalizingRef.current) return;
-      try {
-        setError(null);
-        setLoading(true);
-        await finalizeServerLogin(user);
-      } catch (err) {
-        if (!active) return;
-        setError(getReadableAuthError(err));
-        setLoading(false);
-      }
-    };
-
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          await completeLogin(result.user);
-        }
-      } catch (err) {
-        if (!active) return;
-        setError(getReadableAuthError(err));
-        setLoading(false);
-      }
-    };
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && step === 'credentials') {
-        // Only auto-finalize for Google sign-in (not email/password which goes through OTP)
-        const providers = user.providerData.map((p) => p.providerId);
-        if (providers.includes('google.com')) {
-          void completeLogin(user);
-        }
-      }
-    });
-
-    void handleRedirectResult();
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
-  }, [finalizeServerLogin, getReadableAuthError, isCheckingAuth, step]);
 
   // ── Loading hint escalation ───────────────────────────────────────
   useEffect(() => {
@@ -450,7 +354,6 @@ export default function AdminLoginPage() {
   }, [loading]);
 
   const loadingMessage = (() => {
-    if (loadingStage === 'starting-google') return 'Connecting to Google...';
     if (loadingStage === 'starting-email') return 'Validating credentials...';
     if (loadingStage === 'sending-otp') return 'Sending verification code...';
     if (loadingStage === 'verifying-otp') return 'Verifying code...';
@@ -464,27 +367,6 @@ export default function AdminLoginPage() {
     return 'Signing in...';
   })();
 
-  // ── Google Login ──────────────────────────────────────────────────
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setLoadingStage('starting-google');
-    setError(null);
-    setSuccess(null);
-
-    try {
-      assertFirebaseClientConfig();
-      if (!firebaseAuth) {
-        throw new Error('Missing Firebase client environment variables for Google login.');
-      }
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithRedirect(firebaseAuth, provider);
-    } catch (e) {
-      setError(getReadableAuthError(e));
-      setLoading(false);
-      setLoadingStage('idle');
-    }
-  };
 
   // ── Email/Password Login → Send OTP ───────────────────────────────
   const handleEmailPasswordLogin = async () => {
@@ -766,38 +648,6 @@ export default function AdminLoginPage() {
                     <p className="mt-1 text-red-600/90 text-[13px]">{error}</p>
                   </motion.div>
                 )}
-
-                {/* Google Sign In */}
-                <button
-                  id="google-sign-in-btn"
-                  onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-2xl px-5 py-3.5 text-sm font-bold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
-                  style={{
-                    background: 'linear-gradient(135deg, #8d6b4e 0%, #6e5440 100%)',
-                    color: '#fffaf3',
-                    boxShadow: '0 8px 24px rgba(141,107,78,0.25), inset 0 1px 0 rgba(255,255,255,0.12)',
-                  }}
-                >
-                  {loading && loadingStage === 'starting-google' ? (
-                    <>
-                      <Spinner size={16} light />
-                      {loadingMessage}
-                    </>
-                  ) : (
-                    <>
-                      <GoogleIcon />
-                      Continue with Google
-                    </>
-                  )}
-                </button>
-
-                {/* Divider */}
-                <div className="mt-5 flex items-center gap-3">
-                  <div className="h-px flex-1 bg-[#7a5f47]/12" />
-                  <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8d6b4e]/60">or sign in with email</span>
-                  <div className="h-px flex-1 bg-[#7a5f47]/12" />
-                </div>
 
                 {/* Email / Password Form */}
                 <div className="mt-5 space-y-4">
