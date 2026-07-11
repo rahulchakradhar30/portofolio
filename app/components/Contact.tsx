@@ -49,7 +49,6 @@ export default function Contact() {
     .replace(/\p{Extended_Pictographic}/gu, "")
     .replace(/[\u200D\uFE0F]/g, "");
 
-  if (contentError) throw contentError;
   if (contentLoading && isVisible) {
     return (
       <section className="section-soft relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">

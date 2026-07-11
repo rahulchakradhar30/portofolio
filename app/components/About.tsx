@@ -38,7 +38,6 @@ export default function About() {
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
   const isVisible = content ? content.sectionVisibility?.about !== false : true;
 
-  if (error) throw error;
   if (loading) {
     return (
       <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">

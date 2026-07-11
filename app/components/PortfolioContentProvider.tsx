@@ -64,11 +64,26 @@ export function PortfolioContentProvider({ children }: { children: React.ReactNo
         });
       },
       (err) => {
-        console.error("Firestore onSnapshot error:", err);
-        startTransition(() => {
-          setError(err);
-          setLoading(false);
-        });
+        console.error("Firestore onSnapshot error, falling back to REST API:", err);
+        fetch("/api/admin/content")
+          .then((res) => {
+            if (!res.ok) throw new Error("Failed to load content from fallback API");
+            return res.json();
+          })
+          .then((data) => {
+            startTransition(() => {
+              setContent(data.content || null);
+              setLoading(false);
+              setError(null);
+            });
+          })
+          .catch((fetchErr) => {
+            console.error("Content fallback fetch error:", fetchErr);
+            startTransition(() => {
+              setError(fetchErr instanceof Error ? fetchErr : new Error("Failed to load content"));
+              setLoading(false);
+            });
+          });
       }
     );
 

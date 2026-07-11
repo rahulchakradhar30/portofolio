@@ -45,7 +45,6 @@ export default function Hero() {
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
   const isVisible = content ? content.sectionVisibility?.hero !== false : true;
 
-  if (error) throw error;
   if (loading) return <LoadingSkeleton variant="hero" />;
   if (!isVisible) return null;
 

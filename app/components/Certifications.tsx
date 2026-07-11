@@ -57,7 +57,6 @@ export default function Certifications() {
     fetchCertifications();
   }, []);
 
-  if (error || contentError) throw (error || contentError);
   if ((loading || contentLoading) && isVisible) {
     return (
       <section className="section-surface relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
