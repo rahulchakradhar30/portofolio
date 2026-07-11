@@ -62,5 +62,16 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false;
     }
+    
+    // Admin OTPs, Signup OTPs, and Rate Limits Collection - Server-only (blocked for all public/client access)
+    match /admin_otps/{docId} {
+      allow read, write: if false;
+    }
+    match /signup_otps/{docId} {
+      allow read, write: if false;
+    }
+    match /rate_limits/{docId} {
+      allow read, write: if false;
+    }
   }
 }
