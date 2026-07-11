@@ -253,12 +253,13 @@ const serverFirebaseHelpers = {
       const db = getAdminDb();
       const now = new Date();
       const updatedAtStr = now.toISOString ? now.toISOString() : now;
+      const safeProjectData = removeUndefinedValues(projectData);
       await db.collection('projects').doc(projectId).update({
-        ...projectData,
+        ...safeProjectData,
         updated_at: updatedAtStr,
       });
       console.log('Server: Project updated');
-      return { id: projectId, ...projectData, updated_at: updatedAtStr };
+      return { id: projectId, ...safeProjectData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating project:', error);
       throw error;
@@ -330,12 +331,13 @@ const serverFirebaseHelpers = {
     try {
       console.log('Server: Updating skill:', skillId);
       const db = getAdminDb();
+      const safeSkillData = removeUndefinedValues(skillData);
       await db.collection('skills').doc(skillId).update({
-        ...skillData,
+        ...safeSkillData,
         updated_at: new Date(),
       });
       console.log('Server: Skill updated');
-      return { id: skillId, ...skillData };
+      return { id: skillId, ...safeSkillData };
     } catch (error) {
       console.error('Server: Error updating skill:', error);
       throw error;
@@ -603,12 +605,13 @@ const serverFirebaseHelpers = {
       const db = getAdminDb();
       const now = new Date();
       const updatedAtStr = now.toISOString ? now.toISOString() : now;
+      const safeCertificationData = removeUndefinedValues(certificationData);
       await db.collection('certifications').doc(certificationId).update({
-        ...certificationData,
+        ...safeCertificationData,
         updated_at: updatedAtStr,
       });
       console.log('Server: Certification updated');
-      return { id: certificationId, ...certificationData, updated_at: updatedAtStr };
+      return { id: certificationId, ...safeCertificationData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating certification:', error);
       throw error;
