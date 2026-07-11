@@ -119,6 +119,21 @@ export interface PortfolioContent {
   sectionVisibility?: SectionVisibility;
   siteCopy?: SiteCopy;
   radarConfig?: RadarConfig;
+  // Advanced CMS Extensions
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  seoCanonicalUrl?: string;
+  seoOgImage?: string;
+  seoTwitterCard?: string;
+  seoFavicon?: string;
+  seoThemeColor?: string;
+  seoRobots?: string;
+  animationsEnabled?: boolean;
+  animationSpeed?: 'slow' | 'normal' | 'fast';
+  animationType?: 'fade' | 'slide' | 'zoom';
+  animationDelay?: number;
+  scrollEffects?: boolean;
 }
 
 export interface SectionVisibility {

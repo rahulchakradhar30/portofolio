@@ -58,40 +58,36 @@ function pickByIds<T extends { id: string }>(items: T[], ids: string[]) {
   return ids.map((id) => map.get(id)).filter(Boolean) as T[];
 }
 
+import { usePortfolioContent } from "./PortfolioContentProvider";
+
 export default function PortfolioRadar() {
+  const { content, loading: contentLoading } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [radarConfig, setRadarConfig] = useState<RadarConfig>(DEFAULT_RADAR_CONFIG);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [pointer, setPointer] = useState({ x: 0, y: 0, active: false });
   const [isCompactViewport, setIsCompactViewport] = useState(false);
 
+  const isVisible = content ? content.sectionVisibility?.radar !== false : true;
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const radarConfig = useMemo(() => normalizeRadarConfig(content?.radarConfig), [content]);
+
   useEffect(() => {
     const loadRadar = async () => {
       try {
-        const [skillsRes, projectsRes, certificationsRes, contentRes] = await Promise.all([
+        const [skillsRes, projectsRes, certificationsRes] = await Promise.all([
           fetch("/api/admin/skills"),
           fetch("/api/admin/projects"),
           fetch("/api/admin/certifications"),
-          fetch("/api/admin/content"),
         ]);
 
-        const [skillsData, projectsData, certificationsData, contentData] = await Promise.all([
+        const [skillsData, projectsData, certificationsData] = await Promise.all([
           skillsRes.json(),
           projectsRes.json(),
           certificationsRes.json(),
-          contentRes.json(),
         ]);
-
-        if (contentData?.content) {
-          setIsVisible(contentData.content.sectionVisibility?.radar !== false);
-          setSiteCopy(getSiteCopy(contentData.content));
-          setRadarConfig(normalizeRadarConfig(contentData.content.radarConfig));
-        }
 
         setSkills(Array.isArray(skillsData.skills) ? skillsData.skills : []);
         setProjects(Array.isArray(projectsData.projects) ? projectsData.projects : []);

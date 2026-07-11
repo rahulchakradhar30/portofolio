@@ -1,9 +1,10 @@
 import { MetadataRoute } from 'next';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
-import type { Project, Certification } from '@/app/lib/types';
+import type { Project, Certification, PortfolioContent } from '@/app/lib/types';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rahulchakradhar.com';
+  const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
+  const baseUrl = content?.seoCanonicalUrl || process.env.NEXT_PUBLIC_SITE_URL || 'https://rahulchakradhar.com';
 
   // Base routes
   const routes = [

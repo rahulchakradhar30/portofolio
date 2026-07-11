@@ -4,6 +4,7 @@ import CookieConsent from "./components/CookieConsent";
 import { MotionProvider } from "./components/MotionProvider";
 import AppShell from "./components/AppShell";
 import DevtoolsGuard from "./components/DevtoolsGuard";
+import { PortfolioContentProvider } from "./components/PortfolioContentProvider";
 
 export const metadata: Metadata = {
   title: "Rahul Chakradhar | AI Systems, Storytelling & Impact",
@@ -18,11 +19,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-        <MotionProvider>
-          <DevtoolsGuard />
-          <AppShell>{children}</AppShell>
-          <CookieConsent />
-        </MotionProvider>
+        <PortfolioContentProvider>
+          <MotionProvider>
+            <DevtoolsGuard />
+            <AppShell>{children}</AppShell>
+            <CookieConsent />
+          </MotionProvider>
+        </PortfolioContentProvider>
       </body>
     </html>
   );

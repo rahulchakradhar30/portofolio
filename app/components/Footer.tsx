@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Camera, Code2, Heart, Link2, Mail } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 
 const DEFAULT_SOCIALS = {
@@ -14,31 +15,20 @@ const DEFAULT_SOCIALS = {
 };
 
 export default function Footer() {
+  const { content } = usePortfolioContent();
   const currentYear = new Date().getFullYear();
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [socials, setSocials] = useState(DEFAULT_SOCIALS);
 
-  useEffect(() => {
-    const loadCopy = async () => {
-      try {
-        const res = await fetch("/api/admin/content");
-        const data = await res.json();
-        if (data.content) {
-          setSiteCopy(getSiteCopy(data.content));
-          setSocials({
-            email: data.content.email || DEFAULT_SOCIALS.email,
-            instagram: data.content.instagram || DEFAULT_SOCIALS.instagram,
-            linkedin: data.content.linkedin || DEFAULT_SOCIALS.linkedin,
-            github: data.content.github || DEFAULT_SOCIALS.github,
-          });
-        }
-      } catch {
-        // Keep defaults.
-      }
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+
+  const socials = useMemo(() => {
+    if (!content) return DEFAULT_SOCIALS;
+    return {
+      email: content.email || DEFAULT_SOCIALS.email,
+      instagram: content.instagram || DEFAULT_SOCIALS.instagram,
+      linkedin: content.linkedin || DEFAULT_SOCIALS.linkedin,
+      github: content.github || DEFAULT_SOCIALS.github,
     };
-
-    loadCopy();
-  }, []);
+  }, [content]);
 
   return (
     <footer className="relative overflow-hidden border-t border-[#7a5f47]/10 bg-[#f4eadb] text-[#32281f]">
@@ -124,7 +114,7 @@ export default function Footer() {
             >
               <h4 className="mb-4 text-lg font-semibold text-[#2f241b]">{siteCopy.footerServicesTitle}</h4>
               <ul className="space-y-2 text-[#6a5846]">
-                {siteCopy.footerServices.map((service) => (
+                {siteCopy.footerServices.map((service: string) => (
                   <li key={service}>{service}</li>
                 ))}
               </ul>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import LoadingSkeleton from "./LoadingSkeleton";
@@ -8,6 +8,7 @@ import { useMotionPreferences } from "./MotionProvider";
 import { useIsMobile } from "./useViewport";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { ArrowRight, Sparkles, Layers3 } from "lucide-react";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 
 const DEFAULT_HERO_DATA = {
   heroTitle: "Rahul Chakradhar",
@@ -22,52 +23,31 @@ const DEFAULT_HERO_DATA = {
 };
 
 export default function Hero() {
+  const { content, loading, error } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const isMobile = useIsMobile();
-  const [heroData, setHeroData] = useState(DEFAULT_HERO_DATA);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchHeroData = async () => {
-      try {
-        const res = await fetch('/api/admin/content');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.content) {
-            setIsVisible(data.content.sectionVisibility?.hero !== false);
-            setSiteCopy(getSiteCopy(data.content));
-            setHeroData({
-              heroTitle: data.content.heroTitle || DEFAULT_HERO_DATA.heroTitle,
-              heroSubtitle: data.content.heroSubtitle || DEFAULT_HERO_DATA.heroSubtitle,
-              heroTagline: data.content.heroTagline || DEFAULT_HERO_DATA.heroTagline,
-              profileImage: data.content.profileImage || DEFAULT_HERO_DATA.profileImage,
-              bannerImage: data.content.bannerImage || DEFAULT_HERO_DATA.bannerImage,
-              resumeUrl: data.content.resumeUrl || DEFAULT_HERO_DATA.resumeUrl,
-              instagram: data.content.instagram || DEFAULT_HERO_DATA.instagram,
-              linkedin: data.content.linkedin || DEFAULT_HERO_DATA.linkedin,
-              github: data.content.github || DEFAULT_HERO_DATA.github,
-            });
-          }
-        } else {
-          throw new Error('Failed to load hero content');
-        }
-      } catch (error) {
-        console.error('Error fetching hero data:', error);
-        setError(error instanceof Error ? error : new Error('Failed to load hero section'));
-      } finally {
-        setLoading(false);
-      }
+  const heroData = useMemo(() => {
+    if (!content) return DEFAULT_HERO_DATA;
+    return {
+      heroTitle: content.heroTitle || DEFAULT_HERO_DATA.heroTitle,
+      heroSubtitle: content.heroSubtitle || DEFAULT_HERO_DATA.heroSubtitle,
+      heroTagline: content.heroTagline || DEFAULT_HERO_DATA.heroTagline,
+      profileImage: content.profileImage || DEFAULT_HERO_DATA.profileImage,
+      bannerImage: content.bannerImage || DEFAULT_HERO_DATA.bannerImage,
+      resumeUrl: content.resumeUrl || DEFAULT_HERO_DATA.resumeUrl,
+      instagram: content.instagram || DEFAULT_HERO_DATA.instagram,
+      linkedin: content.linkedin || DEFAULT_HERO_DATA.linkedin,
+      github: content.github || DEFAULT_HERO_DATA.github,
     };
+  }, [content]);
 
-    fetchHeroData();
-  }, []);
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const isVisible = content ? content.sectionVisibility?.hero !== false : true;
 
   if (error) throw error;
-  if (!loading && !isVisible) return null;
   if (loading) return <LoadingSkeleton variant="hero" />;
+  if (!isVisible) return null;
 
   return (
     <section className="relative min-h-screen overflow-hidden pt-24 pb-16 sm:pt-28 lg:pt-36 lg:pb-20">

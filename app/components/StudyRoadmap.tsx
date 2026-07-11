@@ -161,36 +161,33 @@ function normalizeStageMetrics(
   return roadmapItems.map((item) => parsed.get(item.id) || DEFAULT_STAGE_METRIC(item.id));
 }
 
+import { usePortfolioContent } from "./PortfolioContentProvider";
+
 export default function StudyRoadmap() {
+  const { content } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
-  const [enabled, setEnabled] = useState(true);
-  const [allowExtension, setAllowExtension] = useState(false);
-  const [items, setItems] = useState<StudyRoadmapItem[]>(DEFAULT_STUDY_ROADMAP);
-  const [metrics, setMetrics] = useState<StudyRoadmapStageMetric[]>(
-    DEFAULT_STUDY_ROADMAP.map((item) => DEFAULT_STAGE_METRIC(item.id))
-  );
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch("/api/admin/content", { cache: "no-store" });
-        if (!res.ok) return;
+  const enabled = useMemo(() => {
+    if (!content) return true;
+    return content.studyRoadmapEnabled !== false && content.sectionVisibility?.roadmap !== false;
+  }, [content]);
 
-        const data = (await res.json()) as { content?: PortfolioContent };
-        if (!data.content) return;
+  const allowExtension = useMemo(() => {
+    if (!content) return false;
+    return Boolean(content.allowRoadmapExtension);
+  }, [content]);
 
-        setEnabled(data.content.studyRoadmapEnabled !== false && data.content.sectionVisibility?.roadmap !== false);
-        setAllowExtension(Boolean(data.content.allowRoadmapExtension));
-        const normalizedItems = normalizeRoadmap(data.content.studyRoadmap);
-        setItems(normalizedItems);
-        setMetrics(normalizeStageMetrics(normalizedItems, data.content.studyRoadmapMetrics));
-      } catch {
-        // Keep defaults for public rendering stability.
-      }
-    };
+  const items = useMemo(() => {
+    if (!content) return DEFAULT_STUDY_ROADMAP;
+    return normalizeRoadmap(content.studyRoadmap);
+  }, [content]);
 
-    load();
-  }, []);
+  const metrics = useMemo(() => {
+    if (!content) {
+      return DEFAULT_STUDY_ROADMAP.map((item) => DEFAULT_STAGE_METRIC(item.id));
+    }
+    return normalizeStageMetrics(items, content.studyRoadmapMetrics);
+  }, [content, items]);
 
   const visibleItems = useMemo(() => {
     const coreItems = items.filter((item) => !item.isHigherStudy);

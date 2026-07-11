@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Award, ExternalLink, Sparkles, X } from "lucide-react";
@@ -26,38 +26,29 @@ function getCertificationTags(cert: Certification) {
   return Array.from(tags).slice(0, 3);
 }
 
+import { usePortfolioContent } from "./PortfolioContentProvider";
+
 export default function Certifications() {
+  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [selectedCert, setSelectedCert] = useState<Certification | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const isVisible = content ? content.sectionVisibility?.certifications !== false : true;
+
   useEffect(() => {
     const fetchCertifications = async () => {
       try {
-        const [certificationsRes, contentRes] = await Promise.all([
-          fetch('/api/admin/certifications'),
-          fetch('/api/admin/content'),
-        ]);
-
+        const certificationsRes = await fetch('/api/admin/certifications');
         if (!certificationsRes.ok) throw new Error('Failed to fetch certifications');
-
         const certificationsData = await certificationsRes.json();
         setCertifications(Array.isArray(certificationsData.certifications) ? certificationsData.certifications : []);
-
-        if (contentRes.ok) {
-          const contentData = await contentRes.json();
-          if (contentData.content) {
-            setIsVisible(contentData.content.sectionVisibility?.certifications !== false);
-            setSiteCopy(getSiteCopy(contentData.content));
-          }
-        }
-      } catch (fetchError) {
-        console.error('Error fetching certifications:', fetchError);
-        setError(fetchError instanceof Error ? fetchError : new Error('Failed to load certifications'));
+      } catch (err) {
+        console.error('Error fetching certifications:', err);
+        setError(err instanceof Error ? err : new Error('Failed to load certifications'));
       } finally {
         setLoading(false);
       }
@@ -66,8 +57,15 @@ export default function Certifications() {
     fetchCertifications();
   }, []);
 
-  if (error) throw error;
-  if (!loading && !isVisible) return null;
+  if (error || contentError) throw (error || contentError);
+  if ((loading || contentLoading) && isVisible) {
+    return (
+      <section className="section-surface relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+        <LoadingSkeleton variant="cards" />
+      </section>
+    );
+  }
+  if (!isVisible) return null;
 
   const orderedCertifications = prioritizeFeatured(certifications);
   const visibleCertifications = orderedCertifications.slice(0, 6);

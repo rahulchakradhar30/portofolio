@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import LoadingSkeleton from "./LoadingSkeleton";
 import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { BadgeCheck, Compass, Layers3, Sparkles } from "lucide-react";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 
 const DEFAULT_ABOUT = {
   aboutText:
@@ -20,42 +21,24 @@ const DEFAULT_ABOUT = {
 };
 
 export default function About() {
+  const { content, loading, error } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
-  const [aboutData, setAboutData] = useState(DEFAULT_ABOUT);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    const fetchAbout = async () => {
-      try {
-        const res = await fetch('/api/admin/content');
-        if (!res.ok) throw new Error('Failed to load about content');
-        const data = await res.json();
-        if (data.content) {
-          setIsVisible(data.content.sectionVisibility?.about !== false);
-          setSiteCopy(getSiteCopy(data.content));
-          setAboutData({
-            aboutText: data.content.aboutText || DEFAULT_ABOUT.aboutText,
-            aboutStats:
-              Array.isArray(data.content.aboutStats) && data.content.aboutStats.length > 0
-                ? data.content.aboutStats
-                : DEFAULT_ABOUT.aboutStats,
-          });
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to load about section'));
-      } finally {
-        setLoading(false);
-      }
+  const aboutData = useMemo(() => {
+    if (!content) return DEFAULT_ABOUT;
+    return {
+      aboutText: content.aboutText || DEFAULT_ABOUT.aboutText,
+      aboutStats:
+        Array.isArray(content.aboutStats) && content.aboutStats.length > 0
+          ? content.aboutStats
+          : DEFAULT_ABOUT.aboutStats,
     };
+  }, [content]);
 
-    fetchAbout();
-  }, []);
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const isVisible = content ? content.sectionVisibility?.about !== false : true;
 
   if (error) throw error;
-  if (!loading && !isVisible) return null;
   if (loading) {
     return (
       <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
@@ -63,6 +46,7 @@ export default function About() {
       </section>
     );
   }
+  if (!isVisible) return null;
 
   const storyBlocks = [
     {

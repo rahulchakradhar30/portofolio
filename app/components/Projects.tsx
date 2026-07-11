@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -38,38 +38,31 @@ function getProjectHighlights(project: Project) {
   return highlights.filter(Boolean).slice(0, 3);
 }
 
+import { usePortfolioContent } from "./PortfolioContentProvider";
+
 export default function Projects() {
+  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const isVisible = content ? content.sectionVisibility?.projects !== false : true;
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const [projectsRes, contentRes] = await Promise.all([
-          fetch('/api/admin/projects'),
-          fetch('/api/admin/content'),
-        ]);
+        const projectsRes = await fetch('/api/admin/projects');
         if (projectsRes.ok) {
           const data = await projectsRes.json();
           setProjects(data.projects || []);
         } else {
           throw new Error('Failed to fetch projects');
         }
-
-        if (contentRes.ok) {
-          const data = await contentRes.json();
-          if (data.content) {
-            setIsVisible(data.content.sectionVisibility?.projects !== false);
-            setSiteCopy(getSiteCopy(data.content));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-        setError(error instanceof Error ? error : new Error('Failed to load projects'));
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError(err instanceof Error ? err : new Error('Failed to load projects'));
       } finally {
         setLoading(false);
       }
@@ -78,8 +71,15 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
-  if (error) throw error;
-  if (!loading && !isVisible) return null;
+  if (error || contentError) throw (error || contentError);
+  if ((loading || contentLoading) && isVisible) {
+    return (
+      <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+        <LoadingSkeleton variant="cards" />
+      </section>
+    );
+  }
+  if (!isVisible) return null;
 
   const orderedProjects = prioritizeFeatured(projects);
   const visibleProjects = orderedProjects.slice(0, 6);

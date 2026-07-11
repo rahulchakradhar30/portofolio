@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { assertAdminSession } from '@/app/lib/adminAuth';
 import { logAdminAudit } from '@/app/lib/adminAudit';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
+import { createHash } from 'crypto';
+import { getAdminDb } from '@/app/lib/firebaseAdmin';
 
 // Helper to add CORS headers
 function addCorsHeaders(response: NextResponse) {
@@ -73,6 +75,36 @@ export async function POST(request: NextRequest) {
       return addCorsHeaders(response);
     }
 
+    // Compute SHA-256 hash of file
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const fileHash = createHash('sha256').update(fileBuffer).digest('hex');
+
+    // Check database for existing asset hash
+    const db = getAdminDb();
+    const duplicateAssetSnap = await db
+      .collection('media_assets')
+      .where('fileHash', '==', fileHash)
+      .limit(1)
+      .get();
+
+    if (!duplicateAssetSnap.empty) {
+      const existingAsset = duplicateAssetSnap.docs[0].data();
+      console.log('[UPLOAD] Duplicate file detected. Returning cached URL:', existingAsset.url);
+      const response = NextResponse.json(
+        {
+          success: true,
+          imageUrl: existingAsset.url,
+          fileUrl: existingAsset.url,
+          publicId: existingAsset.publicId,
+          fileName: file.name,
+          size: file.size,
+          isDuplicate: true,
+        },
+        { status: 200 }
+      );
+      return addCorsHeaders(response);
+    }
+
     // Create FormData for Cloudinary
     const uploadFormData = new FormData();
     uploadFormData.append('file', file);
@@ -103,6 +135,17 @@ export async function POST(request: NextRequest) {
     const data = await cloudinaryResponse.json();
     console.log('[UPLOAD] Successfully uploaded:', data.public_id, 'URL:', data.secure_url);
 
+    // Record uploaded asset details in database
+    await db.collection('media_assets').add({
+      fileName: file.name,
+      fileType: file.type,
+      size: file.size,
+      fileHash: fileHash,
+      url: data.secure_url,
+      publicId: data.public_id,
+      created_at: new Date().toISOString(),
+    });
+
     const response = NextResponse.json(
       {
         success: true,
@@ -111,6 +154,7 @@ export async function POST(request: NextRequest) {
         publicId: data.public_id,
         fileName: file.name,
         size: file.size,
+        isDuplicate: false,
       },
       { status: 200 }
     );

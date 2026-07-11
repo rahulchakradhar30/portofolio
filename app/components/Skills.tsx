@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { Skill } from "@/app/lib/types";
 import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
@@ -10,6 +10,7 @@ import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { Sparkles } from "lucide-react";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 
 const SKILL_TAG_PRESETS: Record<string, string[]> = {
   python: ["AI", "Backend", "Automation"],
@@ -30,37 +31,28 @@ function getSkillTags(skill: Skill) {
 }
 
 export default function Skills() {
+  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const isVisible = content ? content.sectionVisibility?.skills !== false : true;
 
   useEffect(() => {
     const fetchSkills = async () => {
       try {
-        const [skillsRes, contentRes] = await Promise.all([
-          fetch('/api/admin/skills'),
-          fetch('/api/admin/content'),
-        ]);
+        const skillsRes = await fetch('/api/admin/skills');
         if (skillsRes.ok) {
           const data = await skillsRes.json();
           setSkills(data.skills || []);
         } else {
           throw new Error('Failed to fetch skills');
         }
-
-        if (contentRes.ok) {
-          const data = await contentRes.json();
-          if (data.content) {
-            setIsVisible(data.content.sectionVisibility?.skills !== false);
-            setSiteCopy(getSiteCopy(data.content));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching skills:', error);
-        setError(error instanceof Error ? error : new Error('Failed to load skills'));
+      } catch (err) {
+        console.error('Error fetching skills:', err);
+        setError(err instanceof Error ? err : new Error('Failed to load skills'));
       } finally {
         setLoading(false);
       }
@@ -69,8 +61,15 @@ export default function Skills() {
     fetchSkills();
   }, []);
 
-  if (error) throw error;
-  if (!loading && !isVisible) return null;
+  if (error || contentError) throw (error || contentError);
+  if ((loading || contentLoading) && isVisible) {
+    return (
+      <section className="section-soft relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+        <LoadingSkeleton variant="cards" />
+      </section>
+    );
+  }
+  if (!isVisible) return null;
 
   const orderedSkills = prioritizeFeatured(skills);
   const visibleSkills = orderedSkills.slice(0, 12);

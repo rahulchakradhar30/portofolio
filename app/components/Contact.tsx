@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, useMemo, type ChangeEvent, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { Camera, Code2, Link2, Mail, MapPin, Send, Clock3, ShieldCheck, Briefcase } from "lucide-react";
 import LoadingSkeleton from "./LoadingSkeleton";
@@ -16,7 +16,10 @@ const DEFAULT_CONTACT = {
   github: "https://github.com/rahulchakradhar30",
 };
 
+import { usePortfolioContent } from "./PortfolioContentProvider";
+
 export default function Contact() {
+  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -27,42 +30,34 @@ export default function Contact() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [contactData, setContactData] = useState(DEFAULT_CONTACT);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
-  const [isVisible, setIsVisible] = useState(true);
-  const [loadingContact, setLoadingContact] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+
+  const contactData = useMemo(() => {
+    if (!content) return DEFAULT_CONTACT;
+    return {
+      email: content.email || DEFAULT_CONTACT.email,
+      location: content.location || DEFAULT_CONTACT.location,
+      instagram: content.instagram || DEFAULT_CONTACT.instagram,
+      linkedin: content.linkedin || DEFAULT_CONTACT.linkedin,
+      github: content.github || DEFAULT_CONTACT.github,
+    };
+  }, [content]);
+
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
+  const isVisible = content ? content.sectionVisibility?.contact !== false : true;
 
   const sanitizeContactText = (value: string) => value
     .replace(/\p{Extended_Pictographic}/gu, "")
     .replace(/[\u200D\uFE0F]/g, "");
 
-  useEffect(() => {
-    const fetchContactData = async () => {
-      try {
-        const res = await fetch('/api/admin/content');
-        if (!res.ok) throw new Error('Failed to load contact content');
-        const data = await res.json();
-        if (data.content) {
-          setIsVisible(data.content.sectionVisibility?.contact !== false);
-          setSiteCopy(getSiteCopy(data.content));
-          setContactData({
-            email: data.content.email || DEFAULT_CONTACT.email,
-            location: data.content.location || DEFAULT_CONTACT.location,
-            instagram: data.content.instagram || DEFAULT_CONTACT.instagram,
-            linkedin: data.content.linkedin || DEFAULT_CONTACT.linkedin,
-            github: data.content.github || DEFAULT_CONTACT.github,
-          });
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to load contact section'));
-      } finally {
-        setLoadingContact(false);
-      }
-    };
-
-    fetchContactData();
-  }, []);
+  if (contentError) throw contentError;
+  if (contentLoading && isVisible) {
+    return (
+      <section className="section-soft relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+        <LoadingSkeleton variant="contact" />
+      </section>
+    );
+  }
+  if (!isVisible) return null;
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -115,16 +110,6 @@ export default function Contact() {
       setIsSubmitting(false);
     }
   };
-
-  if (error) throw error;
-  if (!loadingContact && !isVisible) return null;
-  if (loadingContact) {
-    return (
-      <section className="section-soft relative min-h-screen overflow-hidden px-4 py-16 md:py-24" id="contact">
-        <LoadingSkeleton variant="contact" />
-      </section>
-    );
-  }
 
   return (
     <section className="section-soft relative min-h-screen overflow-hidden px-4 py-16 md:py-24" id="contact">

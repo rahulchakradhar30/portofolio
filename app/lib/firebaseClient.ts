@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -24,9 +25,10 @@ export const firebaseApp = hasFirebaseClientConfig()
   : null;
 
 export const firebaseAuth = firebaseApp ? getAuth(firebaseApp) : null;
+export const firebaseDb = firebaseApp ? getFirestore(firebaseApp) : null;
 
 export function assertFirebaseClientConfig() {
-  if (!firebaseApp || !firebaseAuth) {
+  if (!firebaseApp || !firebaseAuth || !firebaseDb) {
     throw new Error('Missing Firebase client environment variables for Google login.');
   }
 }

@@ -6,25 +6,14 @@ import { Command, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 
+import { useMemo } from "react";
+import { usePortfolioContent } from "./PortfolioContentProvider";
+
 export default function Header() {
+  const { content } = usePortfolioContent();
   const [isOpen, setIsOpen] = useState(false);
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
 
-  useEffect(() => {
-    const loadCopy = async () => {
-      try {
-        const res = await fetch("/api/admin/content");
-        const data = await res.json();
-        if (data.content) {
-          setSiteCopy(getSiteCopy(data.content));
-        }
-      } catch {
-        // Keep defaults if the content endpoint is unavailable.
-      }
-    };
-
-    loadCopy();
-  }, []);
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
 
   const navItems = [
     { name: siteCopy.navHome, href: "#home" },
