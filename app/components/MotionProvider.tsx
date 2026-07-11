@@ -1,12 +1,14 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 
 type MotionMode = "system" | "full" | "reduced";
 
 interface MotionContextValue {
   motionMode: MotionMode;
   reducedMotion: boolean;
+  scrollEffectsEnabled: boolean;
   cycleMotionMode: () => void;
 }
 
@@ -15,11 +17,12 @@ const MotionContext = createContext<MotionContextValue | null>(null);
 const STORAGE_KEY = "portfolio-motion-mode";
 
 export function MotionProvider({ children }: { children: React.ReactNode }) {
+  const { content } = usePortfolioContent();
+
   const [motionMode, setMotionMode] = useState<MotionMode>(() => {
     if (typeof window === "undefined") return "full";
     const saved = window.localStorage.getItem(STORAGE_KEY) as MotionMode | null;
-    if (saved === "reduced") return "full";
-    return saved === "full" || saved === "system" ? saved : "full";
+    return saved === "full" || saved === "system" || saved === "reduced" ? saved : "full";
   });
   const [systemReduced, setSystemReduced] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -38,7 +41,11 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(STORAGE_KEY, motionMode);
   }, [motionMode]);
 
-  const reducedMotion = motionMode === "reduced" || (motionMode === "system" && systemReduced);
+  const dbAnimationsEnabled = content ? content.animationsEnabled !== false : true;
+  const dbScrollEffects = content ? content.scrollEffects !== false : true;
+
+  const reducedMotion = !dbAnimationsEnabled || motionMode === "reduced" || (motionMode === "system" && systemReduced);
+  const scrollEffectsEnabled = dbScrollEffects && !reducedMotion;
 
   useEffect(() => {
     document.documentElement.setAttribute("data-motion", reducedMotion ? "reduced" : "full");
@@ -53,8 +60,8 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = useMemo(
-    () => ({ motionMode, reducedMotion, cycleMotionMode }),
-    [motionMode, reducedMotion]
+    () => ({ motionMode, reducedMotion, scrollEffectsEnabled, cycleMotionMode }),
+    [motionMode, reducedMotion, scrollEffectsEnabled]
   );
 
   return <MotionContext.Provider value={value}>{children}</MotionContext.Provider>;
