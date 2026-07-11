@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
       uid: decodedIdToken.uid,
     });
 
-    const resend = new Resend('re_KsPMTsto_PKLfcuYx6XXsB3HQTCMY1caD');
+    const resend = new Resend(process.env.RESEND_API_KEY || '');
 
     await resend.emails.send({
       from: 'onboarding@resend.dev',

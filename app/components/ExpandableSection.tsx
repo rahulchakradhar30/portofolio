@@ -33,6 +33,9 @@ export default function ExpandableSection({
       if (!element) return;
       const nextOverflow = element.scrollHeight > collapsedMaxHeightPx + 8;
       setHasOverflow(nextOverflow);
+      if (!nextOverflow) {
+        setExpanded(false);
+      }
       onOverflowChange?.(nextOverflow);
     };
 
@@ -52,12 +55,6 @@ export default function ExpandableSection({
       window.removeEventListener("resize", measure);
     };
   }, [collapsedMaxHeightPx, onOverflowChange]);
-
-  useEffect(() => {
-    if (!hasOverflow && expanded) {
-      setExpanded(false);
-    }
-  }, [expanded, hasOverflow]);
 
   return (
     <div className={className}>

@@ -26,6 +26,8 @@ export interface Project {
   showCode?: boolean;
   showDetails?: boolean;
   details?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Skill {
@@ -37,6 +39,8 @@ export interface Skill {
   icon: string; // icon name from lucide-react
   proficiency: number; // 0-100
   featured?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AdminUser {
@@ -237,7 +241,7 @@ export interface Certification {
   description: string;
   linkedinUrl?: string;
   featured: boolean;
-  created_at?: Date;
-  updated_at?: Date;
+  created_at?: string;
+  updated_at?: string;
 }
 

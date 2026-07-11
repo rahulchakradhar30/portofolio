@@ -628,4 +628,45 @@ const serverFirebaseHelpers = {
   },
 };
 
-export default serverFirebaseHelpers;
+function serializeDbDoc<T>(doc: T): T {
+  if (doc === null || doc === undefined) return doc;
+
+  if (Array.isArray(doc)) {
+    return doc.map((item) => serializeDbDoc(item)) as unknown as T;
+  }
+
+  if (typeof doc === 'object') {
+    // If it's a Firestore Timestamp (has toDate or _seconds)
+    if (typeof (doc as any).toDate === 'function') {
+      return (doc as any).toDate().toISOString() as unknown as T;
+    }
+    if ('_seconds' in (doc as any) && '_nanoseconds' in (doc as any)) {
+      return new Date((doc as any)._seconds * 1000).toISOString() as unknown as T;
+    }
+    if (doc instanceof Date) {
+      return doc.toISOString() as unknown as T;
+    }
+
+    const entries = Object.entries(doc as Record<string, unknown>).map(([k, v]) => [
+      k,
+      serializeDbDoc(v),
+    ]);
+    return Object.fromEntries(entries) as unknown as T;
+  }
+
+  return doc;
+}
+
+const wrappedHelpers: any = {};
+for (const [key, fn] of Object.entries(serverFirebaseHelpers)) {
+  if (typeof fn === 'function') {
+    wrappedHelpers[key] = async (...args: any[]) => {
+      const result = await (fn as any)(...args);
+      return serializeDbDoc(result);
+    };
+  } else {
+    wrappedHelpers[key] = fn;
+  }
+}
+
+export default wrappedHelpers as typeof serverFirebaseHelpers;
