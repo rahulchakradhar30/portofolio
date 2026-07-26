@@ -670,7 +670,7 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=rahul-portofolio
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=rahul-portofolio.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:...
-NEXT_PUBLIC_SITE_URL=https://rahulchakradhar.com
+NEXT_PUBLIC_SITE_URL=https://rahulchakradhar.vercel.app
 
 # Server-Side Firebase Admin Credentials
 FIREBASE_PROJECT_ID=rahul-portofolio
@@ -743,7 +743,7 @@ CLOUDINARY_API_SECRET=xxxxxxx
 ### Execution Workflow: From Request to Render
 
 1. **HTTP Request Ingress:**
-   - Client issues HTTP GET request to `https://rahulchakradhar.com/`.
+   - Client issues HTTP GET request to `https://rahulchakradhar.vercel.app/`.
    - The request hits Next.js Middleware in `proxy.ts`.
    - `proxy.ts` validates security policies and attaches standard security headers (`CSP`, `X-Frame-Options`, `X-Content-Type-Options`).
 
@@ -777,7 +777,7 @@ To implement full enterprise-grade SEO, the following schema implementations and
     "@type": "Person",
     "name": "Rahul Chakradhar",
     "jobTitle": "AI Systems Engineer & Full-Stack Developer",
-    "url": "https://rahulchakradhar.com",
+    "url": "https://rahulchakradhar.vercel.app",
     "sameAs": [
       "https://github.com/rahulchakradhar",
       "https://linkedin.com/in/rahulchakradhar",
@@ -800,7 +800,7 @@ To implement full enterprise-grade SEO, the following schema implementations and
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Rahul Chakradhar Portfolio",
-  "url": "https://rahulchakradhar.com",
+  "url": "https://rahulchakradhar.vercel.app",
   "author": {
     "@type": "Person",
     "name": "Rahul Chakradhar"
@@ -815,7 +815,7 @@ Ensure `generateMetadata()` in `app/page.tsx`, `app/projects/[id]/page.tsx`, and
 openGraph: {
   title: content.seoTitle,
   description: content.seoDescription,
-  url: content.seoCanonicalUrl || 'https://rahulchakradhar.com',
+  url: content.seoCanonicalUrl || 'https://rahulchakradhar.vercel.app',
   siteName: 'Rahul Chakradhar Portfolio',
   images: [
     {

@@ -8,7 +8,7 @@ import { PortfolioContentProvider } from "./components/PortfolioContentProvider"
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS, getGlobalJsonLdGraph } from "@/app/lib/seoSchemas";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  metadataBase: new URL("https://rahulchakradhar.vercel.app"),
   title: {
     default: `${PRIMARY_NAME} | AI Engineer & Full Stack Developer`,
     template: `%s | ${SITE_NAME}`,

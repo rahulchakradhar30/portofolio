@@ -37,7 +37,9 @@ export async function generateMetadata(): Promise<Metadata> {
       ];
 
   const ogImage = content?.seoOgImage || `${SITE_URL}/icon.svg`;
-  const canonicalUrl = content?.seoCanonicalUrl || SITE_URL;
+  const canonicalUrl = (content?.seoCanonicalUrl && !content.seoCanonicalUrl.includes('portofolio-one-dun-27') && !content.seoCanonicalUrl.includes('rahulchakradhar.com'))
+    ? content.seoCanonicalUrl
+    : SITE_URL;
 
   return {
     title,

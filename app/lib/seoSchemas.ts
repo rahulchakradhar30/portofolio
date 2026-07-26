@@ -1,6 +1,8 @@
 import type { Project, Certification, PortfolioContent } from "@/app/lib/types";
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://rahulchakradhar.com";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('portofolio-one-dun-27') && !process.env.NEXT_PUBLIC_SITE_URL.includes('rahulchakradhar.com')
+  ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+  : "https://rahulchakradhar.vercel.app";
 export const SITE_NAME = "Rahul Chakradhar Portfolio";
 
 export const NAME_VARIATIONS = [

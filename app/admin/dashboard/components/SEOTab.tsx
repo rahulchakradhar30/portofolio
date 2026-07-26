@@ -166,7 +166,7 @@ export default function SEOTab() {
               type="url"
               value={formData.seoCanonicalUrl}
               onChange={(e) => setFormData({ ...formData, seoCanonicalUrl: e.target.value })}
-              placeholder="https://rahulchakradhar.com"
+              placeholder="https://rahulchakradhar.vercel.app"
               className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-300 focus:bg-white focus:ring-2"
             />
           </div>

@@ -45,7 +45,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:378959139923:web:c16eeadc9a610bd14c22a6
 FIREBASE_PROJECT_ID=rahul-portofolio
 FIREBASE_PRIVATE_KEY=[Your private key from .env.local]
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@rahul-portofolio.iam.gserviceaccount.com
-NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
+NEXT_PUBLIC_SITE_URL=https://rahulchakradhar.vercel.app
 ```
 
 ---
@@ -62,7 +62,7 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.vercel.app
 ## After Adding to Vercel
 
 1. Wait for redeployment to complete
-2. Visit: `https://your-vercel-domain.vercel.app/admin/login`
+2. Visit: `https://rahulchakradhar.vercel.app/admin/login`
 3. Sign in with: `rahulchakradharperepogu@gmail.com`
 4. You should now see the admin dashboard
 
