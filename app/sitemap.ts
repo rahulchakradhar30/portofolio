@@ -1,12 +1,13 @@
 import { MetadataRoute } from 'next';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import type { Project, Certification, PortfolioContent } from '@/app/lib/types';
+import { SITE_URL } from '@/app/lib/seoSchemas';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
-  const baseUrl = content?.seoCanonicalUrl || process.env.NEXT_PUBLIC_SITE_URL || 'https://rahulchakradhar.com';
+  const baseUrl = content?.seoCanonicalUrl || process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
 
-  // Base routes
+  // Base public routes (Excludes /admin and /api)
   const routes = [
     '',
     '/projects',

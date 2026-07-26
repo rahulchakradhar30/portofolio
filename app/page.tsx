@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import serverFirebaseHelpers from "@/app/lib/firebaseServer";
 import type { PortfolioContent } from "@/app/lib/types";
+import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS } from "@/app/lib/seoSchemas";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import About from "./components/About";
@@ -17,25 +18,63 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
-  if (!content) return {};
 
-  const title = content.seoTitle || "Rahul Chakradhar | AI Systems, Storytelling & Impact";
-  const description = content.seoDescription || "Premium portfolio for Rahul Chakradhar, focused on AI-powered systems, product thinking, storytelling, and high-trust digital experiences.";
-  const keywords = content.seoKeywords ? content.seoKeywords.split(',').map((k: string) => k.trim()) : undefined;
+  const title = content?.seoTitle || `${PRIMARY_NAME} | AI Engineer, Full Stack Developer & Researcher`;
+  const description =
+    content?.seoDescription ||
+    `Official portfolio of ${PRIMARY_NAME} (P Rahul Chakradhar, Rahul Chakradhar) - AI Engineer, Full Stack Developer, and Student Researcher building AI systems and high-impact software.`;
+  
+  const keywords = content?.seoKeywords
+    ? content.seoKeywords.split(',').map((k: string) => k.trim())
+    : [
+        ...NAME_VARIATIONS,
+        "AI Engineer",
+        "Full Stack Developer",
+        "Rahul Chakradhar Portfolio",
+        "AI Systems",
+        "Next.js Developer",
+        "Software Engineer",
+      ];
+
+  const ogImage = content?.seoOgImage || `${SITE_URL}/icon.svg`;
+  const canonicalUrl = content?.seoCanonicalUrl || SITE_URL;
 
   return {
     title,
     description,
     keywords,
+    applicationName: SITE_NAME,
     alternates: {
-      canonical: content.seoCanonicalUrl || undefined,
+      canonical: canonicalUrl,
     },
     openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
       title,
       description,
-      images: content.seoOgImage ? [{ url: content.seoOgImage }] : [],
+      url: canonicalUrl,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: `${PRIMARY_NAME} Portfolio Preview`,
+        },
+      ],
     },
-    themeColor: content.seoThemeColor || undefined,
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+      site: "@rahulchakradhar",
+      creator: "@rahulchakradhar",
+    },
+    themeColor: content?.seoThemeColor || "#2f241b",
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 
