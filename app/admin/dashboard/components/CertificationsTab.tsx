@@ -169,27 +169,27 @@ export default function CertificationsTab() {
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="rounded-3xl border border-cyan-100 bg-gradient-to-br from-white via-cyan-50 to-emerald-50 p-5 shadow-sm md:p-6">
+      <div className="paper-card p-5 shadow-none md:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]/70">
               <BadgeCheck className="h-3.5 w-3.5" />
               Certifications Studio
             </div>
-            <h2 className="mt-3 text-2xl font-black text-slate-900 md:text-3xl">Manage Certifications</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">Manage Certifications</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/65 md:text-base">
               Add, feature, preview, and organize all certification assets from one clean admin view.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-[420px]">
-            <div className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Total</p>
-              <p className="mt-1 text-2xl font-black text-slate-900">{certifications.length}</p>
+            <div className="rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface)] p-4 shadow-[4px_4px_0_0_rgba(47,36,27,0.08)]">
+              <p className="text-xs uppercase tracking-wide text-[var(--foreground)]/55">Total</p>
+              <p className="mt-1 text-2xl font-black text-[var(--foreground)]">{certifications.length}</p>
             </div>
-            <div className="rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Featured</p>
-              <p className="mt-1 text-2xl font-black text-slate-900">{featuredCount}</p>
+            <div className="rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface)] p-4 shadow-[4px_4px_0_0_rgba(47,36,27,0.08)]">
+              <p className="text-xs uppercase tracking-wide text-[var(--foreground)]/55">Featured</p>
+              <p className="mt-1 text-2xl font-black text-[var(--foreground)]">{featuredCount}</p>
             </div>
             <button
               type="button"
@@ -201,7 +201,7 @@ export default function CertificationsTab() {
                   setShowForm(true);
                 }
               }}
-              className="col-span-2 rounded-2xl bg-gradient-to-r from-[#8d6b4e] to-[#c4a884] px-4 py-4 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 sm:col-span-1"
+              className="col-span-2 rounded-full border-2 border-[var(--foreground)] bg-[var(--accent)] px-4 py-4 text-sm font-semibold text-white shadow-[4px_4px_0_0_rgba(47,36,27,0.12)] transition hover:brightness-105 sm:col-span-1"
             >
               <Plus className="mr-2 inline-block h-4 w-4" />
               {showForm ? 'Close Form' : 'Add Certification'}
@@ -228,10 +228,10 @@ export default function CertificationsTab() {
       </div>
 
       {showForm && (
-        <div className="overflow-hidden rounded-3xl border border-cyan-100 bg-white shadow-lg">
-          <div className="border-b border-cyan-100 bg-gradient-to-r from-cyan-50 to-emerald-50 px-5 py-4 md:px-6">
-            <h3 className="text-lg font-bold text-slate-900">Add Certification</h3>
-            <p className="text-sm text-slate-600">Fill in the details and attach the certificate image.</p>
+        <div className="paper-card overflow-hidden shadow-none">
+          <div className="border-b-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-5 py-4 md:px-6">
+            <h3 className="text-lg font-black tracking-tight text-[var(--foreground)]">Add Certification</h3>
+            <p className="text-sm text-[var(--foreground)]/65">Fill in the details and attach the certificate image.</p>
           </div>
 
           <div className="grid gap-4 p-5 md:grid-cols-2 md:p-6">
@@ -364,10 +364,7 @@ export default function CertificationsTab() {
               </div>
             </div>
           </div>
-          <button
-            onClick={handleAddCertification}
-            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-          >
+          <button onClick={handleAddCertification} className="paper-button-primary w-full px-4 py-3 font-semibold">
             {editingCertificationId ? "Update Certification" : "Add Certification"}
           </button>
           {editingCertificationId && (
@@ -377,7 +374,7 @@ export default function CertificationsTab() {
                 resetCertificationForm();
                 setShowForm(false);
               }}
-              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="paper-button w-full px-4 py-3 font-semibold"
             >
               Cancel Editing
             </button>
@@ -394,7 +391,7 @@ export default function CertificationsTab() {
               key={cert.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-4 rounded-lg border border-gray-200 flex flex-col justify-between hover:border-cyan-300"
+              className="paper-card flex flex-col justify-between p-4 shadow-none"
             >
               <div className="flex gap-4">
                 <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-gray-200">

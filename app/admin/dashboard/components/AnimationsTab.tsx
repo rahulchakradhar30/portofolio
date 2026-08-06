@@ -67,15 +67,15 @@ export default function AnimationsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-cyan-100 bg-gradient-to-br from-white via-cyan-50 to-emerald-50 p-5 shadow-sm md:p-6">
+      <div className="paper-card p-5 shadow-none md:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]/70">
               <Sparkles className="h-3.5 w-3.5" />
               Motion Settings Studio
             </div>
-            <h2 className="mt-3 text-2xl font-black text-slate-900 md:text-3xl">Animation Controls</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">Animation Controls</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/65 md:text-base">
               Customize framer-motion transitions, speed parameters, delay settings, and scroll effects across the entire website interface.
             </p>
           </div>
@@ -83,7 +83,7 @@ export default function AnimationsTab() {
             type="button"
             disabled={saving}
             onClick={handleSave}
-            className="rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 disabled:opacity-50"
+            className="paper-button-primary rounded-full px-6 py-3.5 text-sm font-semibold disabled:opacity-50"
           >
             {saving ? <RefreshCw className="mr-2 inline-block h-4 w-4 animate-spin" /> : null}
             {saving ? "Saving Changes..." : "Save Configuration"}
@@ -93,11 +93,11 @@ export default function AnimationsTab() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Toggle States */}
-        <div className="space-y-5 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <ToggleLeft className="h-5 w-5 text-[#8d6b4e]" /> Core Motion Controls
+        <div className="paper-card space-y-5 p-5 shadow-none md:p-6">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+            <ToggleLeft className="h-5 w-5 text-[var(--accent)]" /> Core Motion Controls
           </h3>
-          <label className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50/50 p-4 cursor-pointer hover:bg-gray-50">
+          <label className="flex cursor-pointer items-center justify-between rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] p-4 hover:bg-[var(--surface)]">
             <div>
               <p className="text-sm font-bold text-gray-800">Enable Website Animations</p>
               <p className="text-xs text-gray-500">Toggle Framer Motion visuals on/off globally.</p>
@@ -106,10 +106,10 @@ export default function AnimationsTab() {
               type="checkbox"
               checked={formData.animationsEnabled}
               onChange={(e) => setFormData({ ...formData, animationsEnabled: e.target.checked })}
-              className="h-5 w-5 accent-cyan-600"
+              className="h-5 w-5 accent-[var(--accent)]"
             />
           </label>
-          <label className="flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50/50 p-4 cursor-pointer hover:bg-gray-50">
+            <label className="flex cursor-pointer items-center justify-between rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] p-4 hover:bg-[var(--surface)]">
             <div>
               <p className="text-sm font-bold text-gray-800">Scroll View Effects</p>
               <p className="text-xs text-gray-500">Trigger entrance transitions when sections scroll into viewport view.</p>
@@ -118,15 +118,15 @@ export default function AnimationsTab() {
               type="checkbox"
               checked={formData.scrollEffects}
               onChange={(e) => setFormData({ ...formData, scrollEffects: e.target.checked })}
-              className="h-5 w-5 accent-cyan-600"
+              className="h-5 w-5 accent-[var(--accent)]"
             />
           </label>
         </div>
 
         {/* Transition Parameters */}
-        <div className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <Activity className="h-5 w-5 text-[#8d6b4e]" /> Transition Parameters
+          <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
+            <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+              <Activity className="h-5 w-5 text-[var(--accent)]" /> Transition Parameters
           </h3>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Global Animation Speed</label>
