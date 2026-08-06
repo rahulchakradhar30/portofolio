@@ -19,23 +19,29 @@ function removeUndefinedValues<T>(value: T): T {
 }
 
 // Server-side Firebase helpers using Admin SDK
+const debugLog = (...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args);
+  }
+};
+
 const serverFirebaseHelpers = {
   // User management
   getUserByEmail: async (email: string) => {
     try {
-      console.log('Server: Looking up user by email:', email);
+      debugLog('Server: Looking up user by email:', email);
       const db = getAdminDb();
       const usersRef = db.collection('admin_users');
       const snapshot = await usersRef.where('email', '==', email).get();
       
       if (snapshot.empty) {
-        console.log('Server: User not found in admin_users collection');
+        debugLog('Server: User not found in admin_users collection');
         return null;
       }
       
       const docSnap = snapshot.docs[0];
       const data = docSnap.data();
-      console.log('Server: User found:', data.email);
+      debugLog('Server: User found:', data.email);
       return { id: docSnap.id, ...data };
     } catch (error) {
       console.error('Server: Error getting user by email:', error);
@@ -45,7 +51,7 @@ const serverFirebaseHelpers = {
 
   createUser: async (userData: Record<string, any>) => {
     try {
-      console.log('Server: Creating new user:', userData.email);
+      debugLog('Server: Creating new user:', userData.email);
       const db = getAdminDb();
       const usersRef = db.collection('admin_users');
       const now = new Date();
@@ -55,7 +61,7 @@ const serverFirebaseHelpers = {
         created_at: createdAtStr,
         updated_at: createdAtStr,
       });
-      console.log('Server: User created with ID:', docRef.id);
+      debugLog('Server: User created with ID:', docRef.id);
       return { id: docRef.id, ...userData, created_at: createdAtStr, updated_at: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating user:', error);
@@ -66,7 +72,7 @@ const serverFirebaseHelpers = {
 
   updateUser: async (userId: string, userData: Record<string, any>) => {
     try {
-      console.log('Server: Updating user:', userId);
+      debugLog('Server: Updating user:', userId);
       const db = getAdminDb();
       const userRef = db.collection('admin_users').doc(userId);
       const now = new Date();
@@ -75,7 +81,7 @@ const serverFirebaseHelpers = {
         ...userData,
         updated_at: updatedAtStr,
       });
-      console.log('Server: User updated');
+      debugLog('Server: User updated');
       return { id: userId, ...userData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating user:', error);
@@ -87,7 +93,7 @@ const serverFirebaseHelpers = {
   // OTP management
   storeOTP: async (email: string, otp: string, expiresAt: Date, type: string = 'email_verification') => {
     try {
-      console.log('Server: Storing OTP for:', email, 'Type:', type);
+      debugLog('Server: Storing OTP for:', email, 'Type:', type);
       const db = getAdminDb();
       const otpsRef = db.collection('email_otps');
       
@@ -104,7 +110,7 @@ const serverFirebaseHelpers = {
         created_at: createdAtStr,
         verified: false,
       });
-      console.log('Server: OTP stored with ID:', docRef.id);
+      debugLog('Server: OTP stored with ID:', docRef.id);
       return { 
         id: docRef.id, 
         email, 
@@ -122,7 +128,7 @@ const serverFirebaseHelpers = {
 
   getLatestOTP: async (email: string, type: string = 'email_verification') => {
     try {
-      console.log('Server: Getting latest OTP for:', email, 'Type:', type);
+      debugLog('Server: Getting latest OTP for:', email, 'Type:', type);
       const db = getAdminDb();
       const otpsRef = db.collection('email_otps');
       const snapshot = await otpsRef
@@ -133,13 +139,13 @@ const serverFirebaseHelpers = {
         .get();
 
       if (snapshot.empty) {
-        console.log('Server: No OTP found');
+        debugLog('Server: No OTP found');
         return null;
       }
 
       const docSnap = snapshot.docs[0];
       const data = docSnap.data();
-      console.log('Server: OTP found');
+      debugLog('Server: OTP found');
       return { id: docSnap.id, ...data };
     } catch (error) {
       console.error('Server: Error getting OTP:', error);
@@ -149,14 +155,14 @@ const serverFirebaseHelpers = {
 
   markOTPVerified: async (otpId: string) => {
     try {
-      console.log('Server: Marking OTP as verified:', otpId);
+      debugLog('Server: Marking OTP as verified:', otpId);
       const db = getAdminDb();
       const now = new Date();
       await db.collection('email_otps').doc(otpId).update({
         verified: true,
         verified_at: now.toISOString ? now.toISOString() : now,
       });
-      console.log('Server: OTP marked as verified');
+      debugLog('Server: OTP marked as verified');
     } catch (error) {
       console.error('Server: Error marking OTP verified:', error);
       console.error('Server: Full error details:', error instanceof Error ? error.message : String(error));
@@ -166,10 +172,10 @@ const serverFirebaseHelpers = {
 
   deleteOTP: async (otpId: string) => {
     try {
-      console.log('Server: Deleting OTP:', otpId);
+      debugLog('Server: Deleting OTP:', otpId);
       const db = getAdminDb();
       await db.collection('email_otps').doc(otpId).delete();
-      console.log('Server: OTP deleted');
+      debugLog('Server: OTP deleted');
     } catch (error) {
       console.error('Server: Error deleting OTP:', error);
       throw error;
@@ -179,10 +185,10 @@ const serverFirebaseHelpers = {
   // Activity logging
   logActivity: async (email: string, action: string, details: Record<string, any> = {}) => {
     try {
-      console.log('Server: Logging activity:', action, 'for:', email);
+      debugLog('Server: Logging activity:', action, 'for:', email);
       const db = getAdminDb();
       const now = new Date();
-      await db.collection('activity_logs').add({
+      await db.collection('admin_activity_logs').add({
         email,
         action,
         details,
@@ -198,11 +204,11 @@ const serverFirebaseHelpers = {
   // Projects management
   getAllProjects: async () => {
     try {
-      console.log('Server: Getting all projects');
+      debugLog('Server: Getting all projects');
       const db = getAdminDb();
       const snapshot = await db.collection('projects').orderBy('created_at', 'desc').get();
       const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('Server: Found', projects.length, 'projects');
+      debugLog('Server: Found', projects.length, 'projects');
       return projects;
     } catch (error) {
       console.error('Server: Error getting projects:', error);
@@ -212,14 +218,14 @@ const serverFirebaseHelpers = {
 
   getProjectById: async (projectId: string) => {
     try {
-      console.log('Server: Getting project:', projectId);
+      debugLog('Server: Getting project:', projectId);
       const db = getAdminDb();
       const docSnap = await db.collection('projects').doc(projectId).get();
       if (!docSnap.exists) {
-        console.log('Server: Project not found');
+        debugLog('Server: Project not found');
         return null;
       }
-      console.log('Server: Project found');
+      debugLog('Server: Project found');
       return { id: docSnap.id, ...docSnap.data() };
     } catch (error) {
       console.error('Server: Error getting project:', error);
@@ -229,7 +235,7 @@ const serverFirebaseHelpers = {
 
   createProject: async (projectData: Record<string, any>) => {
     try {
-      console.log('Server: Creating project:', projectData.title);
+      debugLog('Server: Creating project:', projectData.title);
       const db = getAdminDb();
       const now = new Date();
       const createdAtStr = now.toISOString ? now.toISOString() : now;
@@ -238,7 +244,7 @@ const serverFirebaseHelpers = {
         created_at: createdAtStr,
         updated_at: createdAtStr,
       });
-      console.log('Server: Project created with ID:', docRef.id);
+      debugLog('Server: Project created with ID:', docRef.id);
       return { id: docRef.id, ...projectData, created_at: createdAtStr, updated_at: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating project:', error);
@@ -249,7 +255,7 @@ const serverFirebaseHelpers = {
 
   updateProject: async (projectId: string, projectData: Record<string, any>) => {
     try {
-      console.log('Server: Updating project:', projectId);
+      debugLog('Server: Updating project:', projectId);
       const db = getAdminDb();
       const now = new Date();
       const updatedAtStr = now.toISOString ? now.toISOString() : now;
@@ -258,7 +264,7 @@ const serverFirebaseHelpers = {
         ...safeProjectData,
         updated_at: updatedAtStr,
       });
-      console.log('Server: Project updated');
+      debugLog('Server: Project updated');
       return { id: projectId, ...safeProjectData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating project:', error);
@@ -268,10 +274,10 @@ const serverFirebaseHelpers = {
 
   deleteProject: async (projectId: string) => {
     try {
-      console.log('Server: Deleting project:', projectId);
+      debugLog('Server: Deleting project:', projectId);
       const db = getAdminDb();
       await db.collection('projects').doc(projectId).delete();
-      console.log('Server: Project deleted');
+      debugLog('Server: Project deleted');
     } catch (error) {
       console.error('Server: Error deleting project:', error);
       throw error;
@@ -281,11 +287,11 @@ const serverFirebaseHelpers = {
   // Skills management
   getAllSkills: async () => {
     try {
-      console.log('Server: Getting all skills');
+      debugLog('Server: Getting all skills');
       const db = getAdminDb();
       const snapshot = await db.collection('skills').orderBy('created_at', 'desc').get();
       const skills = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('Server: Found', skills.length, 'skills');
+      debugLog('Server: Found', skills.length, 'skills');
       return skills;
     } catch (error) {
       console.error('Server: Error getting skills:', error);
@@ -295,14 +301,14 @@ const serverFirebaseHelpers = {
 
   getSkillById: async (skillId: string) => {
     try {
-      console.log('Server: Getting skill:', skillId);
+      debugLog('Server: Getting skill:', skillId);
       const db = getAdminDb();
       const docSnap = await db.collection('skills').doc(skillId).get();
       if (!docSnap.exists) {
-        console.log('Server: Skill not found');
+        debugLog('Server: Skill not found');
         return null;
       }
-      console.log('Server: Skill found');
+      debugLog('Server: Skill found');
       return { id: docSnap.id, ...docSnap.data() };
     } catch (error) {
       console.error('Server: Error getting skill:', error);
@@ -312,14 +318,14 @@ const serverFirebaseHelpers = {
 
   createSkill: async (skillData: Record<string, any>) => {
     try {
-      console.log('Server: Creating skill:', skillData.name);
+      debugLog('Server: Creating skill:', skillData.name);
       const db = getAdminDb();
       const docRef = await db.collection('skills').add({
         ...skillData,
         created_at: new Date(),
         updated_at: new Date(),
       });
-      console.log('Server: Skill created with ID:', docRef.id);
+      debugLog('Server: Skill created with ID:', docRef.id);
       return { id: docRef.id, ...skillData };
     } catch (error) {
       console.error('Server: Error creating skill:', error);
@@ -329,14 +335,14 @@ const serverFirebaseHelpers = {
 
   updateSkill: async (skillId: string, skillData: Record<string, any>) => {
     try {
-      console.log('Server: Updating skill:', skillId);
+      debugLog('Server: Updating skill:', skillId);
       const db = getAdminDb();
       const safeSkillData = removeUndefinedValues(skillData);
       await db.collection('skills').doc(skillId).update({
         ...safeSkillData,
         updated_at: new Date(),
       });
-      console.log('Server: Skill updated');
+      debugLog('Server: Skill updated');
       return { id: skillId, ...safeSkillData };
     } catch (error) {
       console.error('Server: Error updating skill:', error);
@@ -346,10 +352,10 @@ const serverFirebaseHelpers = {
 
   deleteSkill: async (skillId: string) => {
     try {
-      console.log('Server: Deleting skill:', skillId);
+      debugLog('Server: Deleting skill:', skillId);
       const db = getAdminDb();
       await db.collection('skills').doc(skillId).delete();
-      console.log('Server: Skill deleted');
+      debugLog('Server: Skill deleted');
     } catch (error) {
       console.error('Server: Error deleting skill:', error);
       throw error;
@@ -359,15 +365,15 @@ const serverFirebaseHelpers = {
   // Portfolio content
   getPortfolioContent: async () => {
     try {
-      console.log('Server: Getting portfolio content');
+      debugLog('Server: Getting portfolio content');
       const db = getAdminDb();
       const snapshot = await db.collection('portfolio_content').limit(1).get();
       if (snapshot.empty) {
-        console.log('Server: No portfolio content found');
+        debugLog('Server: No portfolio content found');
         return null;
       }
       const doc = snapshot.docs[0];
-      console.log('Server: Portfolio content found');
+      debugLog('Server: Portfolio content found');
       return { id: doc.id, ...doc.data() };
     } catch (error) {
       console.error('Server: Error getting portfolio content:', error);
@@ -377,7 +383,7 @@ const serverFirebaseHelpers = {
 
   updatePortfolioContent: async (contentData: Record<string, any>) => {
     try {
-      console.log('Server: Updating portfolio content');
+      debugLog('Server: Updating portfolio content');
       const db = getAdminDb();
       const snapshot = await db.collection('portfolio_content').limit(1).get();
       const safeContentData = removeUndefinedValues(contentData);
@@ -389,7 +395,7 @@ const serverFirebaseHelpers = {
           created_at: new Date(),
           updated_at: new Date(),
         });
-        console.log('Server: Portfolio content created');
+        debugLog('Server: Portfolio content created');
         return { id: docRef.id, ...safeContentData };
       } else {
         // Update existing document
@@ -398,7 +404,7 @@ const serverFirebaseHelpers = {
           ...safeContentData,
           updated_at: new Date(),
         });
-        console.log('Server: Portfolio content updated');
+        debugLog('Server: Portfolio content updated');
         return { id: docId, ...safeContentData };
       }
     } catch (error) {
@@ -410,7 +416,7 @@ const serverFirebaseHelpers = {
   // Messages management
   createContactMessage: async (messageData: Record<string, any>) => {
     try {
-      console.log('Server: Creating contact message');
+      debugLog('Server: Creating contact message');
       const db = getAdminDb();
       const now = new Date();
       const createdAtStr = now.toISOString();
@@ -422,7 +428,7 @@ const serverFirebaseHelpers = {
         createdAt: createdAtStr,
       });
 
-      console.log('Server: Contact message created with ID:', docRef.id);
+      debugLog('Server: Contact message created with ID:', docRef.id);
       return { id: docRef.id, ...messageData, created_at: createdAtStr, updated_at: createdAtStr, createdAt: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating contact message:', error);
@@ -432,7 +438,7 @@ const serverFirebaseHelpers = {
 
   createHireRequest: async (requestData: Record<string, any>) => {
     try {
-      console.log('Server: Creating hire request');
+      debugLog('Server: Creating hire request');
       const db = getAdminDb();
       const now = new Date();
       const createdAtStr = now.toISOString();
@@ -446,7 +452,7 @@ const serverFirebaseHelpers = {
         createdAt: createdAtStr,
       });
 
-      console.log('Server: Hire request created with ID:', docRef.id);
+      debugLog('Server: Hire request created with ID:', docRef.id);
       return { id: docRef.id, ...requestData, read: false, status: requestData.status || 'new', created_at: createdAtStr, updated_at: createdAtStr, createdAt: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating hire request:', error);
@@ -456,7 +462,7 @@ const serverFirebaseHelpers = {
 
   getAllMessages: async (unreadOnly: boolean = false) => {
     try {
-      console.log('Server: Getting messages, unreadOnly:', unreadOnly);
+      debugLog('Server: Getting messages, unreadOnly:', unreadOnly);
       const db = getAdminDb();
       let query: any = db.collection('contact_messages');
       
@@ -466,7 +472,7 @@ const serverFirebaseHelpers = {
       
       const snapshot = await query.orderBy('created_at', 'desc').get();
       const messages = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      console.log('Server: Found', messages.length, 'messages');
+      debugLog('Server: Found', messages.length, 'messages');
       return messages;
     } catch (error) {
       console.error('Server: Error getting messages:', error);
@@ -476,13 +482,13 @@ const serverFirebaseHelpers = {
 
   updateMessage: async (messageId: string, isRead: boolean) => {
     try {
-      console.log('Server: Updating message:', messageId, 'isRead:', isRead);
+      debugLog('Server: Updating message:', messageId, 'isRead:', isRead);
       const db = getAdminDb();
       await db.collection('contact_messages').doc(messageId).update({
         read: isRead,
         updated_at: new Date(),
       });
-      console.log('Server: Message updated');
+      debugLog('Server: Message updated');
     } catch (error) {
       console.error('Server: Error updating message:', error);
       throw error;
@@ -491,10 +497,10 @@ const serverFirebaseHelpers = {
 
   deleteMessage: async (messageId: string) => {
     try {
-      console.log('Server: Deleting message:', messageId);
+      debugLog('Server: Deleting message:', messageId);
       const db = getAdminDb();
       await db.collection('contact_messages').doc(messageId).delete();
-      console.log('Server: Message deleted');
+      debugLog('Server: Message deleted');
     } catch (error) {
       console.error('Server: Error deleting message:', error);
       throw error;
@@ -503,7 +509,7 @@ const serverFirebaseHelpers = {
 
   getAllHireRequests: async (unreadOnly: boolean = false) => {
     try {
-      console.log('Server: Getting hire requests, unreadOnly:', unreadOnly);
+      debugLog('Server: Getting hire requests, unreadOnly:', unreadOnly);
       const db = getAdminDb();
       let query: any = db.collection('hire_requests');
 
@@ -513,7 +519,7 @@ const serverFirebaseHelpers = {
 
       const snapshot = await query.orderBy('created_at', 'desc').get();
       const requests = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
-      console.log('Server: Found', requests.length, 'hire requests');
+      debugLog('Server: Found', requests.length, 'hire requests');
       return requests;
     } catch (error) {
       console.error('Server: Error getting hire requests:', error);
@@ -523,13 +529,13 @@ const serverFirebaseHelpers = {
 
   updateHireRequest: async (requestId: string, isRead: boolean) => {
     try {
-      console.log('Server: Updating hire request:', requestId, 'isRead:', isRead);
+      debugLog('Server: Updating hire request:', requestId, 'isRead:', isRead);
       const db = getAdminDb();
       await db.collection('hire_requests').doc(requestId).update({
         read: isRead,
         updated_at: new Date(),
       });
-      console.log('Server: Hire request updated');
+      debugLog('Server: Hire request updated');
     } catch (error) {
       console.error('Server: Error updating hire request:', error);
       throw error;
@@ -538,10 +544,10 @@ const serverFirebaseHelpers = {
 
   deleteHireRequest: async (requestId: string) => {
     try {
-      console.log('Server: Deleting hire request:', requestId);
+      debugLog('Server: Deleting hire request:', requestId);
       const db = getAdminDb();
       await db.collection('hire_requests').doc(requestId).delete();
-      console.log('Server: Hire request deleted');
+      debugLog('Server: Hire request deleted');
     } catch (error) {
       console.error('Server: Error deleting hire request:', error);
       throw error;
@@ -551,11 +557,11 @@ const serverFirebaseHelpers = {
   // Certifications management
   getAllCertifications: async () => {
     try {
-      console.log('Server: Getting all certifications');
+      debugLog('Server: Getting all certifications');
       const db = getAdminDb();
       const snapshot = await db.collection('certifications').orderBy('created_at', 'desc').get();
       const certifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      console.log('Server: Found', certifications.length, 'certifications');
+      debugLog('Server: Found', certifications.length, 'certifications');
       return certifications;
     } catch (error) {
       console.error('Server: Error getting certifications:', error);
@@ -565,14 +571,14 @@ const serverFirebaseHelpers = {
 
   getCertificationById: async (certificationId: string) => {
     try {
-      console.log('Server: Getting certification:', certificationId);
+      debugLog('Server: Getting certification:', certificationId);
       const db = getAdminDb();
       const docSnap = await db.collection('certifications').doc(certificationId).get();
       if (!docSnap.exists) {
-        console.log('Server: Certification not found');
+        debugLog('Server: Certification not found');
         return null;
       }
-      console.log('Server: Certification found');
+      debugLog('Server: Certification found');
       return { id: docSnap.id, ...docSnap.data() };
     } catch (error) {
       console.error('Server: Error getting certification:', error);
@@ -582,7 +588,7 @@ const serverFirebaseHelpers = {
 
   createCertification: async (certificationData: Record<string, any>) => {
     try {
-      console.log('Server: Creating certification:', certificationData.title);
+      debugLog('Server: Creating certification:', certificationData.title);
       const db = getAdminDb();
       const now = new Date();
       const createdAtStr = now.toISOString ? now.toISOString() : now;
@@ -591,7 +597,7 @@ const serverFirebaseHelpers = {
         created_at: createdAtStr,
         updated_at: createdAtStr,
       });
-      console.log('Server: Certification created with ID:', docRef.id);
+      debugLog('Server: Certification created with ID:', docRef.id);
       return { id: docRef.id, ...certificationData, created_at: createdAtStr, updated_at: createdAtStr };
     } catch (error) {
       console.error('Server: Error creating certification:', error);
@@ -601,7 +607,7 @@ const serverFirebaseHelpers = {
 
   updateCertification: async (certificationId: string, certificationData: Record<string, any>) => {
     try {
-      console.log('Server: Updating certification:', certificationId);
+      debugLog('Server: Updating certification:', certificationId);
       const db = getAdminDb();
       const now = new Date();
       const updatedAtStr = now.toISOString ? now.toISOString() : now;
@@ -610,7 +616,7 @@ const serverFirebaseHelpers = {
         ...safeCertificationData,
         updated_at: updatedAtStr,
       });
-      console.log('Server: Certification updated');
+      debugLog('Server: Certification updated');
       return { id: certificationId, ...safeCertificationData, updated_at: updatedAtStr };
     } catch (error) {
       console.error('Server: Error updating certification:', error);
@@ -620,10 +626,10 @@ const serverFirebaseHelpers = {
 
   deleteCertification: async (certificationId: string) => {
     try {
-      console.log('Server: Deleting certification:', certificationId);
+      debugLog('Server: Deleting certification:', certificationId);
       const db = getAdminDb();
       await db.collection('certifications').doc(certificationId).delete();
-      console.log('Server: Certification deleted');
+      debugLog('Server: Certification deleted');
     } catch (error) {
       console.error('Server: Error deleting certification:', error);
       throw error;

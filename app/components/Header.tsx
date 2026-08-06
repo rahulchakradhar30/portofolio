@@ -18,7 +18,7 @@ export default function Header() {
   const navItems = [
     { name: siteCopy.navHome, href: "#home" },
     { name: siteCopy.navAbout, href: "#about" },
-    { name: "Academic Track", href: "#roadmap" },
+    { name: siteCopy.navAcademic, href: "#roadmap" },
     { name: siteCopy.navRadar, href: "#radar" },
     { name: siteCopy.navSkills, href: "#skills" },
     { name: siteCopy.navProjects, href: "#projects" },

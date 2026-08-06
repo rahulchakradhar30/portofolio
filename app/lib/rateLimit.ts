@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
+import { getAdminDb } from './firebaseAdmin';
 
 type Bucket = {
   count: number;
@@ -35,6 +36,7 @@ export function getRateLimitKey(request: NextRequest, scope: string) {
   return `${scope}:${ip}:${ua.slice(0, 80)}`;
 }
 
+// Synchronous in-memory rate limit for public routes
 export function enforceRateLimit(options: {
   request: NextRequest;
   scope: string;
@@ -75,4 +77,75 @@ export function enforceRateLimit(options: {
   existing.count += 1;
   BUCKETS.set(key, existing);
   return { ok: true as const };
+}
+
+// Async Firestore-backed rate limit for cross-instance consistency on sensitive routes
+export async function asyncEnforceAdminRateLimit(options: {
+  request: NextRequest;
+  scope: string;
+  max: number;
+  windowMs: number;
+}) {
+  const { request, scope, max, windowMs } = options;
+  
+  // First, check in-memory (fast fail)
+  const memLimit = enforceRateLimit(options);
+  if (!memLimit.ok) return memLimit;
+
+  try {
+    const db = getAdminDb();
+    const key = getRateLimitKey(request, scope);
+    // Hash key to ensure it's a valid document ID
+    const docId = Buffer.from(key).toString('base64').replace(/[^a-zA-Z0-9]/g, '');
+    const ref = db.collection('rate_limits').doc(docId);
+    
+    const now = Date.now();
+    
+    const result = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(ref);
+      
+      if (!snap.exists) {
+        tx.set(ref, { count: 1, resetAt: now + windowMs });
+        return { ok: true };
+      }
+      
+      const data = snap.data();
+      if (!data) return { ok: true };
+      
+      if (data.resetAt <= now) {
+        tx.set(ref, { count: 1, resetAt: now + windowMs });
+        return { ok: true };
+      }
+      
+      if (data.count >= max) {
+        return { ok: false, resetAt: data.resetAt };
+      }
+      
+      tx.update(ref, { count: data.count + 1 });
+      return { ok: true };
+    });
+    
+    if (!result.ok) {
+      const retryAfterSeconds = Math.ceil(((result as any).resetAt - now) / 1000);
+      return {
+        ok: false as const,
+        response: NextResponse.json(
+          {
+            error: 'Too many requests. Please slow down and try again.',
+            retryAfterSeconds,
+          },
+          {
+            status: 429,
+            headers: { 'Retry-After': String(retryAfterSeconds) },
+          }
+        ),
+      };
+    }
+    
+    return { ok: true as const };
+  } catch (err) {
+    // If Firestore fails (e.g., config error), fallback to just the in-memory limit
+    console.error('Firestore rate limit error:', err);
+    return { ok: true as const };
+  }
 }

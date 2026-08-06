@@ -57,8 +57,14 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
     
-    // Activity Logs (Readable by admins, writable by backend only)
-    match /activity_logs/{logId} {
+    // Hire Requests (Readable by admins, writable by anyone)
+    match /hire_requests/{requestId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    
+    // Admin Activity Logs (Readable by admins, writable by backend only)
+    match /admin_activity_logs/{logId} {
       allow read: if isAdmin();
       allow write: if false;
     }

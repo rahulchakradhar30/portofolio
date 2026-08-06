@@ -44,6 +44,14 @@ export const metadata: Metadata = {
     description: `Official portfolio of ${PRIMARY_NAME} - AI Engineer, Full Stack Developer, and Student Researcher.`,
     url: SITE_URL,
     locale: "en_US",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: `${PRIMARY_NAME} Portfolio`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -51,6 +59,7 @@ export const metadata: Metadata = {
     description: `Official portfolio of ${PRIMARY_NAME} - AI Engineer & Full Stack Developer.`,
     site: "@rahulchakradhar",
     creator: "@rahulchakradhar",
+    images: ["/api/og"],
   },
   robots: {
     index: true,

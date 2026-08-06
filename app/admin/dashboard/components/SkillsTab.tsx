@@ -27,10 +27,11 @@ export default function SkillsTab() {
     proficiency: 75,
     icon: SKILL_LOGO_PRESETS[0].url,
     featured: false,
+    order: "",
   });
 
   const resetSkillForm = useCallback(() => {
-    setFormData({ title: "", description: "", proficiency: 75, icon: SKILL_LOGO_PRESETS[0].url, featured: false });
+    setFormData({ title: "", description: "", proficiency: 75, icon: SKILL_LOGO_PRESETS[0].url, featured: false, order: "" });
     setEditingSkillId(null);
   }, []);
 
@@ -65,6 +66,7 @@ export default function SkillsTab() {
             proficiency: formData.proficiency,
             iconName: formData.icon,
             featured: formData.featured,
+            order: formData.order !== "" ? parseInt(formData.order) : null,
           })
         : await adminAPI.createSkill({
             title: formData.title,
@@ -72,6 +74,7 @@ export default function SkillsTab() {
             proficiency: formData.proficiency,
             iconName: formData.icon,
             featured: formData.featured,
+            order: formData.order !== "" ? parseInt(formData.order) : null,
           });
       if (res.success) {
         alert(editingSkillId ? "Skill updated successfully!" : "Skill added successfully!");
@@ -96,6 +99,7 @@ export default function SkillsTab() {
       proficiency: skill.proficiency || 75,
       icon: normalizeSkillIcon(skill.icon) || SKILL_LOGO_PRESETS[0].url,
       featured: Boolean(skill.featured),
+      order: skill.order?.toString() || "",
     });
     setEditingSkillId(skill.id);
     setShowForm(true);
@@ -170,6 +174,13 @@ export default function SkillsTab() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={3}
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition resize-none"
+          />
+          <input
+            type="number"
+            placeholder="Display Order (Optional, e.g. 1, 2, 3)"
+            value={formData.order}
+            onChange={(e) => setFormData({ ...formData, order: e.target.value })}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
           />
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-2">Proficiency: {formData.proficiency}%</label>
@@ -298,6 +309,7 @@ export default function SkillsTab() {
                   )}
                   <h3 className="font-semibold text-gray-800">{skill.title}</h3>
                   {skill.featured && <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">Featured</span>}
+                  {skill.order !== undefined && skill.order !== null && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">Order: {skill.order}</span>}
                 </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleEditSkill(skill)} className="text-blue-600 hover:bg-gray-100 p-1 rounded" title="Edit Skill">

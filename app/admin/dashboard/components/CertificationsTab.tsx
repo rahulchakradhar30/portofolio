@@ -33,12 +33,13 @@ export default function CertificationsTab() {
     description: "",
     linkedinUrl: "",
     featured: false,
+    order: "",
     galleryImagesText: "",
     youtubeLinksText: "",
   });
 
   const resetCertificationForm = useCallback(() => {
-    setFormData({ title: "", issuer: "", issuedDate: "", expiryDate: "", credentialId: "", credentialUrl: "", imageUrl: "", description: "", linkedinUrl: "", featured: false, galleryImagesText: "", youtubeLinksText: "" });
+    setFormData({ title: "", issuer: "", issuedDate: "", expiryDate: "", credentialId: "", credentialUrl: "", imageUrl: "", description: "", linkedinUrl: "", featured: false, order: "", galleryImagesText: "", youtubeLinksText: "" });
     setEditingCertificationId(null);
   }, []);
 
@@ -98,6 +99,7 @@ export default function CertificationsTab() {
       description: formData.description,
       linkedinUrl: formData.linkedinUrl,
       featured: formData.featured,
+      order: formData.order !== "" ? parseInt(formData.order) : null,
       galleryImages: parseUrlList(formData.galleryImagesText),
       youtubeLinks: parseUrlList(formData.youtubeLinksText),
     } as Record<string, unknown>;
@@ -127,6 +129,7 @@ export default function CertificationsTab() {
       description: cert.description || "",
       linkedinUrl: cert.linkedinUrl || "",
       featured: Boolean(cert.featured),
+      order: cert.order?.toString() || "",
       galleryImagesText: (cert.galleryImages || []).join("\n"),
       youtubeLinksText: (cert.youtubeLinks || []).join("\n"),
     });
@@ -274,6 +277,13 @@ export default function CertificationsTab() {
                 rows={4}
                 className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-300 focus:bg-white focus:ring-2 focus:ring-cyan-200"
               />
+              <input
+                type="number"
+                placeholder="Display Order (Optional, e.g. 1, 2, 3)"
+                value={formData.order}
+                onChange={(e) => setFormData({ ...formData, order: e.target.value })}
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-cyan-300 focus:bg-white focus:ring-2 focus:ring-cyan-200"
+              />
             </div>
 
             <div className="space-y-4">
@@ -397,7 +407,10 @@ export default function CertificationsTab() {
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between border-t pt-3">
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${cert.featured ? 'bg-cyan-50 text-cyan-700' : 'bg-slate-100 text-slate-700'}`}>{cert.featured ? 'Featured' : 'Standard'}</span>
+                <div className="flex gap-2">
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${cert.featured ? 'bg-cyan-50 text-cyan-700' : 'bg-slate-100 text-slate-700'}`}>{cert.featured ? 'Featured' : 'Standard'}</span>
+                  {cert.order !== undefined && cert.order !== null && <span className="rounded-full bg-slate-100 text-slate-700 px-2.5 py-0.5 text-xs font-semibold">Order: {cert.order}</span>}
+                </div>
                 <div className="flex gap-2">
                   <button onClick={() => handleEditCertification(cert)} className="p-1.5 text-blue-600 hover:bg-slate-50 rounded-lg"><Edit2 className="h-4 w-4" /></button>
                   <button onClick={() => handleDeleteCertification(cert.id)} className="p-1.5 text-red-600 hover:bg-slate-50 rounded-lg"><Trash2 className="h-4 w-4" /></button>

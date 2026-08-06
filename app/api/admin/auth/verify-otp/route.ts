@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth, getAdminDb } from '@/app/lib/firebaseAdmin';
 import { ADMIN_SESSION_COOKIE } from '@/app/lib/adminAuth';
-import { enforceRateLimit } from '@/app/lib/rateLimit';
+import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 import { type OtpEntry, MAX_VERIFY_ATTEMPTS } from '../send-otp/route';
 
@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const originError = rejectDisallowedOrigin(request);
     if (originError) return originError;
 
-    const limit = enforceRateLimit({ request, scope: 'admin-verify-otp', max: 10, windowMs: 60_000 });
+    const limit = await asyncEnforceAdminRateLimit({ request, scope: 'admin-verify-otp', max: 10, windowMs: 60_000 });
     if (!limit.ok) return limit.response;
 
     let payload: unknown;

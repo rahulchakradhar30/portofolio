@@ -4,6 +4,7 @@ export const DEFAULT_SITE_COPY: SiteCopy = {
   headerBrand: "PRC",
   navHome: "Home",
   navAbout: "About",
+  navAcademic: "Academic Track",
   navRadar: "Work Map",
   navSkills: "Skills",
   navProjects: "Projects",

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
-import { rejectDisallowedOrigin, verifyFormHoneypot, hasLikelyBotUserAgent, textTooLong } from '@/app/lib/security';
+import { rejectDisallowedOrigin, verifyFormHoneypot, hasLikelyBotUserAgent } from '@/app/lib/security';
+import { validateEmail, validateRequiredString, validateOptionalString } from '@/app/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,66 +22,50 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
-    const {
-      fullName,
-      companyName,
-      email,
-      phone,
-      website,
-      projectType,
-      role,
-      budget,
-      timeline,
-      description,
-      preferredContact,
-    } = data;
 
     const honeypotError = verifyFormHoneypot(data, 'companyWebsiteMirror');
     if (honeypotError) return honeypotError;
 
-    if (!fullName || !email || !projectType || !description) {
-      return NextResponse.json(
-        { error: 'Full name, email, project type, and description are required' },
-        { status: 400 }
-      );
-    }
+    const vFullName = validateRequiredString(data.fullName, 'Full Name', 140);
+    const vEmail = validateRequiredString(data.email, 'Email', 240);
+    const vProjectType = validateRequiredString(data.projectType, 'Project Type', 120);
+    const vDescription = validateRequiredString(data.description, 'Description', 6000);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
-      );
-    }
+    const vCompanyName = validateOptionalString(data.companyName, 240);
+    const vPhone = validateOptionalString(data.phone, 80);
+    const vWebsite = validateOptionalString(data.website, 320);
+    const vRole = validateOptionalString(data.role, 120);
+    const vBudget = validateOptionalString(data.budget, 120);
+    const vTimeline = validateOptionalString(data.timeline, 120);
+    const vPreferredContact = validateOptionalString(data.preferredContact, 40);
 
-    if (
-      textTooLong(fullName, 140) ||
-      textTooLong(companyName, 240) ||
-      textTooLong(email, 240) ||
-      textTooLong(phone, 80) ||
-      textTooLong(website, 320) ||
-      textTooLong(projectType, 120) ||
-      textTooLong(role, 120) ||
-      textTooLong(budget, 120) ||
-      textTooLong(timeline, 120) ||
-      textTooLong(description, 6000) ||
-      textTooLong(preferredContact, 40)
-    ) {
-      return NextResponse.json({ error: 'Input too long' }, { status: 400 });
-    }
+    if (!vFullName.valid) return NextResponse.json({ error: vFullName.error }, { status: 400 });
+    if (!vEmail.valid) return NextResponse.json({ error: vEmail.error }, { status: 400 });
+    if (!vProjectType.valid) return NextResponse.json({ error: vProjectType.error }, { status: 400 });
+    if (!vDescription.valid) return NextResponse.json({ error: vDescription.error }, { status: 400 });
+
+    if (!validateEmail(vEmail.value)) return NextResponse.json({ error: 'Invalid email format' }, { status: 400 });
+
+    if (!vCompanyName.valid) return NextResponse.json({ error: vCompanyName.error }, { status: 400 });
+    if (!vPhone.valid) return NextResponse.json({ error: vPhone.error }, { status: 400 });
+    if (!vWebsite.valid) return NextResponse.json({ error: vWebsite.error }, { status: 400 });
+    if (!vRole.valid) return NextResponse.json({ error: vRole.error }, { status: 400 });
+    if (!vBudget.valid) return NextResponse.json({ error: vBudget.error }, { status: 400 });
+    if (!vTimeline.valid) return NextResponse.json({ error: vTimeline.error }, { status: 400 });
+    if (!vPreferredContact.valid) return NextResponse.json({ error: vPreferredContact.error }, { status: 400 });
 
     const hireRequest = {
-      fullName,
-      companyName: companyName || '',
-      email,
-      phone: phone || '',
-      website: website || '',
-      projectType,
-      role: role || '',
-      budget: budget || '',
-      timeline: timeline || '',
-      description,
-      preferredContact: preferredContact || 'email',
+      fullName: vFullName.value,
+      companyName: vCompanyName.value || '',
+      email: vEmail.value,
+      phone: vPhone.value || '',
+      website: vWebsite.value || '',
+      projectType: vProjectType.value,
+      role: vRole.value || '',
+      budget: vBudget.value || '',
+      timeline: vTimeline.value || '',
+      description: vDescription.value,
+      preferredContact: vPreferredContact.value || 'email',
     };
 
     const savedRequest = await serverFirebaseHelpers.createHireRequest(hireRequest);

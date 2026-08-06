@@ -12,8 +12,6 @@
     "setup": "npm run setup:firebase && firebase deploy --only firestore:rules"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.103.0",
-    "crypto-js": "^4.2.0",
     "dotenv": "^17.4.1",
     "firebase": "^12.12.0",
     "firebase-admin": "^13.8.0",
@@ -22,20 +20,15 @@
     "next": "16.2.3",
     "nodemailer": "^9.0.3",
     "openai": "^6.34.0",
-    "qrcode": "^1.5.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "resend": "^6.10.0",
-    "speakeasy": "^2.0.0"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.1",
-    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/speakeasy": "^2.0.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",

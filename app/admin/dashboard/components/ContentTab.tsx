@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2 } from "lucide-react";
@@ -14,6 +14,7 @@ import type {
   RadarConfig,
   RadarKind,
   SectionVisibility,
+  SiteCopy,
   StudyRoadmapItem,
   StudyRoadmapMetricType,
   StudyRoadmapStageMetric,
@@ -119,8 +120,8 @@ export default function ContentTab() {
     enabledKinds:
       Array.isArray(input?.enabledKinds) && input!.enabledKinds.length > 0
         ? input!.enabledKinds.filter(
-            (kind): kind is RadarKind => kind === "skill" || kind === "project" || kind === "certification"
-          )
+          (kind): kind is RadarKind => kind === "skill" || kind === "project" || kind === "certification"
+        )
         : DEFAULT_RADAR_CONFIG.enabledKinds,
     skillIds: Array.isArray(input?.skillIds) ? input!.skillIds.filter(Boolean) : [],
     projectIds: Array.isArray(input?.projectIds) ? input!.projectIds.filter(Boolean) : [],
@@ -215,10 +216,10 @@ export default function ContentTab() {
 
       const metricType: StudyRoadmapMetricType =
         value.metricType === "cgpa" ||
-        value.metricType === "ccpa" ||
-        value.metricType === "percentage" ||
-        value.metricType === "marks" ||
-        value.metricType === "custom"
+          value.metricType === "ccpa" ||
+          value.metricType === "percentage" ||
+          value.metricType === "marks" ||
+          value.metricType === "custom"
           ? value.metricType
           : "percentage";
 
@@ -234,11 +235,11 @@ export default function ContentTab() {
     return roadmapItems.map((item) => byId.get(item.id) || DEFAULT_STAGE_METRIC(item.id));
   };
 
-  const updateSiteCopyField = <K extends keyof typeof DEFAULT_SITE_COPY>(
+  const updateSiteCopyField = <K extends keyof SiteCopy>(
     key: K,
-    value: (typeof DEFAULT_SITE_COPY)[K]
+    value: SiteCopy[K]
   ) => {
-    setSiteCopyForm((prev) => ({ ...prev, [key]: value }));
+    setSiteCopyForm((prev: SiteCopy) => ({ ...prev, [key]: value }));
   };
 
   const loadContent = useCallback(async () => {
@@ -566,6 +567,7 @@ export default function ContentTab() {
                 <input type="text" value={siteCopyForm.headerHireCta} onChange={(e) => updateSiteCopyField("headerHireCta", e.target.value)} disabled={!editMode} placeholder="Header CTA" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
                 <input type="text" value={siteCopyForm.navHome} onChange={(e) => updateSiteCopyField("navHome", e.target.value)} disabled={!editMode} placeholder="Nav Home" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
                 <input type="text" value={siteCopyForm.navAbout} onChange={(e) => updateSiteCopyField("navAbout", e.target.value)} disabled={!editMode} placeholder="Nav About" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
+                <input type="text" value={siteCopyForm.navAcademic} onChange={(e) => updateSiteCopyField("navAcademic", e.target.value)} disabled={!editMode} placeholder="Nav Academic" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
                 <input type="text" value={siteCopyForm.navRadar} onChange={(e) => updateSiteCopyField("navRadar", e.target.value)} disabled={!editMode} placeholder="Nav Radar" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
                 <input type="text" value={siteCopyForm.navSkills} onChange={(e) => updateSiteCopyField("navSkills", e.target.value)} disabled={!editMode} placeholder="Nav Skills" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />
                 <input type="text" value={siteCopyForm.navProjects} onChange={(e) => updateSiteCopyField("navProjects", e.target.value)} disabled={!editMode} placeholder="Nav Projects" className="w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black" />

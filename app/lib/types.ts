@@ -18,6 +18,7 @@ export interface Project {
   github: string;
   demo: string;
   featured: boolean;
+  order?: number;
   category: string;
   youtubeUrl?: string;
   youtubeTitle?: string;
@@ -39,6 +40,7 @@ export interface Skill {
   icon: string; // icon name from lucide-react
   proficiency: number; // 0-100
   featured?: boolean;
+  order?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -183,6 +185,7 @@ export interface SiteCopy {
   headerBrand: string;
   navHome: string;
   navAbout: string;
+  navAcademic: string;
   navRadar: string;
   navSkills: string;
   navProjects: string;
@@ -256,6 +259,7 @@ export interface Certification {
   description: string;
   linkedinUrl?: string;
   featured: boolean;
+  order?: number;
   created_at?: string;
   updated_at?: string;
 }

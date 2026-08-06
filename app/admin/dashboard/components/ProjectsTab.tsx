@@ -39,6 +39,7 @@ export default function ProjectsTab() {
     codeName: "",
     showCode: false,
     showDetails: false,
+    order: "",
     galleryImagesText: "",
     youtubeLinksText: "",
   });
@@ -61,6 +62,7 @@ export default function ProjectsTab() {
       codeName: "",
       showCode: false,
       showDetails: false,
+      order: "",
       galleryImagesText: "",
       youtubeLinksText: "",
     });
@@ -114,6 +116,7 @@ export default function ProjectsTab() {
       codeName: formData.codeName,
       showCode: formData.showCode,
       showDetails: formData.showDetails,
+      order: formData.order !== "" ? parseInt(formData.order) : null,
       galleryImages,
       youtubeLinks,
     };
@@ -136,6 +139,7 @@ export default function ProjectsTab() {
             codeName: formData.codeName,
             showCode: formData.showCode,
             showDetails: formData.showDetails,
+            order: formData.order !== "" ? parseInt(formData.order) : null,
             galleryImages,
             youtubeLinks,
           })
@@ -173,6 +177,7 @@ export default function ProjectsTab() {
       codeName: project.codeName || "",
       showCode: Boolean(project.showCode),
       showDetails: Boolean(project.showDetails),
+      order: project.order?.toString() || "",
       galleryImagesText: (project.galleryImages || []).join("\n"),
       youtubeLinksText: (project.youtubeLinks || []).join("\n"),
     });
@@ -312,6 +317,13 @@ export default function ProjectsTab() {
             placeholder="Category"
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20 transition"
+          />
+          <input
+            type="number"
+            placeholder="Display Order (Optional, e.g. 1, 2, 3)"
+            value={formData.order}
+            onChange={(e) => setFormData({ ...formData, order: e.target.value })}
             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20 transition"
           />
           <div>
@@ -492,6 +504,7 @@ export default function ProjectsTab() {
                 <div className="mt-2 flex flex-wrap gap-2 text-xs">
                   <span className="rounded-full bg-violet-50 px-2 py-1 text-[#8d6b4e]">{project.featured ? 'Featured' : 'Regular'}</span>
                   <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-700">Details: {project.showDetails ? 'On' : 'Off'}</span>
+                  <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-700">Order: {project.order ?? 'None'}</span>
                   <span className="rounded-full bg-gray-100 px-2 py-1 text-gray-700">Code: {project.showCode ? 'On' : 'Off'}</span>
                 </div>
               </div>
