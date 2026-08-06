@@ -51,7 +51,7 @@ export default function Contact() {
 
   if (contentLoading && isVisible) {
     return (
-      <section className="section-soft relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="contact" />
       </section>
     );
@@ -111,104 +111,106 @@ export default function Contact() {
   };
 
   return (
-    <section className="section-soft relative min-h-screen overflow-hidden px-4 py-16 md:py-24" id="contact">
-      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,rgba(122,95,71,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(122,95,71,0.12)_1px,transparent_1px)] [background-size:46px_46px]" />
-
+    <section className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="contact">
       <div className="relative z-10 mx-auto max-w-[1600px] px-0 sm:px-2 lg:px-6">
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 50 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.8 }}
+          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
           viewport={{ once: true, amount: 0.2 }}
-          className="mb-12 text-center md:mb-16"
+          className="mb-16 text-center"
         >
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#7a5f47]">
-            <ShieldCheck className="h-3.5 w-3.5" />
+          <div className="paper-chip mx-auto mb-6 inline-flex uppercase tracking-[0.24em] gap-2">
+            <ShieldCheck className="h-4 w-4" />
             Fast response, clear scope
           </div>
-          <h2 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-5xl lg:text-6xl">
+          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.contactHeading}
           </h2>
-          <p className="mx-auto max-w-2xl px-2 text-sm leading-relaxed text-[#6a5846] sm:text-base md:text-xl">
+          <p className="mx-auto max-w-2xl text-lg md:text-xl font-medium">
             {siteCopy.contactSubtitle}
           </p>
-          <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-[#8d6b4e] to-[#c4a884] md:mt-6 md:w-24" />
+          <div className="mx-auto mt-8 h-1 w-24 bg-[var(--foreground)] editorial-border rounded-full" />
         </motion.div>
 
-        <ExpandableSection collapsedMaxHeightPx={820}>
+        <ExpandableSection collapsedMaxHeightPx={850}>
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-12">
           <motion.div
-            initial={reducedMotion ? false : { opacity: 0, x: -50 }}
+            initial={reducedMotion ? false : { opacity: 0, x: -30 }}
             whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={reducedMotion ? undefined : { duration: 0.8 }}
+            transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
             viewport={{ once: true, amount: 0.2 }}
-            className="space-y-5 md:space-y-6"
+            className="space-y-6 md:space-y-8"
           >
-            <div className="premium-card rounded-[1.75rem] p-5 sm:p-6">
-              <h3 className="text-2xl font-bold text-[#2f241b] md:text-3xl">{siteCopy.contactIntroTitle}</h3>
-              <p className="mt-4 text-base leading-relaxed text-[#6a5846] md:text-lg">
+            <div className="paper-card p-6 sm:p-8 border-none bg-transparent shadow-none">
+              <h3 className="text-3xl font-black text-[var(--foreground)] tracking-tight">{siteCopy.contactIntroTitle}</h3>
+              <p className="mt-4 text-lg font-medium leading-relaxed">
                 {siteCopy.contactIntroBody}
               </p>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-3">
               {[
                 { icon: Clock3, label: "Response", value: "1-2 business days" },
                 { icon: Briefcase, label: "Best for", value: "Product briefs" },
                 { icon: ShieldCheck, label: "Approach", value: "Clear scope first" },
-              ].map((item) => {
+              ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.label} className="premium-card rounded-2xl p-4">
-                    <Icon className="h-5 w-5 text-[#8d6b4e]" />
-                    <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">{item.label}</p>
-                    <p className="mt-1 text-sm font-medium text-[#2f241b]">{item.value}</p>
-                  </div>
+                  <motion.div
+                    key={item.label}
+                    whileHover={reducedMotion ? undefined : { y: -4, scale: 1.02 }}
+                    className="paper-card p-5 transition-transform"
+                  >
+                    <Icon className="h-6 w-6 text-[var(--foreground)] mb-4" />
+                    <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">{item.label}</p>
+                    <p className="mt-1 text-base font-black text-[var(--foreground)]">{item.value}</p>
+                  </motion.div>
                 );
               })}
             </div>
 
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <motion.div
-                whileHover={reducedMotion ? undefined : { scale: 1.01 }}
-                className="premium-card flex items-center gap-3 rounded-2xl p-4"
+                whileHover={reducedMotion ? undefined : { scale: 1.02 }}
+                className="paper-card flex items-center gap-4 p-5"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,rgba(34,211,238,0.22)_0%,rgba(99,102,241,0.22)_100%)]">
-                  <Mail className="h-5 w-5 text-[#5f4a38]" />
+                <div className="flex h-12 w-12 items-center justify-center border-2 border-[var(--foreground)] rounded bg-[var(--surface-soft)]">
+                  <Mail className="h-6 w-6 text-[var(--foreground)]" />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-[#2f241b]">Email</div>
-                  <div className="truncate text-sm text-[#6a5846]">{contactData.email}</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Email</div>
+                  <div className="truncate text-base font-black text-[var(--foreground)]">{contactData.email}</div>
                 </div>
               </motion.div>
 
               <motion.div
-                whileHover={reducedMotion ? undefined : { scale: 1.01 }}
-                className="premium-card flex items-center gap-3 rounded-2xl p-4"
+                whileHover={reducedMotion ? undefined : { scale: 1.02 }}
+                className="paper-card flex items-center gap-4 p-5"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[linear-gradient(145deg,rgba(34,211,238,0.22)_0%,rgba(99,102,241,0.22)_100%)]">
-                  <MapPin className="h-5 w-5 text-[#5f4a38]" />
+                <div className="flex h-12 w-12 items-center justify-center border-2 border-[var(--foreground)] rounded bg-[var(--surface-soft)]">
+                  <MapPin className="h-6 w-6 text-[var(--foreground)]" />
                 </div>
                 <div>
-                  <div className="text-sm font-semibold text-[#2f241b]">Location</div>
-                  <div className="text-sm text-[#6a5846]">{contactData.location}</div>
+                  <div className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Location</div>
+                  <div className="text-base font-black text-[var(--foreground)]">{contactData.location}</div>
                 </div>
               </motion.div>
             </div>
 
-            <div className="premium-card rounded-[1.75rem] p-5 sm:p-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">{siteCopy.contactSocialPrompt}</p>
-              <div className="mt-4 flex flex-wrap gap-3">
+            <div className="paper-card p-6 sm:p-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">{siteCopy.contactSocialPrompt}</p>
+              <div className="mt-5 flex flex-wrap gap-4">
                 <motion.a
                   whileHover={reducedMotion ? undefined : { scale: 1.05, y: -2 }}
                   whileTap={reducedMotion ? undefined : { scale: 0.95 }}
                   href={contactData.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-button inline-flex h-12 w-12 items-center justify-center p-0"
                   title="Instagram"
                 >
-                  <Camera className="h-5 w-5" />
+                  <Camera className="h-6 w-6" />
                 </motion.a>
                 <motion.a
                   whileHover={reducedMotion ? undefined : { scale: 1.05, y: -2 }}
@@ -216,10 +218,10 @@ export default function Contact() {
                   href={contactData.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-button inline-flex h-12 w-12 items-center justify-center p-0"
                   title="LinkedIn"
                 >
-                  <Link2 className="h-5 w-5" />
+                  <Link2 className="h-6 w-6" />
                 </motion.a>
                 <motion.a
                   whileHover={reducedMotion ? undefined : { scale: 1.05, y: -2 }}
@@ -227,25 +229,25 @@ export default function Contact() {
                   href={contactData.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-button inline-flex h-12 w-12 items-center justify-center p-0"
                   title="GitHub"
                 >
-                  <Code2 className="h-5 w-5" />
+                  <Code2 className="h-6 w-6" />
                 </motion.a>
               </div>
             </div>
           </motion.div>
 
           <motion.form
-            initial={reducedMotion ? false : { opacity: 0, x: 50 }}
+            initial={reducedMotion ? false : { opacity: 0, x: 30 }}
             whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={reducedMotion ? undefined : { duration: 0.8 }}
+            transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
             viewport={{ once: true, amount: 0.2 }}
             onSubmit={handleSubmit}
-            className="premium-card rounded-[1.75rem] p-5 text-[#2f241b] md:p-8"
+            className="paper-card p-6 md:p-10"
           >
-            <h3 className="text-xl font-bold text-[#2f241b] md:text-2xl">{siteCopy.contactFormTitle}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">
+            <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">{siteCopy.contactFormTitle}</h3>
+            <p className="mt-3 text-base font-medium">
               Share the scope, goals, and timeline. I’ll reply with a clear next step.
             </p>
 
@@ -253,20 +255,20 @@ export default function Contact() {
               <motion.div
                 initial={reducedMotion ? false : { opacity: 0, y: -10 }}
                 animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                className={`mt-5 rounded-2xl border p-4 text-sm md:text-base ${
+                className={`mt-6 p-5 text-sm md:text-base font-bold uppercase tracking-widest editorial-border ${
                   submitStatus.type === "success"
-                    ? "border-[#7a5f47]/15 bg-[#f7efe4] text-[#5f4a38]"
-                    : "border-rose-300/20 bg-rose-300/8 text-rose-100"
+                    ? "bg-[var(--surface-soft)] text-[var(--foreground)]"
+                    : "bg-red-50 text-red-900 border-red-900"
                 }`}
               >
                 {submitStatus.message}
               </motion.div>
             )}
 
-            <div className="mt-6 space-y-4 md:space-y-5">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="mt-8 space-y-6">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="firstName" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8d6b4e]">
+                  <label htmlFor="firstName" className="mb-3 block text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                     First Name
                   </label>
                   <input
@@ -275,12 +277,12 @@ export default function Contact() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-3 text-sm text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+                    className="w-full border-2 border-[var(--foreground)] bg-white px-5 py-4 text-base font-bold text-[var(--foreground)] placeholder-gray-400 transition-colors focus:bg-[var(--surface-soft)] focus:outline-none"
                     placeholder="John"
                   />
                 </div>
                 <div>
-                  <label htmlFor="lastName" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8d6b4e]">
+                  <label htmlFor="lastName" className="mb-3 block text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                     Last Name
                   </label>
                   <input
@@ -289,14 +291,14 @@ export default function Contact() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-3 text-sm text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+                    className="w-full border-2 border-[var(--foreground)] bg-white px-5 py-4 text-base font-bold text-[var(--foreground)] placeholder-gray-400 transition-colors focus:bg-[var(--surface-soft)] focus:outline-none"
                     placeholder="Doe"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="email" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8d6b4e]">
+                <label htmlFor="email" className="mb-3 block text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                   Email
                 </label>
                 <input
@@ -305,13 +307,13 @@ export default function Contact() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                    className="w-full rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-3 text-sm text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full border-2 border-[var(--foreground)] bg-white px-5 py-4 text-base font-bold text-[var(--foreground)] placeholder-gray-400 transition-colors focus:bg-[var(--surface-soft)] focus:outline-none"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="subject" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8d6b4e]">
+                <label htmlFor="subject" className="mb-3 block text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                   Subject
                 </label>
                 <input
@@ -320,13 +322,13 @@ export default function Contact() {
                   value={formData.subject}
                   onChange={handleInputChange}
                   required
-                  className="w-full rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-3 text-sm text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full border-2 border-[var(--foreground)] bg-white px-5 py-4 text-base font-bold text-[var(--foreground)] placeholder-gray-400 transition-colors focus:bg-[var(--surface-soft)] focus:outline-none"
                   placeholder="Project Discussion"
                 />
               </div>
 
               <div>
-                <label htmlFor="message" className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-[#8d6b4e]">
+                <label htmlFor="message" className="mb-3 block text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                   Message
                 </label>
                 <textarea
@@ -335,13 +337,13 @@ export default function Contact() {
                   value={formData.message}
                   onChange={handleInputChange}
                   required
-                    className="w-full resize-none rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-3 text-sm text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full resize-none border-2 border-[var(--foreground)] bg-white px-5 py-4 text-base font-bold text-[var(--foreground)] placeholder-gray-400 transition-colors focus:bg-[var(--surface-soft)] focus:outline-none"
                   placeholder="Tell me about your project..."
                 ></textarea>
               </div>
 
-              <div className="flex items-center gap-3 rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4 text-sm text-[#6a5846]">
-                <ShieldCheck className="h-4 w-4 text-[#8d6b4e]" />
+              <div className="flex items-center gap-3 border-2 border-[var(--foreground)] bg-[var(--surface-strong)] p-4 text-sm font-bold text-[var(--foreground)]">
+                <ShieldCheck className="h-5 w-5 text-[var(--foreground)]" />
                 Your message goes straight to the inbox. No noise, no clutter.
               </div>
 
@@ -350,9 +352,9 @@ export default function Contact() {
                 whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex w-full items-center justify-center rounded-2xl bg-[#8d6b4e] px-6 py-4 font-semibold text-[#fffaf3] shadow-[0_18px_36px_rgba(122,95,71,0.18)] transition-all duration-300 hover:shadow-[0_22px_48px_rgba(122,95,71,0.24)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="paper-button-primary w-full justify-center px-8 py-5 text-lg disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Send className="mr-2 h-5 w-5" />
+                <Send className="mr-3 h-5 w-5" />
                 {isSubmitting ? "Sending..." : "Send Message"}
               </motion.button>
             </div>

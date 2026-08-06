@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Command, Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getSiteCopy } from "@/app/lib/siteCopy";
-
-import { useMemo } from "react";
 import { usePortfolioContent } from "./PortfolioContentProvider";
 
 export default function Header() {
@@ -29,15 +27,15 @@ export default function Header() {
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="fixed top-0 left-0 right-0 z-50 border-b border-[#7a5f47]/10 bg-[#fbf7f0]/90 backdrop-blur-xl"
+      transition={{ duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
+      className="fixed top-0 left-0 right-0 z-50 bg-[var(--surface)] border-b-2 border-[var(--foreground)]"
     >
       <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="text-2xl font-black tracking-[0.24em] bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-transparent"
+            whileHover={{ y: -2 }}
+            className="text-2xl font-black tracking-tighter text-[var(--foreground)] select-none"
           >
             {siteCopy.headerBrand}
           </motion.div>
@@ -48,26 +46,26 @@ export default function Header() {
               <motion.a
                 key={item.name}
                 href={item.href}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="font-medium text-[#5f4a38] transition-colors duration-200 hover:text-[#8d6b4e]"
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
+                className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)]"
               >
                 {item.name}
               </motion.a>
             ))}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-4 md:flex">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-              className="inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-4 py-2 text-xs font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+              className="paper-button inline-flex items-center gap-2 px-5 py-2.5 text-sm"
             >
               <Command className="h-4 w-4" />
               Quick Search
-              <span className="rounded border border-[#7a5f47]/15 px-1.5 py-0.5 text-[10px] text-[#7a5f47]">Ctrl K</span>
+              <span className="ml-1 rounded border-2 border-[var(--foreground)] px-1.5 py-0.5 text-[10px] font-bold">Ctrl K</span>
             </button>
-            <Link href="/hire" className="rounded-full bg-[#8d6b4e] px-6 py-2 font-semibold text-[#fffaf3] shadow-lg shadow-[rgba(122,95,71,0.18)] transition-all duration-300 hover:scale-[1.02]">
+            <Link href="/hire" className="paper-button-primary px-6 py-2.5 text-sm">
               {siteCopy.headerHireCta}
             </Link>
           </div>
@@ -76,9 +74,9 @@ export default function Header() {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 text-[#8d6b4e] md:hidden"
+            className="p-2 text-[var(--foreground)] md:hidden border-2 border-[var(--foreground)] rounded-xl bg-[var(--surface)]"
           >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </motion.button>
         </div>
 
@@ -88,22 +86,24 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="mt-4 border-t border-[#7a5f47]/10 pb-4 pt-4 md:hidden"
+            className="mt-4 border-t-2 border-[var(--foreground)] pt-6 pb-4 md:hidden"
           >
-            <nav className="flex flex-col space-y-4">
+            <nav className="flex flex-col space-y-6 text-center">
               {navItems.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className="font-medium text-[#5f4a38] transition-colors duration-200 hover:text-[#8d6b4e]"
+                  className="font-bold text-xl text-[var(--foreground)] tracking-tight"
                 >
                   {item.name}
                 </a>
               ))}
-              <Link href="/hire" className="mt-4 rounded-full bg-[#8d6b4e] px-6 py-2 font-semibold text-[#fffaf3] shadow-lg shadow-[rgba(122,95,71,0.18)]">
-                {siteCopy.headerHireCta}
-              </Link>
+              <div className="pt-4">
+                <Link href="/hire" className="paper-button-primary inline-block w-full max-w-xs mx-auto py-3">
+                  {siteCopy.headerHireCta}
+                </Link>
+              </div>
             </nav>
           </motion.div>
         )}

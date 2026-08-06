@@ -162,10 +162,20 @@ function normalizeStageMetrics(
 }
 
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import { useRef } from "react";
+import { useScroll, useSpring } from "framer-motion";
 
 export default function StudyRoadmap() {
   const { content } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
+  const sectionRef = useRef<HTMLDivElement | null>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
   const enabled = useMemo(() => {
     if (!content) return true;
@@ -200,80 +210,86 @@ export default function StudyRoadmap() {
   if (!enabled || visibleItems.length === 0) return null;
 
   return (
-    <section className="section-soft relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10" id="roadmap">
-      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,rgba(122,95,71,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(122,95,71,0.12)_1px,transparent_1px)] [background-size:46px_46px]" />
-
+    <section ref={sectionRef} className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="roadmap">
       <div className="relative z-10 mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.7 }}
+          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
           viewport={{ once: true, amount: 0.2 }}
-          className="mb-10 text-center md:mb-14"
+          className="mb-16 text-center"
         >
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#7a5f47]">
-            <GraduationCap className="h-3.5 w-3.5" />
+          <div className="paper-chip mx-auto mb-6 inline-flex uppercase tracking-[0.24em] gap-2">
+            <GraduationCap className="h-4 w-4" />
             Study roadmap
           </div>
-          <h2 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:text-5xl">
+          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             Academic Journey
           </h2>
-          <p className="mx-auto max-w-3xl text-sm leading-relaxed text-[#6a5846] sm:text-base md:text-lg">
+          <p className="mx-auto max-w-3xl text-lg md:text-xl font-medium">
             A horizontal roadmap of learning stages from school to university, with optional extension for higher studies.
           </p>
         </motion.div>
 
         <div className="relative">
-          <div className="pointer-events-none absolute left-0 right-0 top-[46%] hidden h-px bg-gradient-to-r from-[#c4a884]/10 via-[#8d6b4e]/60 to-[#b6926d]/20 lg:block" />
-
-        <ExpandableSection collapsedMaxHeightPx={780}>
-          <div className="grid grid-cols-1 gap-5 lg:grid-flow-col lg:auto-cols-[minmax(280px,1fr)] lg:overflow-x-auto lg:pb-2">
-            {visibleItems.map((item, index) => {
-              const stageMetric = metrics.find((metric) => metric.roadmapItemId === item.id);
-              const showMetric = Boolean(stageMetric?.enabled && stageMetric.value.trim());
-
-              return (
-                <motion.article
-                  key={item.id}
-                  initial={reducedMotion ? false : { opacity: 0, y: 24 }}
-                  whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                  transition={reducedMotion ? undefined : { duration: 0.45, delay: index * 0.08 }}
-                  viewport={{ once: true, amount: 0.2 }}
-                  className="relative rounded-3xl border border-[#7a5f47]/12 bg-white p-5 text-[#2f241b] shadow-[0_16px_40px_rgba(122,95,71,0.1)]"
-                >
-                  <div className="mb-3 inline-flex items-center rounded-full border border-[#7a5f47]/15 bg-[#fbf7f0] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7a5f47]">
-                    {item.period}
-                  </div>
-                  <h3 className="text-xl font-bold text-[#2f241b]">{item.stage}</h3>
-                  <p className="mt-1 text-sm font-medium text-[#7a5f47]">{item.institution}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-[#6a5846]">{item.description}</p>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-xs text-[#6a5846]">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {showMetric ? (
-                    <div className="mt-4 rounded-xl border border-[#7a5f47]/15 bg-[#f7efe4] px-3 py-2">
-                      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#8d6b4e]">
-                        {(stageMetric?.label || METRIC_LABEL_BY_TYPE[stageMetric?.metricType || "percentage"]).trim()}
-                      </div>
-                      <div className="mt-1 text-sm font-bold text-[#2f241b]">{stageMetric?.value}</div>
-                    </div>
-                  ) : null}
-
-                  <div className="mt-4 hidden items-center gap-2 lg:flex">
-                    <span className="h-2 w-2 rounded-full bg-[#8d6b4e]" />
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#8d6b4e]/80">Stage {index + 1}</span>
-                  </div>
-                </motion.article>
-              );
-            })}
+          {/* Scroll progress living timeline beam */}
+          <div className="pointer-events-none absolute left-0 right-0 top-[48%] hidden h-2 bg-[var(--surface-strong)] lg:block rounded-full editorial-border">
+            <motion.div
+              style={{ scaleX, transformOrigin: "0%" }}
+              className="h-full w-full bg-[var(--foreground)]"
+            />
           </div>
-        </ExpandableSection>
+
+          <ExpandableSection collapsedMaxHeightPx={800}>
+            <div className="grid grid-cols-1 gap-6 lg:grid-flow-col lg:auto-cols-[minmax(300px,1fr)] lg:overflow-x-auto lg:pb-8 lg:pt-4">
+              {visibleItems.map((item, index) => {
+                const stageMetric = metrics.find((metric) => metric.roadmapItemId === item.id);
+                const showMetric = Boolean(stageMetric?.enabled && stageMetric.value.trim());
+
+                return (
+                  <motion.article
+                    key={item.id}
+                    initial={reducedMotion ? false : { opacity: 0, y: 30, scale: 0.98 }}
+                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    whileHover={reducedMotion ? undefined : { y: -8 }}
+                    transition={reducedMotion ? undefined : { duration: 0.6, delay: index * 0.05, ease: [0.42, 0, 0.58, 1] }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    className="paper-card p-6 sm:p-8"
+                  >
+                    <div className="paper-chip mb-6 inline-flex text-xs">
+                      <span className="mr-2 h-2 w-2 rounded-full bg-[var(--accent)] animate-pulse" />
+                      {item.period}
+                    </div>
+                    <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)]">{item.stage}</h3>
+                    <p className="mt-2 text-sm font-bold uppercase tracking-widest text-[var(--accent)]">{item.institution}</p>
+                    <p className="mt-4 text-base font-medium leading-relaxed">{item.description}</p>
+
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {item.tags.map((tag) => (
+                        <span key={tag} className="paper-chip px-3 py-1.5 text-xs font-bold bg-[var(--surface-soft)]">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {showMetric ? (
+                      <div className="mt-6 rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface-strong)] px-5 py-4">
+                        <div className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
+                          {(stageMetric?.label || METRIC_LABEL_BY_TYPE[stageMetric?.metricType || "percentage"]).trim()}
+                        </div>
+                        <div className="mt-2 text-xl font-black text-[var(--foreground)]">{stageMetric?.value}</div>
+                      </div>
+                    ) : null}
+
+                    <div className="mt-6 hidden items-center gap-2 lg:flex">
+                      <span className="h-3 w-3 rounded-full bg-[var(--accent)] editorial-border" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--foreground)]">Stage {index + 1}</span>
+                    </div>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </ExpandableSection>
         </div>
       </div>
     </section>

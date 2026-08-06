@@ -59,7 +59,7 @@ export default function Certifications() {
 
   if ((loading || contentLoading) && isVisible) {
     return (
-      <section className="section-surface relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="cards" />
       </section>
     );
@@ -70,104 +70,100 @@ export default function Certifications() {
   const visibleCertifications = orderedCertifications.slice(0, 6);
 
   return (
-    <section className="section-surface relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute top-0 left-0 h-px w-full bg-gradient-to-r from-[#8d6b4e] via-white/60 to-[#c4a884]" />
-
+    <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 50 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.8 }}
+          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
           viewport={{ once: true, amount: 0.2 }}
-          className="mb-12 text-center md:mb-16"
+          className="mb-16 text-center"
         >
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#7a5f47]">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="paper-chip mx-auto mb-6 inline-flex uppercase tracking-[0.24em] gap-2">
+            <Sparkles className="h-4 w-4" />
             Verified proof
           </div>
-          <h2 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-6xl">
+          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.certificationsHeading}
           </h2>
-          <p className="mx-auto max-w-2xl px-2 text-sm leading-relaxed text-[#6a5846] sm:text-base md:text-xl">
+          <p className="mx-auto max-w-2xl text-lg md:text-xl font-medium">
             {siteCopy.certificationsSubtitle}
           </p>
-          <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-[#8d6b4e] to-[#c4a884] md:mt-6 md:w-24" />
+          <div className="mx-auto mt-8 h-1 w-24 bg-[var(--foreground)] editorial-border rounded-full" />
         </motion.div>
 
         {loading ? (
           <LoadingSkeleton variant="cards" count={6} />
         ) : (
           <ExpandableSection collapsedMaxHeightPx={900}>
-            <div className="grid auto-rows-fr gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6 2xl:gap-8">
+            <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
               {visibleCertifications.length === 0 ? (
-                <div className="col-span-full text-center text-[#7a5f47]">{siteCopy.certificationsEmpty}</div>
+                <div className="col-span-full text-center font-bold text-lg">{siteCopy.certificationsEmpty}</div>
               ) : (
                 visibleCertifications.map((cert, index) => (
                   <motion.button
                     key={cert.id}
                     type="button"
-                    initial={reducedMotion ? false : { opacity: 0, y: 40 }}
-                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                    transition={reducedMotion ? undefined : { duration: 0.55, delay: index * 0.08 }}
-                    whileHover={reducedMotion ? undefined : { y: -10 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    className="group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[#7a5f47]/12 bg-white text-left text-[#2f241b] shadow-[0_20px_50px_rgba(122,95,71,0.1)] transition-all duration-300 hover:border-[#8d6b4e]/30 hover:shadow-[0_24px_70px_rgba(122,95,71,0.16)]"
+                    initial={reducedMotion ? false : { opacity: 0, y: 30, scale: 0.98 }}
+                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    transition={reducedMotion ? undefined : { duration: 0.6, delay: index * 0.05, ease: [0.42, 0, 0.58, 1] }}
+                    whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    className="paper-card group flex h-full flex-col overflow-hidden text-left"
                     onClick={() => setSelectedCert(cert)}
                   >
-                    <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-[#f7efe4] via-[#fdfaf5] to-[#ede0cf]">
+                    <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-soft)] border-b-2 border-[var(--foreground)]">
                       {cert.image ? (
                         <Image
                           src={cert.image}
                           alt={cert.title}
                           fill
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover object-center transition-transform duration-300 group-hover:scale-[1.03]"
+                          className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_30%_25%,rgba(235,216,188,0.55)_0%,rgba(196,168,132,0.28)_38%,#f7efe4_100%)]">
-                          <Award className="h-16 w-16 text-[#8d6b4e]" />
+                        <div className="flex h-full items-center justify-center bg-[var(--surface-strong)]">
+                          <Award className="h-16 w-16 text-[var(--foreground)] transition-transform duration-300 group-hover:scale-110 opacity-20" />
                         </div>
                       )}
 
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#c4a884]/18 via-transparent to-[#b6926d]/18" />
-
                       {cert.featured && (
-                        <div className="absolute top-4 right-4">
-                          <span className="inline-flex items-center rounded-full border border-[#7a5f47]/15 bg-white/90 px-3 py-1 text-xs font-semibold text-[#7a5f47]">
+                        <div className="absolute top-4 right-4 z-10">
+                          <span className="paper-chip bg-[var(--surface)] text-xs font-bold shadow-sm">
                             Featured
                           </span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex flex-1 flex-col space-y-4 p-5 sm:p-6">
+                    <div className="flex flex-1 flex-col space-y-4 p-6 sm:p-8">
                       <div>
-                        <h3 className="text-lg font-bold text-[#2f241b] transition-colors group-hover:text-[#8d6b4e] sm:text-xl">
+                        <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)] transition-colors group-hover:text-[var(--accent)]">
                           {cert.title}
                         </h3>
-                        <p className="mt-2 text-sm font-medium text-[#7a5f47]">Issuer: {cert.issuer}</p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.22em] text-[#8d6b4e]">
+                        <p className="mt-3 text-sm font-bold text-[var(--foreground)] uppercase tracking-widest">Issuer: {cert.issuer}</p>
+                        <p className="mt-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                           Issued {new Date(cert.issuedDate).toLocaleDateString()}
                         </p>
                       </div>
 
-                      <p className="text-sm leading-relaxed text-[#6a5846]">{cert.description}</p>
+                      <p className="text-base font-medium leading-relaxed">{cert.description}</p>
 
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 pt-2">
                         {getCertificationTags(cert).map((tag) => (
-                          <span key={tag} className="rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-xs text-[#6a5846]">
+                          <span key={tag} className="paper-chip px-3 py-1.5 text-xs font-bold bg-[var(--surface-soft)]">
                             {tag}
                           </span>
                         ))}
                       </div>
 
-                      <div className="mt-auto flex flex-wrap gap-3 pt-1">
-                        <span className="inline-flex items-center rounded-full bg-[#8d6b4e] px-4 py-2 text-sm font-semibold text-[#fffaf3] transition hover:scale-[1.02]">
+                      <div className="mt-auto flex flex-wrap gap-3 pt-4">
+                        <span className="paper-button-primary text-sm px-5 py-2.5">
                           View details
                         </span>
                         {cert.credentialUrl ? (
-                          <span className="inline-flex items-center rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] transition group-hover:border-[#8d6b4e]/30 group-hover:bg-[#f7efe4]">
-                            Credential available
+                          <span className="paper-button text-sm px-5 py-2.5 bg-white">
+                            Credential
                             <ExternalLink className="ml-2 h-4 w-4" />
                           </span>
                         ) : null}
@@ -187,31 +183,31 @@ export default function Certifications() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setSelectedCert(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#2f241b]/40 p-3 sm:p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--foreground)]/40 p-3 sm:p-4 backdrop-blur-sm"
         >
           <motion.div
-            initial={{ scale: 0.92, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.92, opacity: 0 }}
+            exit={{ scale: 0.95, opacity: 0 }}
             onClick={(event) => event.stopPropagation()}
-            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[1.75rem] border border-[#7a5f47]/12 bg-white shadow-2xl"
+            className="paper-card max-h-[90vh] w-full max-w-2xl overflow-y-auto shadow-2xl"
           >
-            <div className="sticky top-0 flex items-center justify-between border-b border-[#7a5f47]/10 bg-white/95 p-4 sm:p-6">
+            <div className="sticky top-0 flex items-center justify-between border-b-2 border-[var(--foreground)] bg-[var(--surface)] p-4 sm:p-6 z-10">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">Certification details</p>
-                <h2 className="mt-1 pr-3 text-lg font-bold text-[#2f241b] sm:text-2xl">{selectedCert.title}</h2>
+                <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Certification details</p>
+                <h2 className="mt-2 pr-3 text-2xl font-black text-[var(--foreground)]">{selectedCert.title}</h2>
               </div>
               <button
                 onClick={() => setSelectedCert(null)}
-                className="rounded-full border border-[#7a5f47]/12 bg-white p-2 text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                className="paper-button p-2"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="space-y-6 p-4 sm:p-8">
+            <div className="space-y-6 p-6 sm:p-8">
               {selectedCert.image && (
-                <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-400/10 via-slate-950/20 to-indigo-400/10">
+                <div className="relative aspect-[16/9] w-full overflow-hidden border-2 border-[var(--foreground)] rounded-lg bg-[var(--surface-soft)]">
                   <Image
                     src={selectedCert.image}
                     alt={selectedCert.title}
@@ -223,36 +219,36 @@ export default function Certifications() {
               )}
 
               <div className="grid gap-4 md:grid-cols-2 md:gap-6">
-                <div className="rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#8d6b4e]">Issuer</p>
-                  <p className="mt-2 text-lg font-semibold text-[#2f241b]">{selectedCert.issuer}</p>
+                <div className="paper-card p-5 bg-[var(--surface-soft)] shadow-none">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Issuer</p>
+                  <p className="mt-2 text-xl font-black text-[var(--foreground)]">{selectedCert.issuer}</p>
                 </div>
-                <div className="rounded-2xl border border-[#7a5f47]/10 bg-white p-4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#8d6b4e]">Issued</p>
-                  <p className="mt-2 text-lg font-semibold text-[#2f241b]">{new Date(selectedCert.issuedDate).toLocaleDateString()}</p>
+                <div className="paper-card p-5 shadow-none bg-white">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Issued</p>
+                  <p className="mt-2 text-xl font-black text-[var(--foreground)]">{new Date(selectedCert.issuedDate).toLocaleDateString()}</p>
                 </div>
                 {selectedCert.expiryDate && (
-                  <div className="rounded-2xl border border-[#7a5f47]/10 bg-white p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[#8d6b4e]">Expiry</p>
-                    <p className="mt-2 text-lg font-semibold text-[#2f241b]">{new Date(selectedCert.expiryDate).toLocaleDateString()}</p>
+                  <div className="paper-card p-5 shadow-none bg-white">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Expiry</p>
+                    <p className="mt-2 text-xl font-black text-[var(--foreground)]">{new Date(selectedCert.expiryDate).toLocaleDateString()}</p>
                   </div>
                 )}
                 {selectedCert.credentialId && (
-                  <div className="rounded-2xl border border-[#7a5f47]/10 bg-white p-4">
-                    <p className="text-xs uppercase tracking-[0.24em] text-[#8d6b4e]">Credential ID</p>
-                    <p className="mt-2 text-lg font-semibold text-[#2f241b]">{selectedCert.credentialId}</p>
+                  <div className="paper-card p-5 shadow-none bg-white">
+                    <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Credential ID</p>
+                    <p className="mt-2 text-xl font-black text-[var(--foreground)]">{selectedCert.credentialId}</p>
                   </div>
                 )}
               </div>
 
               {selectedCert.description && (
-                <div className="rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4 sm:p-5">
-                  <p className="text-xs uppercase tracking-[0.24em] text-[#8d6b4e]">Description</p>
-                  <p className="mt-3 leading-relaxed text-[#6a5846]">{selectedCert.description}</p>
+                <div className="paper-card p-5 sm:p-6 bg-[var(--surface-soft)] shadow-none">
+                  <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Description</p>
+                  <p className="mt-3 text-base font-medium leading-relaxed">{selectedCert.description}</p>
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap gap-4 pt-4">
                 {selectedCert.credentialUrl && (
                   <motion.a
                     whileHover={{ scale: 1.02 }}
@@ -260,9 +256,9 @@ export default function Certifications() {
                     href={selectedCert.credentialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center rounded-full bg-[#8d6b4e] px-5 py-3 font-semibold text-[#fffaf3] transition"
+                    className="paper-button-primary px-6 py-3"
                   >
-                    <ExternalLink className="mr-2 h-4 w-4" />
+                    <ExternalLink className="mr-2 h-5 w-5" />
                     View credential
                   </motion.a>
                 )}
@@ -273,9 +269,9 @@ export default function Certifications() {
                     href={selectedCert.linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center rounded-full border border-[#7a5f47]/12 bg-white px-5 py-3 font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                    className="paper-button bg-white px-6 py-3"
                   >
-                    <ExternalLink className="mr-2 h-4 w-4" />
+                    <ExternalLink className="mr-2 h-5 w-5" />
                     View on LinkedIn
                   </motion.a>
                 )}

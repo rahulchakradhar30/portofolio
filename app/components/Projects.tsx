@@ -73,7 +73,7 @@ export default function Projects() {
 
   if ((loading || contentLoading) && isVisible) {
     return (
-      <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="cards" />
       </section>
     );
@@ -84,96 +84,100 @@ export default function Projects() {
   const visibleProjects = orderedProjects.slice(0, 6);
 
   return (
-    <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute top-0 right-0 h-px w-full bg-gradient-to-l from-[#8d6b4e] via-white/60 to-[#c4a884]" />
-
+    <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 50 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.8 }}
+          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
           viewport={{ once: true, amount: 0.2 }}
-          className="mb-12 text-center md:mb-16"
+          className="mb-16 text-center"
         >
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#7a5f47]">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="paper-chip mx-auto mb-6 inline-flex uppercase tracking-[0.24em] gap-2">
+            <Sparkles className="h-4 w-4" />
             Product showcase
           </div>
-          <h2 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-3xl font-black text-transparent sm:text-4xl md:mb-6 md:text-6xl">
+          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.projectsHeading}
           </h2>
-          <p className="mx-auto max-w-2xl px-2 text-sm leading-relaxed text-[#6a5846] sm:text-base md:text-xl">
+          <p className="mx-auto max-w-2xl text-lg md:text-xl font-medium">
             {siteCopy.projectsSubtitle}
           </p>
-          <div className="mx-auto mt-4 h-px w-16 bg-gradient-to-r from-[#8d6b4e] to-[#c4a884] md:mt-6 md:w-24" />
+          <div className="mx-auto mt-8 h-1 w-24 bg-[var(--foreground)] editorial-border rounded-full" />
         </motion.div>
 
         {loading ? (
           <LoadingSkeleton variant="cards" count={6} />
         ) : (
           <ExpandableSection collapsedMaxHeightPx={860}>
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:gap-6 2xl:gap-8">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
               {visibleProjects.length === 0 ? (
-                <div className="col-span-full text-center text-[#7a5f47]">{siteCopy.projectsEmpty}</div>
+                <div className="col-span-full text-center font-bold text-lg">{siteCopy.projectsEmpty}</div>
               ) : (
                 visibleProjects.map((project, index) => (
                   <motion.div
                     key={project.id || index}
-                    initial={reducedMotion ? false : { opacity: 0, y: 40 }}
-                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                    transition={reducedMotion ? undefined : { duration: 0.55, delay: index * 0.08 }}
-                    whileHover={reducedMotion ? undefined : { y: -10 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    className="group overflow-hidden rounded-[1.75rem] border border-[#7a5f47]/12 bg-white text-[#2f241b] shadow-[0_20px_50px_rgba(122,95,71,0.1)] transition-all duration-300 hover:border-[#8d6b4e]/30 hover:shadow-[0_24px_70px_rgba(122,95,71,0.16)]"
+                    initial={reducedMotion ? false : { opacity: 0, y: 30, scale: 0.98 }}
+                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                    transition={reducedMotion ? undefined : { duration: 0.6, delay: index * 0.05, ease: [0.42, 0, 0.58, 1] }}
+                    whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    className="paper-card group overflow-hidden"
                   >
-                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-[#f7efe4] via-[#fdfaf5] to-[#ede0cf] sm:h-52">
+                    <div className="relative h-48 overflow-hidden bg-[var(--surface-soft)] sm:h-56 border-b-2 border-[var(--foreground)]">
                       {project.image ? (
                         <Image 
                           src={project.image} 
                           alt={project.title} 
                           fill
-                          className="object-cover"
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(34,211,238,0.24)_0%,rgba(99,102,241,0.16)_36%,rgba(15,23,42,0.96)_100%)]" />
+                        <div className="absolute inset-0 bg-[var(--surface-strong)] flex items-center justify-center">
+                          <span className="font-bold text-xl text-[var(--foreground)] opacity-20">No Image</span>
+                        </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-br from-[#c4a884]/18 via-transparent to-[#b6926d]/18" />
-                      <div className="absolute top-4 left-4">
-                        {project.featured && (
-                          <span className="flex items-center rounded-full border border-[#7a5f47]/15 bg-white/90 px-3 py-1 text-xs font-semibold text-[#7a5f47]">
-                            <Star className="mr-1 h-3 w-3" />
+                      
+                      {project.featured && (
+                        <div className="absolute top-4 left-4 z-10">
+                          <span className="paper-chip flex items-center bg-[var(--surface)] font-bold text-xs">
+                            <Star className="mr-1.5 h-3.5 w-3.5" />
                             Featured
                           </span>
-                        )}
-                      </div>
-                      <div className="absolute top-4 right-4">
-                        <span className="rounded-full border border-[#7a5f47]/12 bg-white/90 px-3 py-1 text-xs font-medium text-[#5f4a38]">
+                        </div>
+                      )}
+                      
+                      <div className="absolute top-4 right-4 z-10">
+                        <span className="paper-chip bg-[var(--surface)] text-xs font-bold">
                           {project.category || "Project"}
                         </span>
                       </div>
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/0 opacity-0 transition-colors duration-300 group-hover:bg-white/25 group-hover:opacity-100">
-                        <Eye className="h-8 w-8 text-[#2f241b]" />
+                      
+                      <div className="absolute inset-0 flex items-center justify-center bg-[var(--surface-strong)]/80 opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100">
+                        <div className="paper-card rounded-full p-4 transition-transform duration-300 group-hover:scale-110 bg-[var(--surface)]">
+                          <Eye className="h-6 w-6 text-[var(--foreground)]" />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="space-y-4 p-5 sm:p-6">
+                    <div className="space-y-6 p-6 sm:p-8">
                       <div>
-                        <h3 className="text-lg font-bold text-[#2f241b] transition-colors group-hover:text-[#8d6b4e] sm:text-xl">
+                        <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)] transition-colors group-hover:text-[var(--accent)]">
                           {project.title}
                         </h3>
-                        <p className="mt-3 text-sm leading-relaxed text-[#6a5846] sm:text-base">
+                        <p className="mt-3 text-base font-medium leading-relaxed">
                           {project.description}
                         </p>
                       </div>
 
                       <div>
-                        <div className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-[#8d6b4e]">
+                        <div className="mb-3 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                           Highlights
                         </div>
-                        <ul className="space-y-2 text-sm leading-relaxed text-[#6a5846]">
+                        <ul className="space-y-2 text-sm font-semibold leading-relaxed">
                           {getProjectHighlights(project).map((highlight) => (
                             <li key={highlight} className="flex gap-2">
-                              <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[#8d6b4e]" />
+                              <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--accent)]" />
                               <span>{highlight}</span>
                             </li>
                           ))}
@@ -182,17 +186,17 @@ export default function Projects() {
 
                       <div className="flex flex-wrap gap-2">
                         {Array.isArray(project.tech) && project.tech.slice(0, 5).map((tech: string) => (
-                          <span key={tech} className="rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-xs text-[#6a5846]">
+                          <span key={tech} className="paper-chip px-3 py-1.5 text-xs font-bold bg-[var(--surface-soft)]">
                             {tech}
                           </span>
                         ))}
                       </div>
 
-                      <div className="flex flex-wrap gap-3 pt-1">
+                      <div className="flex flex-wrap gap-3 pt-2">
                         {project.showDetails !== false && (
                           <Link
                             href={`/projects/${project.id}`}
-                            className="inline-flex items-center rounded-full bg-[#8d6b4e] px-4 py-2 text-sm font-semibold text-[#fffaf3] transition hover:scale-[1.02]"
+                            className="paper-button-primary text-sm px-5 py-2.5"
                           >
                             Details
                             <ArrowRight className="ml-2 h-4 w-4" />
@@ -204,7 +208,7 @@ export default function Projects() {
                             href={project.demo}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                            className="paper-button text-sm px-5 py-2.5"
                           >
                             Demo
                             <ExternalLink className="ml-2 h-4 w-4" />
@@ -216,7 +220,7 @@ export default function Projects() {
                             href={project.github}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                            className="paper-button text-sm px-5 py-2.5"
                           >
                             Source
                             <ExternalLink className="ml-2 h-4 w-4" />

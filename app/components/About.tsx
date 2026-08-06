@@ -40,7 +40,7 @@ export default function About() {
 
   if (loading) {
     return (
-      <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
+      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="about" />
       </section>
     );
@@ -69,90 +69,98 @@ export default function About() {
   ];
 
   return (
-    <section className="section-surface relative min-h-screen px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute top-0 left-0 h-px w-full bg-gradient-to-r from-[#8d6b4e] via-white/50 to-[#c4a884]" />
-
+    <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 50 }}
+          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
           whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.8 }}
+          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
           viewport={{ once: true, amount: 0.2 }}
-          className="mb-12 text-center sm:mb-16"
+          className="mb-16 text-center"
         >
-          <div className="mx-auto mb-4 inline-flex rounded-full border border-[#7a5f47]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7a5f47] shadow-sm">
+          <div className="paper-chip mx-auto mb-6 inline-flex uppercase tracking-[0.24em]">
             {siteCopy.aboutBadge}
           </div>
-          <h2 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-4xl font-black text-transparent md:text-6xl">
+          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.aboutHeading}
           </h2>
-          <div className="mx-auto h-px w-24 bg-gradient-to-r from-[#8d6b4e] to-[#c4a884]" />
+          <div className="mx-auto h-1 w-24 bg-[var(--foreground)] editorial-border rounded-full" />
         </motion.div>
 
-        <ExpandableSection collapsedMaxHeightPx={760}>
-          <div className="grid items-start gap-10 md:grid-cols-2 lg:gap-16">
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, x: -50 }}
-            whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true, amount: 0.25 }}
-            className="space-y-4"
-          >
-            {storyBlocks.map((block) => {
-              const Icon = block.icon;
-              return (
-                <div key={block.label} className="premium-card rounded-3xl p-5 sm:p-6">
-                  <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">
-                    <Icon className="h-4 w-4" />
-                    {block.label}
-                  </div>
-                  <h3 className="mt-3 text-2xl font-bold text-[#2f241b]">{block.title}</h3>
-                  <p className="mt-3 text-base leading-relaxed text-[#6a5846] sm:text-lg">{block.copy}</p>
-                </div>
-              );
-            })}
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {siteCopy.aboutTags.map((tag) => (
-                <span key={tag} className="premium-chip rounded-full px-4 py-2 text-sm font-medium text-[#6a5846]">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, x: 50 }}
-            whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true, amount: 0.25 }}
-            className="relative"
-          >
-            <div className="premium-card rounded-[2rem] p-6 sm:p-8">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">
-                <Layers3 className="h-4 w-4" />
-                Proof points
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
-                {aboutData.aboutStats.slice(0, 4).map((stat, index) => (
+        <ExpandableSection collapsedMaxHeightPx={850}>
+          <div className="grid items-start gap-12 md:grid-cols-2 lg:gap-20">
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, x: -30 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.1, ease: [0.42, 0, 0.58, 1] }}
+              viewport={{ once: true, amount: 0.2 }}
+              className="space-y-6"
+            >
+              {storyBlocks.map((block, idx) => {
+                const Icon = block.icon;
+                return (
                   <motion.div
-                    key={`${stat.label}-${index}`}
-                    className="rounded-2xl border border-[#7a5f47]/10 bg-white p-4 text-center"
-                    initial={reducedMotion ? false : { opacity: 0, y: 18 }}
+                    key={block.label}
+                    initial={reducedMotion ? false : { opacity: 0, y: 20 }}
                     whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-                    transition={reducedMotion ? undefined : { duration: 0.4, delay: index * 0.08 }}
-                    viewport={{ once: true, amount: 0.35 }}
+                    transition={reducedMotion ? undefined : { duration: 0.6, delay: idx * 0.1, ease: [0.42, 0, 0.58, 1] }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    className="paper-card p-6 sm:p-8"
                   >
-                    <div className="text-3xl font-black text-[#2f241b]">{stat.value}</div>
-                    <div className="mt-2 text-sm text-[#6a5846]">{stat.label}</div>
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
+                      <Icon className="h-5 w-5" />
+                      {block.label}
+                    </div>
+                    <h3 className="mt-4 text-3xl font-black tracking-tight">{block.title}</h3>
+                    <p className="mt-4 text-lg leading-relaxed font-medium">{block.copy}</p>
                   </motion.div>
+                );
+              })}
+
+              <div className="grid gap-3 sm:grid-cols-2 pt-4">
+                {siteCopy.aboutTags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="paper-chip text-center cursor-default py-3 text-sm"
+                  >
+                    {tag}
+                  </span>
                 ))}
               </div>
-              <div className="mt-4 rounded-2xl border border-[#7a5f47]/10 bg-[#f8f1e7] p-4 text-sm leading-relaxed text-[#6a5846]">
-                {siteCopy.aboutFooter}
+            </motion.div>
+
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, x: 30 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.2, ease: [0.42, 0, 0.58, 1] }}
+              viewport={{ once: true, amount: 0.2 }}
+              className="relative"
+            >
+              <div className="paper-card p-8 sm:p-10">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
+                  <Layers3 className="h-5 w-5" />
+                  Proof points
+                </div>
+                <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6">
+                  {aboutData.aboutStats.slice(0, 4).map((stat, index) => (
+                    <motion.div
+                      key={`${stat.label}-${index}`}
+                      className="rounded-3xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] p-6 text-center transition-all duration-300 hover:bg-[var(--surface-strong)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_rgba(42,36,31,0.15)]"
+                      initial={reducedMotion ? false : { opacity: 0, y: 20, scale: 0.95 }}
+                      whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                      transition={reducedMotion ? undefined : { duration: 0.5, delay: index * 0.1, ease: [0.42, 0, 0.58, 1] }}
+                      viewport={{ once: true, amount: 0.2 }}
+                    >
+                      <div className="text-4xl font-black tracking-tighter text-[var(--foreground)]">{stat.value}</div>
+                      <div className="mt-2 text-sm font-bold uppercase tracking-wide">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="mt-8 rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface-strong)] p-6 text-base font-bold leading-relaxed text-[var(--foreground)] shadow-[2px_2px_0_0_rgba(42,36,31,0.1)]">
+                  {siteCopy.aboutFooter}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
           </div>
         </ExpandableSection>
       </div>

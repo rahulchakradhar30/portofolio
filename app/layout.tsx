@@ -4,6 +4,7 @@ import CookieConsent from "./components/CookieConsent";
 import { MotionProvider } from "./components/MotionProvider";
 import AppShell from "./components/AppShell";
 import DevtoolsGuard from "./components/DevtoolsGuard";
+import PaperBackground from "./components/PaperBackground";
 import { PortfolioContentProvider } from "./components/PortfolioContentProvider";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS, getGlobalJsonLdGraph } from "@/app/lib/seoSchemas";
 
@@ -85,7 +86,7 @@ export default function RootLayout({
   const globalJsonLd = getGlobalJsonLdGraph();
 
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -95,6 +96,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <PortfolioContentProvider>
           <MotionProvider>
+            <PaperBackground />
             <DevtoolsGuard />
             <AppShell>{children}</AppShell>
             <CookieConsent />

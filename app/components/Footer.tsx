@@ -31,62 +31,61 @@ export default function Footer() {
   }, [content]);
 
   return (
-    <footer className="relative overflow-hidden border-t border-[#7a5f47]/10 bg-[#f4eadb] text-[#32281f]">
-      <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,rgba(122,95,71,0.12)_1px,transparent_1px),linear-gradient(to_bottom,rgba(122,95,71,0.12)_1px,transparent_1px)] [background-size:48px_48px]" />
-
-      <div className="relative z-10 px-4 py-16 sm:px-6 lg:px-10">
+    <footer className="relative overflow-hidden border-t-2 border-[var(--foreground)] bg-[var(--surface-strong)] text-[var(--foreground)]">
+      <div className="relative z-10 px-4 py-20 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-[1600px]">
-          <div className="mb-12 grid gap-8 md:grid-cols-4">
+          <div className="mb-16 grid gap-12 md:grid-cols-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
+              viewport={{ once: true }}
               className="md:col-span-2"
             >
-              <h3 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-2xl font-black text-transparent">
+              <h3 className="mb-6 text-3xl font-black tracking-tighter">
                 {siteCopy.footerBrand}
               </h3>
-              <p className="mb-6 max-w-md leading-relaxed text-[#6a5846]">
+              <p className="mb-8 max-w-md text-lg font-medium">
                 {siteCopy.footerLead}
               </p>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-4">
                 <motion.a
-                  whileHover={{ scale: 1.06, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ y: 0 }}
                   href={socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
-                  <Code2 className="h-5 w-5" />
+                  <Code2 className="h-6 w-6" />
                 </motion.a>
                 <motion.a
-                  whileHover={{ scale: 1.06, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ y: 0 }}
                   href={socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
-                  <Link2 className="h-5 w-5" />
+                  <Link2 className="h-6 w-6" />
                 </motion.a>
                 <motion.a
-                  whileHover={{ scale: 1.06, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ y: 0 }}
                   href={socials.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
-                  <Camera className="h-5 w-5" />
+                  <Camera className="h-6 w-6" />
                 </motion.a>
                 <motion.a
-                  whileHover={{ scale: 1.06, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={{ y: -4 }}
+                  whileTap={{ y: 0 }}
                   href={`mailto:${socials.email}`}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[#7a5f47]/12 bg-white text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-6 w-6" />
                 </motion.a>
               </div>
             </motion.div>
@@ -94,26 +93,28 @@ export default function Footer() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1 }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.42, 0, 0.58, 1] }}
+              viewport={{ once: true }}
             >
-              <h4 className="mb-4 text-lg font-semibold text-[#2f241b]">{siteCopy.footerQuickLinksTitle}</h4>
-              <ul className="space-y-2 text-[#6a5846]">
-                <li><Link href="#about" className="transition hover:text-[#8d6b4e]">{siteCopy.navAbout}</Link></li>
-                <li><Link href="#radar" className="transition hover:text-[#8d6b4e]">{siteCopy.navRadar}</Link></li>
-                <li><Link href="#skills" className="transition hover:text-[#8d6b4e]">{siteCopy.navSkills}</Link></li>
-                <li><Link href="#projects" className="transition hover:text-[#8d6b4e]">{siteCopy.navProjects}</Link></li>
-                <li><Link href="/hire" className="transition hover:text-[#8d6b4e]">{siteCopy.navHire}</Link></li>
-                <li><Link href="#contact" className="transition hover:text-[#8d6b4e]">{siteCopy.navContact}</Link></li>
+              <h4 className="mb-6 text-xl font-bold tracking-tight">{siteCopy.footerQuickLinksTitle}</h4>
+              <ul className="space-y-4 font-semibold">
+                <li><Link href="#about" className="transition hover:text-[var(--accent)]">{siteCopy.navAbout}</Link></li>
+                <li><Link href="#radar" className="transition hover:text-[var(--accent)]">{siteCopy.navRadar}</Link></li>
+                <li><Link href="#skills" className="transition hover:text-[var(--accent)]">{siteCopy.navSkills}</Link></li>
+                <li><Link href="#projects" className="transition hover:text-[var(--accent)]">{siteCopy.navProjects}</Link></li>
+                <li><Link href="/hire" className="transition hover:text-[var(--accent)]">{siteCopy.navHire}</Link></li>
+                <li><Link href="#contact" className="transition hover:text-[var(--accent)]">{siteCopy.navContact}</Link></li>
               </ul>
             </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: [0.42, 0, 0.58, 1] }}
+              viewport={{ once: true }}
             >
-              <h4 className="mb-4 text-lg font-semibold text-[#2f241b]">{siteCopy.footerServicesTitle}</h4>
-              <ul className="space-y-2 text-[#6a5846]">
+              <h4 className="mb-6 text-xl font-bold tracking-tight">{siteCopy.footerServicesTitle}</h4>
+              <ul className="space-y-4 font-semibold">
                 {siteCopy.footerServices.map((service: string) => (
                   <li key={service}>{service}</li>
                 ))}
@@ -125,13 +126,14 @@ export default function Footer() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col items-start justify-between gap-4 border-t border-[#7a5f47]/10 pt-8 md:flex-row md:items-center"
+            viewport={{ once: true }}
+            className="flex flex-col items-start justify-between gap-4 border-t-2 border-[var(--foreground)] pt-8 md:flex-row md:items-center"
           >
-            <p className="text-sm text-[#6a5846]">
+            <p className="font-bold">
               {siteCopy.footerCopyright.replace("{year}", String(currentYear))}
             </p>
-            <p className="flex items-center text-sm text-[#6a5846]">
-              {siteCopy.footerMadeWith} <Heart className="mx-1 h-4 w-4 text-[#8d6b4e]" />
+            <p className="flex items-center font-bold">
+              {siteCopy.footerMadeWith} <Heart className="mx-2 h-5 w-5 text-[var(--accent)]" />
             </p>
           </motion.div>
         </div>
