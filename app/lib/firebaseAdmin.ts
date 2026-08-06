@@ -46,8 +46,8 @@ const initializeAdmin = () => {
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     };
 
-    if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-      throw new Error('Missing Firebase credentials in environment variables and no credentials file found');
+    if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail || serviceAccount.privateKey.includes('[SENSITIVE]')) {
+      throw new Error('Missing or placeholder Firebase credentials in environment variables and no credentials file found');
     }
 
     admin.initializeApp({
@@ -58,6 +58,7 @@ const initializeAdmin = () => {
     console.log('Firebase Admin initialized successfully from environment variables');
     return admin.app();
   } catch (error) {
+    isInitializing = false;
     console.error('Failed to initialize Firebase Admin:', error);
     throw error;
   }

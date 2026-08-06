@@ -212,7 +212,7 @@ const serverFirebaseHelpers = {
       return projects;
     } catch (error) {
       console.error('Server: Error getting projects:', error);
-      throw error;
+      return [];
     }
   },
 
@@ -295,7 +295,7 @@ const serverFirebaseHelpers = {
       return skills;
     } catch (error) {
       console.error('Server: Error getting skills:', error);
-      throw error;
+      return [];
     }
   },
 
@@ -565,7 +565,7 @@ const serverFirebaseHelpers = {
       return certifications;
     } catch (error) {
       console.error('Server: Error getting certifications:', error);
-      throw error;
+      return [];
     }
   },
 
