@@ -10,6 +10,7 @@ import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 
 type RadarNode = {
   id: string;
@@ -58,10 +59,8 @@ function pickByIds<T extends { id: string }>(items: T[], ids: string[]) {
   return ids.map((id) => map.get(id)).filter(Boolean) as T[];
 }
 
-import { usePortfolioContent } from "./PortfolioContentProvider";
-
 export default function PortfolioRadar() {
-  const { content, loading: contentLoading } = usePortfolioContent();
+  const { content } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -106,6 +105,7 @@ export default function PortfolioRadar() {
     const syncViewportMode = () => {
       setIsCompactViewport(window.innerWidth < 1024);
     };
+
     syncViewportMode();
     window.addEventListener("resize", syncViewportMode);
     return () => window.removeEventListener("resize", syncViewportMode);
@@ -186,17 +186,7 @@ export default function PortfolioRadar() {
   if (!loading && !isVisible) return null;
 
   return (
-    <section className="relative min-h-screen overflow-hidden px-4 py-16 sm:px-6 md:py-24 lg:px-10">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(235,216,188,0.6)_0%,transparent_28%),radial-gradient(circle_at_80%_30%,rgba(196,168,132,0.25)_0%,transparent_26%),linear-gradient(180deg,#fbf7f0_0%,#f4eadb_100%)]" />
-      <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(to_right,rgba(122,95,71,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(122,95,71,0.08)_1px,transparent_1px)] [background-size:44px_44px]" />
-      {!reducedMotion ? (
-        <motion.div
-          className="pointer-events-none absolute -top-24 right-10 h-64 w-64 rounded-full bg-[#c4a884]/25 blur-3xl"
-          animate={{ x: [0, 18, -10, 0], y: [0, 12, -8, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ) : null}
-
+    <section className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:px-10">
       <div className="relative z-10 mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 40 }}
@@ -205,221 +195,219 @@ export default function PortfolioRadar() {
           viewport={{ once: true, amount: 0.2 }}
           className="mb-10 text-center sm:mb-14"
         >
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/15 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#7a5f47] backdrop-blur">
+          <div className="paper-chip mx-auto inline-flex items-center gap-2 uppercase tracking-[0.24em]">
             <Sparkles className="h-4 w-4" />
             {siteCopy.radarBadge}
           </div>
-          <h2 className="mt-5 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:text-6xl">
+          <h2 className="mt-5 text-4xl font-black tracking-tighter text-[var(--foreground)] sm:text-5xl md:text-6xl">
             {siteCopy.radarHeading}
           </h2>
-          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-[#6a5846] sm:text-base md:text-lg">
+          <p className="mx-auto mt-4 max-w-3xl text-sm font-medium leading-relaxed text-[var(--foreground)]/75 sm:text-base md:text-lg">
             {siteCopy.radarSubtitle}
           </p>
         </motion.div>
 
         <ExpandableSection collapsedMaxHeightPx={880}>
           <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, x: -40 }}
-            whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={reducedMotion ? undefined : { duration: 0.8 }}
-            viewport={{ once: true, amount: 0.18 }}
-            className="relative"
-          >
-            {isCompactViewport ? (
-              <div className="rounded-[1.75rem] border border-[#7a5f47]/12 bg-white p-4 shadow-[0_24px_70px_rgba(122,95,71,0.12)] backdrop-blur-xl sm:p-5">
-                <div className="mb-4 flex items-center justify-between rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4">
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8d6b4e]">Signal Core</div>
-                    <div className="mt-1 text-2xl font-black text-[#2f241b]">{stats.reduce((total, item) => total + item.value, 0)}</div>
-                    <div className="text-xs text-[#6a5846]">active portfolio signals</div>
-                  </div>
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#c4a884]/40 to-[#eadbbf]/50 blur-[1px]" />
-                </div>
-
-                {!loading ? (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {radarNodes.map((node) => (
-                      <Link
-                        key={`${node.kind}-${node.id}`}
-                        href={node.href}
-                        className="flex items-center gap-3 rounded-2xl border border-[#7a5f47]/10 bg-white px-3 py-3 transition hover:border-[#8d6b4e]/25"
-                      >
-                        <div
-                          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[#7a5f47]/10"
-                          style={{ background: `linear-gradient(135deg, ${node.accent}33, rgba(255,255,255,0.08))` }}
-                        >
-                          {node.iconUrl ? (
-                            <div
-                              role="img"
-                              aria-label={node.title}
-                              className="h-6 w-6 bg-contain bg-center bg-no-repeat"
-                              style={{ backgroundImage: `url(${node.iconUrl})` }}
-                            />
-                          ) : (
-                            <span className="text-sm font-black text-[#5f4a38]">{node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}</span>
-                          )}
-                        </div>
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-bold text-[#2f241b]">{node.title}</div>
-                          <div className="truncate text-[10px] uppercase tracking-[0.18em]" style={{ color: "#8d6b4e" }}>
-                            {node.subtitle}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="skeleton-shimmer h-52 rounded-2xl border border-[#7a5f47]/10" />
-                )}
-              </div>
-            ) : (
-            <div
-              className="relative mx-auto aspect-square max-w-[560px] [perspective:1400px]"
-              onMouseMove={onRadarMove}
-              onMouseLeave={onRadarLeave}
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, x: -40 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8 }}
+              viewport={{ once: true, amount: 0.18 }}
+              className="relative"
             >
-              <motion.div
-                className="relative h-full w-full rounded-[2rem] border border-[#7a5f47]/12 bg-white p-4 shadow-[0_30px_80px_rgba(122,95,71,0.14)] backdrop-blur-xl sm:p-6"
-                style={{ transformStyle: "preserve-3d" }}
-                animate={reducedMotion ? undefined : { rotateX: tiltX, rotateY: tiltY }}
-                transition={{ duration: pointer.active ? 0.08 : 0.45, ease: pointer.active ? "linear" : "easeOut" }}
-              >
-              <div className="absolute inset-4 rounded-[1.75rem] border border-[#7a5f47]/10" />
-              <div className="absolute inset-[12%] rounded-full border border-[#7a5f47]/10" />
-              <div className="absolute inset-[24%] rounded-full border border-[#c4a884]/18" />
-              <div className="absolute inset-[7%] rounded-full border border-[#7a5f47]/5" style={{ transform: "translateZ(18px)" }} />
-
-              <motion.div
-                animate={reducedMotion ? undefined : { rotate: 360 }}
-                transition={reducedMotion ? undefined : { duration: 28, ease: "linear", repeat: Infinity }}
-                className="absolute inset-0"
-              >
-                <div className="absolute left-1/2 top-[9%] h-[82%] w-[1px] bg-gradient-to-b from-[#8d6b4e]/0 via-[#8d6b4e]/30 to-[#8d6b4e]/0" />
-                <div className="absolute left-[9%] top-1/2 h-[1px] w-[82%] bg-gradient-to-r from-[#b6926d]/0 via-[#b6926d]/30 to-[#b6926d]/0" />
-                <div className="absolute left-1/2 top-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#7a5f47]/5" />
-              </motion.div>
-
-              <div className="absolute left-1/2 top-1/2 flex h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#7a5f47]/12 bg-white/85 text-center shadow-[0_0_80px_rgba(122,95,71,0.16)] backdrop-blur-md">
-                <div>
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#8d6b4e]">Interactive Work Map</div>
-                  <div className="mt-2 text-2xl font-black text-[#2f241b]">{stats.reduce((total, item) => total + item.value, 0)}</div>
-                  <div className="mt-1 text-xs text-[#6a5846]">connected portfolio signals</div>
-                </div>
-              </div>
-
-              {!reducedMotion ? (
-                <motion.div
-                  className="pointer-events-none absolute -inset-5 rounded-full"
-                  animate={{
-                    background: `radial-gradient(circle at ${50 + pointer.x * 20}% ${50 + pointer.y * 18}%, rgba(56,189,248,0.18), rgba(56,189,248,0) 58%)`,
-                  }}
-                  transition={{ duration: pointer.active ? 0.07 : 0.45 }}
-                />
-              ) : null}
-
-              {!loading &&
-                radarNodes.map((node, index) => {
-                  const angle = (360 / Math.max(radarNodes.length, 1)) * index - 90;
-                  const x = 50 + orbitRadius * Math.cos((angle * Math.PI) / 180);
-                  const y = 50 + orbitRadius * Math.sin((angle * Math.PI) / 180);
-                  const depth = node.kind === "project" ? 72 : node.kind === "certification" ? 62 : 82;
-
-                  return (
-                    <motion.a
-                      key={`${node.kind}-${node.id}`}
-                      href={node.href}
-                      initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
-                      whileInView={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
-                      whileHover={reducedMotion ? undefined : { y: -6, scale: 1.05 }}
-                      transition={reducedMotion ? undefined : { duration: 0.5, delay: index * 0.06 }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      className="group absolute flex min-w-[120px] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl border border-[#7a5f47]/10 bg-white px-2.5 py-3 text-center shadow-lg backdrop-blur-md transition-colors hover:border-[#8d6b4e]/20 lg:min-w-[134px] xl:min-w-[150px]"
-                      style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) translateZ(${depth}px)` }}
-                    >
-                      <div
-                        className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#7a5f47]/10 shadow-[0_0_20px_rgba(122,95,71,0.08)]"
-                        style={{ background: `linear-gradient(135deg, ${node.accent}33, rgba(255,255,255,0.08))` }}
-                      >
-                        {node.iconUrl ? (
-                          <div
-                            role="img"
-                            aria-label={node.title}
-                            className="h-7 w-7 bg-contain bg-center bg-no-repeat"
-                            style={{ backgroundImage: `url(${node.iconUrl})` }}
-                          />
-                        ) : (
-                            <span className="text-lg font-black text-[#5f4a38]">{node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}</span>
-                        )}
+              {isCompactViewport ? (
+                <div className="paper-card p-4 shadow-none sm:p-5">
+                  <div className="mb-4 flex items-center justify-between rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] p-4">
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[var(--accent)]">Signal Core</div>
+                      <div className="mt-1 text-2xl font-black tracking-tight text-[var(--foreground)]">
+                        {stats.reduce((total, item) => total + item.value, 0)}
                       </div>
-                      <div className="max-w-full">
-                        <div className="truncate text-xs font-bold text-[#2f241b] sm:text-sm">{node.title}</div>
-                        <div className="mt-0.5 truncate text-[10px] uppercase tracking-[0.18em]" style={{ color: "#8d6b4e" }}>
-                          {node.subtitle}
-                        </div>
-                      </div>
-                    </motion.a>
-                  );
-                })}
-
-              {loading ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="skeleton-shimmer h-52 w-52 rounded-full border border-[#7a5f47]/10" />
-                </div>
-              ) : null}
-              </motion.div>
-            </div>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={reducedMotion ? false : { opacity: 0, x: 40 }}
-            whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
-            transition={reducedMotion ? undefined : { duration: 0.8 }}
-            viewport={{ once: true, amount: 0.18 }}
-            className="space-y-6"
-          >
-            <div className="rounded-[2rem] border border-[#7a5f47]/12 bg-white p-6 shadow-[0_24px_80px_rgba(122,95,71,0.12)] backdrop-blur-xl sm:p-8">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#8d6b4e]">
-                <Layers3 className="h-4 w-4" />
-                Live portfolio metrics
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] p-4">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8d6b4e]">{stat.label}</div>
-                    <div className="mt-2 text-3xl font-black text-[#2f241b]">{stat.value}</div>
+                      <div className="text-xs text-[var(--foreground)]/65">active portfolio signals</div>
+                    </div>
+                    <div className="h-10 w-10 rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface)]" />
                   </div>
-                ))}
-              </div>
 
-              <div className="mt-6 rounded-2xl border border-[#7a5f47]/10 bg-gradient-to-r from-[#f7efe4] via-white to-[#f4eadb] p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-[#2f241b]">
-                  <Star className="h-4 w-4 text-[#8d6b4e]" />
-                  {siteCopy.radarFeatureTitle}
+                  {!loading ? (
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {radarNodes.map((node) => (
+                        <Link
+                          key={`${node.kind}-${node.id}`}
+                          href={node.href}
+                          className="paper-card flex items-center gap-3 px-3 py-3 shadow-none transition-transform duration-300 hover:-translate-y-1"
+                        >
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)]">
+                            {node.iconUrl ? (
+                              <div
+                                role="img"
+                                aria-label={node.title}
+                                className="h-6 w-6 bg-contain bg-center bg-no-repeat"
+                                style={{ backgroundImage: `url(${node.iconUrl})` }}
+                              />
+                            ) : (
+                              <span className="text-sm font-black text-[var(--foreground)]">
+                                {node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}
+                              </span>
+                            )}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-bold text-[var(--foreground)]">{node.title}</div>
+                            <div className="truncate text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                              {node.subtitle}
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="skeleton-shimmer h-52 rounded-2xl border-2 border-[var(--foreground)]/10" />
+                  )}
                 </div>
-                <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">
-                  {siteCopy.radarFeatureCopy}
-                </p>
+              ) : (
+                <div className="relative mx-auto aspect-square max-w-[560px] [perspective:1400px]" onMouseMove={onRadarMove} onMouseLeave={onRadarLeave}>
+                  <motion.div
+                    className="paper-card relative h-full w-full p-4 shadow-none sm:p-6"
+                    style={{ transformStyle: "preserve-3d" }}
+                    animate={reducedMotion ? undefined : { rotateX: tiltX, rotateY: tiltY }}
+                    transition={reducedMotion ? undefined : { duration: pointer.active ? 0.08 : 0.45, ease: pointer.active ? "linear" : "easeOut" }}
+                  >
+                    <div className="absolute inset-4 rounded-[1.75rem] border-2 border-[var(--foreground)]/10" />
+                    <div className="absolute inset-[12%] rounded-full border border-[var(--foreground)]/10" />
+                    <div className="absolute inset-[24%] rounded-full border border-[var(--accent)]/20" />
+                    <div className="absolute inset-[7%] rounded-full border border-[var(--foreground)]/5" style={{ transform: "translateZ(18px)" }} />
+
+                    <motion.div
+                      animate={reducedMotion ? undefined : { rotate: 360 }}
+                      transition={reducedMotion ? undefined : { duration: 28, ease: "linear", repeat: Infinity }}
+                      className="absolute inset-0"
+                    >
+                      <div className="absolute left-1/2 top-[9%] h-[82%] w-[1px] bg-gradient-to-b from-transparent via-[var(--accent)]/30 to-transparent" />
+                      <div className="absolute left-[9%] top-1/2 h-[1px] w-[82%] bg-gradient-to-r from-transparent via-[var(--accent)]/30 to-transparent" />
+                      <div className="absolute left-1/2 top-1/2 h-[72%] w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--foreground)]/5" />
+                    </motion.div>
+
+                    <div className="absolute left-1/2 top-1/2 flex h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface)]/90 text-center shadow-[0_0_80px_rgba(122,95,71,0.08)]">
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-[0.28em] text-[var(--accent)]">Interactive Work Map</div>
+                        <div className="mt-2 text-2xl font-black tracking-tight text-[var(--foreground)]">
+                          {stats.reduce((total, item) => total + item.value, 0)}
+                        </div>
+                        <div className="mt-1 text-xs text-[var(--foreground)]/65">connected portfolio signals</div>
+                      </div>
+                    </div>
+
+                    {!reducedMotion ? (
+                      <motion.div
+                        className="pointer-events-none absolute -inset-5 rounded-full"
+                        animate={{
+                          background: `radial-gradient(circle at ${50 + pointer.x * 20}% ${50 + pointer.y * 18}%, rgba(56,189,248,0.16), rgba(56,189,248,0) 58%)`,
+                        }}
+                        transition={{ duration: pointer.active ? 0.07 : 0.45 }}
+                      />
+                    ) : null}
+
+                    {!loading &&
+                      radarNodes.map((node, index) => {
+                        const angle = (360 / Math.max(radarNodes.length, 1)) * index - 90;
+                        const x = 50 + orbitRadius * Math.cos((angle * Math.PI) / 180);
+                        const y = 50 + orbitRadius * Math.sin((angle * Math.PI) / 180);
+                        const depth = node.kind === "project" ? 72 : node.kind === "certification" ? 62 : 82;
+
+                        return (
+                          <motion.a
+                            key={`${node.kind}-${node.id}`}
+                            href={node.href}
+                            initial={reducedMotion ? false : { opacity: 0, scale: 0.8 }}
+                            whileInView={reducedMotion ? undefined : { opacity: 1, scale: 1 }}
+                            whileHover={reducedMotion ? undefined : { y: -6, scale: 1.05 }}
+                            transition={reducedMotion ? undefined : { duration: 0.5, delay: index * 0.06 }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            className="group absolute flex min-w-[120px] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface)] px-2.5 py-3 text-center shadow-[4px_4px_0_0_rgba(47,36,27,0.08)] transition-transform hover:-translate-y-2 lg:min-w-[134px] xl:min-w-[150px]"
+                            style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) translateZ(${depth}px)` }}
+                          >
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] shadow-[0_0_20px_rgba(122,95,71,0.08)]">
+                              {node.iconUrl ? (
+                                <div
+                                  role="img"
+                                  aria-label={node.title}
+                                  className="h-7 w-7 bg-contain bg-center bg-no-repeat"
+                                  style={{ backgroundImage: `url(${node.iconUrl})` }}
+                                />
+                              ) : (
+                                <span className="text-lg font-black text-[var(--foreground)]">
+                                  {node.kind === "project" ? "P" : node.kind === "certification" ? "C" : "S"}
+                                </span>
+                              )}
+                            </div>
+                            <div className="max-w-full">
+                              <div className="truncate text-xs font-bold text-[var(--foreground)] sm:text-sm">{node.title}</div>
+                              <div className="mt-0.5 truncate text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
+                                {node.subtitle}
+                              </div>
+                            </div>
+                          </motion.a>
+                        );
+                      })}
+
+                    {loading ? (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="skeleton-shimmer h-52 w-52 rounded-full border-2 border-[var(--foreground)]/10" />
+                      </div>
+                    ) : null}
+                  </motion.div>
+                </div>
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, x: 40 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, x: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8 }}
+              viewport={{ once: true, amount: 0.18 }}
+              className="space-y-6"
+            >
+              <div className="paper-card p-6 shadow-none sm:p-8">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-[var(--accent)]">
+                  <Layers3 className="h-4 w-4" />
+                  Live portfolio metrics
+                </div>
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className="rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] p-4 shadow-[3px_3px_0_0_rgba(47,36,27,0.06)]">
+                      <div className="text-[11px] font-bold uppercase tracking-[0.22em] text-[var(--accent)]">{stat.label}</div>
+                      <div className="mt-2 text-3xl font-black tracking-tight text-[var(--foreground)]">{stat.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface)] p-4 shadow-[4px_4px_0_0_rgba(47,36,27,0.06)]">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-[var(--foreground)]">
+                    <Star className="h-4 w-4 text-[var(--accent)]" />
+                    {siteCopy.radarFeatureTitle}
+                  </div>
+                  <p className="mt-2 text-sm leading-relaxed text-[var(--foreground)]/70">
+                    {siteCopy.radarFeatureCopy}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Link href="#skills" className="rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-4 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]">
-                {siteCopy.radarExploreSkills} <ArrowUpRight className="ml-2 inline h-4 w-4" />
-              </Link>
-              <Link href="#projects" className="rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-4 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]">
-                {siteCopy.radarSeeProjects} <ArrowUpRight className="ml-2 inline h-4 w-4" />
-              </Link>
-              <Link href="#certifications" className="rounded-2xl border border-[#7a5f47]/12 bg-white px-4 py-4 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]">
-                {siteCopy.radarViewCredentials} <ArrowUpRight className="ml-2 inline h-4 w-4" />
-              </Link>
-            </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Link href="#skills" className="paper-button px-4 py-4 text-sm font-semibold">
+                  {siteCopy.radarExploreSkills} <ArrowUpRight className="ml-2 inline h-4 w-4" />
+                </Link>
+                <Link href="#projects" className="paper-button px-4 py-4 text-sm font-semibold">
+                  {siteCopy.radarSeeProjects} <ArrowUpRight className="ml-2 inline h-4 w-4" />
+                </Link>
+                <Link href="#certifications" className="paper-button px-4 py-4 text-sm font-semibold">
+                  {siteCopy.radarViewCredentials} <ArrowUpRight className="ml-2 inline h-4 w-4" />
+                </Link>
+              </div>
 
-            <div className="rounded-[2rem] border border-[#7a5f47]/10 bg-white p-5 text-sm leading-relaxed text-[#6a5846] backdrop-blur-xl sm:p-6">
-              {siteCopy.radarCommandCopy}
-            </div>
-          </motion.div>
+              <div className="paper-card p-5 text-sm leading-relaxed text-[var(--foreground)]/75 shadow-none sm:p-6">
+                {siteCopy.radarCommandCopy}
+              </div>
+            </motion.div>
           </div>
         </ExpandableSection>
       </div>
