@@ -68,7 +68,7 @@ export default function ExpandableSection({
         </div>
 
         {!expanded && hasOverflow ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f4eadb] via-[#f4eadb]/80 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--surface-strong)] via-[var(--surface-strong)]/80 to-transparent" />
         ) : null}
       </div>
 
@@ -78,7 +78,7 @@ export default function ExpandableSection({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => setExpanded((current) => !current)}
-          className="mx-auto mt-5 inline-flex items-center justify-center rounded-full border border-[#7a5f47]/12 bg-white px-6 py-2.5 text-sm font-semibold text-[#5f4a38] shadow-sm transition hover:border-[#8d6b4e]/30 hover:bg-[#f7efe4]"
+          className="paper-button mx-auto mt-5 inline-flex items-center justify-center px-6 py-2.5 text-sm font-semibold"
           aria-expanded={expanded}
         >
           {expanded ? viewLessLabel : viewMoreLabel}

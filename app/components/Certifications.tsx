@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Award, ExternalLink, Sparkles, X } from "lucide-react";
 import type { Certification } from "@/app/lib/types";
 import { prioritizeFeatured } from "@/app/lib/contentOrdering";
@@ -59,7 +59,7 @@ export default function Certifications() {
 
   if ((loading || contentLoading) && isVisible) {
     return (
-      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
+      <section className="relative px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
         <LoadingSkeleton variant="cards" />
       </section>
     );
@@ -70,7 +70,7 @@ export default function Certifications() {
   const visibleCertifications = orderedCertifications.slice(0, 6);
 
   return (
-    <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
+    <section className="relative px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}
@@ -177,21 +177,22 @@ export default function Certifications() {
         )}
       </div>
 
-      {selectedCert && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setSelectedCert(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--foreground)]/40 p-3 sm:p-4 backdrop-blur-sm"
-        >
+      <AnimatePresence>
+        {selectedCert ? (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            onClick={(event) => event.stopPropagation()}
-            className="paper-card max-h-[90vh] w-full max-w-2xl overflow-y-auto shadow-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedCert(null)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--foreground)]/40 p-3 backdrop-blur-sm sm:p-4"
           >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(event) => event.stopPropagation()}
+              className="paper-card max-h-[90vh] w-full max-w-2xl overflow-y-auto shadow-2xl"
+            >
             <div className="sticky top-0 flex items-center justify-between border-b-2 border-[var(--foreground)] bg-[var(--surface)] p-4 sm:p-6 z-10">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">Certification details</p>
@@ -279,7 +280,8 @@ export default function Certifications() {
             </div>
           </motion.div>
         </motion.div>
-      )}
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

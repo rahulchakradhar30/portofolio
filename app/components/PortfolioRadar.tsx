@@ -186,7 +186,7 @@ export default function PortfolioRadar() {
   if (!loading && !isVisible) return null;
 
   return (
-    <section className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:px-10">
+    <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:px-10">
       <div className="relative z-10 mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 40 }}

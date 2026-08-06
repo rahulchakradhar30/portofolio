@@ -40,7 +40,7 @@ export default function About() {
 
   if (loading) {
     return (
-      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
+      <section className="relative px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="about" />
       </section>
     );
@@ -69,7 +69,7 @@ export default function About() {
   ];
 
   return (
-    <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
+    <section className="relative px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}

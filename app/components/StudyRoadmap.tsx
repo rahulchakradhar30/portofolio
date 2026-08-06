@@ -167,7 +167,7 @@ import { useScroll, useSpring } from "framer-motion";
 
 export default function StudyRoadmap() {
   const { content } = usePortfolioContent();
-  const { reducedMotion } = useMotionPreferences();
+  const { reducedMotion, scrollEffectsEnabled } = useMotionPreferences();
   const sectionRef = useRef<HTMLDivElement | null>(null);
 
   const { scrollYProgress } = useScroll({
@@ -210,7 +210,7 @@ export default function StudyRoadmap() {
   if (!enabled || visibleItems.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="roadmap">
+    <section ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="roadmap">
       <div className="relative z-10 mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}
@@ -233,11 +233,12 @@ export default function StudyRoadmap() {
 
         <div className="relative">
           {/* Scroll progress living timeline beam */}
-          <div className="pointer-events-none absolute left-0 right-0 top-[48%] hidden h-2 bg-[var(--surface-strong)] lg:block rounded-full editorial-border">
-            <motion.div
-              style={{ scaleX, transformOrigin: "0%" }}
-              className="h-full w-full bg-[var(--foreground)]"
-            />
+          <div className="pointer-events-none absolute left-0 right-0 top-[48%] hidden h-2 rounded-full editorial-border bg-[var(--surface-strong)] lg:block">
+            {scrollEffectsEnabled ? (
+              <motion.div style={{ scaleX, transformOrigin: "0%" }} className="h-full w-full bg-[var(--foreground)]" />
+            ) : (
+              <div className="h-full w-full bg-[var(--foreground)]/25" />
+            )}
           </div>
 
           <ExpandableSection collapsedMaxHeightPx={800}>

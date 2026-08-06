@@ -63,7 +63,7 @@ export default function Skills() {
 
   if ((loading || contentLoading) && isVisible) {
     return (
-      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
+      <section className="relative px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="cards" />
       </section>
     );
@@ -74,7 +74,7 @@ export default function Skills() {
   const visibleSkills = orderedSkills.slice(0, 12);
 
   return (
-    <section className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
+    <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="relative z-10 mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}

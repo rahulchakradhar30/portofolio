@@ -53,10 +53,9 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
     window.localStorage.setItem(MAGNIFIER_STORAGE_KEY, String(magnifierEnabled));
   }, [magnifierEnabled]);
 
-  const dbAnimationsEnabled = content ? content.animationsEnabled !== false : true;
   const dbScrollEffects = content ? content.scrollEffects !== false : true;
 
-  const reducedMotion = !dbAnimationsEnabled || motionMode === "reduced" || (motionMode === "system" && systemReduced);
+  const reducedMotion = motionMode === "reduced" || (motionMode === "system" && systemReduced);
   const scrollEffectsEnabled = dbScrollEffects && !reducedMotion;
 
   useEffect(() => {

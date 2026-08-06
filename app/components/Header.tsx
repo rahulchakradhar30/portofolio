@@ -1,14 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Command, Menu, X } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import { useMotionPreferences } from "./MotionProvider";
 
 export default function Header() {
   const { content } = usePortfolioContent();
+  const { reducedMotion } = useMotionPreferences();
   const [isOpen, setIsOpen] = useState(false);
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
@@ -25,9 +27,9 @@ export default function Header() {
 
   return (
     <motion.header
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
+      initial={reducedMotion ? false : { y: -100 }}
+      animate={reducedMotion ? undefined : { y: 0 }}
+      transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
       className="fixed top-0 left-0 right-0 z-50 bg-[var(--surface)] border-b-2 border-[var(--foreground)]"
     >
       <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-10">
@@ -81,32 +83,35 @@ export default function Header() {
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-4 border-t-2 border-[var(--foreground)] pt-6 pb-4 md:hidden"
-          >
-            <nav className="flex flex-col space-y-6 text-center">
-              {navItems.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="font-bold text-xl text-[var(--foreground)] tracking-tight"
-                >
-                  {item.name}
-                </a>
-              ))}
-              <div className="pt-4">
-                <Link href="/hire" className="paper-button-primary inline-block w-full max-w-xs mx-auto py-3">
-                  {siteCopy.headerHireCta}
-                </Link>
-              </div>
-            </nav>
-          </motion.div>
-        )}
+        <AnimatePresence initial={false}>
+          {isOpen ? (
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, height: 0 }}
+              animate={reducedMotion ? undefined : { opacity: 1, height: "auto" }}
+              exit={reducedMotion ? undefined : { opacity: 0, height: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.25, ease: [0.42, 0, 0.58, 1] }}
+              className="mt-4 border-t-2 border-[var(--foreground)] pt-6 pb-4 md:hidden"
+            >
+              <nav className="flex flex-col space-y-6 text-center">
+                {navItems.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className="font-bold text-xl text-[var(--foreground)] tracking-tight"
+                  >
+                    {item.name}
+                  </a>
+                ))}
+                <div className="pt-4">
+                  <Link href="/hire" className="paper-button-primary inline-block w-full max-w-xs mx-auto py-3">
+                    {siteCopy.headerHireCta}
+                  </Link>
+                </div>
+              </nav>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
     </motion.header>
   );

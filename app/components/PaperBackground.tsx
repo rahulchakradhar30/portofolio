@@ -1,8 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useMotionPreferences } from "./MotionProvider";
 
 export default function PaperBackground() {
+  const { scrollEffectsEnabled } = useMotionPreferences();
+
   return (
     <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[var(--background)]">
       {/* Soft Vignette / Lighting */}
@@ -28,33 +31,37 @@ export default function PaperBackground() {
       </div>
 
       {/* Abstract Floating Shapes (Subtle Depth) */}
-      <motion.div
-        animate={{
-          y: [0, -20, 0],
-          rotate: [0, 2, 0],
-          scale: [1, 1.02, 1]
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-        className="absolute -top-[10%] -right-[5%] w-[40vw] h-[40vw] rounded-full bg-[#f0e9dd] opacity-30 blur-[100px]"
-      />
-      <motion.div
-        animate={{
-          y: [0, 30, 0],
-          rotate: [0, -3, 0],
-          scale: [1, 1.05, 1]
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2
-        }}
-        className="absolute top-[40%] -left-[10%] w-[50vw] h-[50vw] rounded-full bg-[#f7f3ea] opacity-40 blur-[120px]"
-      />
+      {scrollEffectsEnabled ? (
+        <>
+          <motion.div
+            animate={{
+              y: [0, -20, 0],
+              rotate: [0, 2, 0],
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              duration: 12,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute -top-[10%] -right-[5%] h-[40vw] w-[40vw] rounded-full bg-[#f0e9dd] opacity-30 blur-[100px]"
+          />
+          <motion.div
+            animate={{
+              y: [0, 30, 0],
+              rotate: [0, -3, 0],
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2,
+            }}
+            className="absolute top-[40%] -left-[10%] h-[50vw] w-[50vw] rounded-full bg-[#f7f3ea] opacity-40 blur-[120px]"
+          />
+        </>
+      ) : null}
     </div>
   );
 }

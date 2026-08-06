@@ -51,7 +51,7 @@ export default function Contact() {
 
   if (contentLoading && isVisible) {
     return (
-      <section className="relative min-h-screen px-4 py-24 sm:px-6 lg:px-10">
+      <section className="relative px-4 py-24 sm:px-6 lg:px-10">
         <LoadingSkeleton variant="contact" />
       </section>
     );
@@ -111,7 +111,7 @@ export default function Contact() {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="contact">
+    <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="contact">
       <div className="relative z-10 mx-auto max-w-[1600px] px-0 sm:px-2 lg:px-6">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}
