@@ -88,20 +88,20 @@ export default function SEOTab() {
   };
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-500">Loading SEO configurations...</div>;
+    return <div className="text-center py-10 text-[var(--foreground)]/60">Loading SEO configurations...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-cyan-100 bg-gradient-to-br from-white via-cyan-50 to-emerald-50 p-5 shadow-sm md:p-6">
+      <div className="paper-card p-5 shadow-none md:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-cyan-100 px-3 py-1 text-xs font-semibold text-cyan-800">
+            <div className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]/70">
               <Globe className="h-3.5 w-3.5" />
               SEO Management Studio
             </div>
-            <h2 className="mt-3 text-2xl font-black text-slate-900 md:text-3xl">Search Engine Optimization</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 md:text-base">
+            <h2 className="mt-3 text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">Search Engine Optimization</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/65 md:text-base">
               Optimize metadata, social sharing cards, canonical URLs, and indexing configurations to ensure maximum search engine visibility.
             </p>
           </div>
@@ -109,7 +109,7 @@ export default function SEOTab() {
             type="button"
             disabled={saving}
             onClick={handleSave}
-            className="rounded-2xl bg-gradient-to-r from-cyan-600 to-emerald-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg transition hover:opacity-95 disabled:opacity-50"
+            className="paper-button-primary rounded-full px-6 py-3.5 text-sm font-semibold disabled:opacity-50"
           >
             {saving ? <RefreshCw className="mr-2 inline-block h-4 w-4 animate-spin" /> : null}
             {saving ? "Saving Changes..." : "Save Settings"}
@@ -119,9 +119,9 @@ export default function SEOTab() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Core Metadata */}
-        <div className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <Search className="h-5 w-5 text-[#8d6b4e]" /> Core Metadata Settings
+        <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+            <Search className="h-5 w-5 text-[var(--accent)]" /> Core Metadata Settings
           </h3>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Global SEO Title</label>
@@ -156,9 +156,9 @@ export default function SEOTab() {
         </div>
 
         {/* Crawler & Advanced Settings */}
-        <div className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <Globe className="h-5 w-5 text-[#8d6b4e]" /> Crawler & Technical SEO
+        <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+            <Globe className="h-5 w-5 text-[var(--accent)]" /> Crawler & Technical SEO
           </h3>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Base Canonical URL</label>
@@ -204,9 +204,9 @@ export default function SEOTab() {
         </div>
 
         {/* Social Card / Open Graph Settings */}
-        <div className="md:col-span-2 space-y-4 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-            <ImageIcon className="h-5 w-5 text-[#8d6b4e]" /> Social Meta (Open Graph & Twitter Cards)
+        <div className="md:col-span-2 space-y-4 paper-card p-5 shadow-none md:p-6">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+            <ImageIcon className="h-5 w-5 text-[var(--accent)]" /> Social Meta (Open Graph & Twitter Cards)
           </h3>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-4">

@@ -148,15 +148,15 @@ export default function SettingsTab() {
   });
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-500">Loading settings...</div>;
+    return <div className="text-center py-10 text-[var(--foreground)]/60">Loading settings...</div>;
   }
 
   return (
     <div className="space-y-8">
       {/* Social Links & System Settings */}
-      <div className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <Settings className="h-5 w-5 text-[#8d6b4e]" /> System Links & Info
+      <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
+        <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+          <Settings className="h-5 w-5 text-[var(--accent)]" /> System Links & Info
         </h3>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
@@ -214,24 +214,19 @@ export default function SettingsTab() {
             />
           </div>
         </div>
-        <button
-          type="button"
-          disabled={saving}
-          onClick={handleSaveSocials}
-          className="mt-4 rounded-xl bg-[#8d6b4e] px-6 py-2.5 text-sm font-semibold text-white transition hover:opacity-95 disabled:opacity-50"
-        >
+        <button type="button" disabled={saving} onClick={handleSaveSocials} className="paper-button-primary mt-4 px-6 py-2.5 text-sm font-semibold disabled:opacity-50">
           {saving ? "Updating..." : "Save Parameters"}
         </button>
       </div>
 
       {/* Production-Grade Media Library */}
-      <div className="space-y-4 rounded-3xl border border-gray-200 bg-white p-5 md:p-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between border-b pb-4">
+      <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
+        <div className="flex flex-col gap-3 border-b-2 border-[var(--foreground)]/10 pb-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-              <ImageIcon className="h-5 w-5 text-[#8d6b4e]" /> Media Asset Library
+            <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+              <ImageIcon className="h-5 w-5 text-[var(--accent)]" /> Media Asset Library
             </h3>
-            <p className="text-xs text-gray-500">Duplicate-free secure media database. Search, view, copy URLs, and clean up files.</p>
+            <p className="text-xs text-[var(--foreground)]/55">Duplicate-free secure media database. Search, view, copy URLs, and clean up files.</p>
           </div>
           <div className="relative w-full md:max-w-xs">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -246,9 +241,9 @@ export default function SettingsTab() {
         </div>
 
         {loadingMedia ? (
-          <div className="text-center py-6 text-gray-400">Loading library...</div>
+          <div className="text-center py-6 text-[var(--foreground)]/45">Loading library...</div>
         ) : filteredMedia.length === 0 ? (
-          <div className="text-center py-10 border border-dashed rounded-2xl text-gray-500 bg-gray-50">
+          <div className="paper-card border-dashed py-10 text-center text-[var(--foreground)]/60 shadow-none">
             No media assets found in library.
           </div>
         ) : (

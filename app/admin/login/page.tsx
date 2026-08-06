@@ -573,11 +573,11 @@ export default function AdminLoginPage() {
   // ── Loading screen ────────────────────────────────────────────────
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'radial-gradient(circle at 20% 20%, rgba(235,216,188,0.6) 0%, transparent 35%), linear-gradient(135deg, #fbf7f0 0%, #f4eadb 45%, #ede0cf 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center px-4">
         <LoginBackground />
         <div className="text-center relative z-10">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-[#c4a884]/35 border-t-[#8d6b4e] animate-spin mb-4" />
-          <p className="text-[#5f4a38] text-sm font-medium">Checking secure session...</p>
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-[var(--foreground)]/20 border-t-[var(--accent)] animate-spin mb-4" />
+          <p className="text-[var(--foreground)]/65 text-sm font-medium">Checking secure session...</p>
         </div>
       </div>
     );
@@ -586,10 +586,7 @@ export default function AdminLoginPage() {
   // ── Main render ───────────────────────────────────────────────────
   return (
     <div
-      className="min-h-screen px-4 py-12 sm:py-20 relative"
-      style={{
-        background: 'radial-gradient(circle at 20% 20%, rgba(235,216,188,0.6) 0%, transparent 35%), linear-gradient(135deg, #fbf7f0 0%, #f4eadb 45%, #ede0cf 100%)',
-      }}
+      className="min-h-screen relative px-4 py-12 sm:py-20"
     >
       <LoginBackground />
 
@@ -598,19 +595,11 @@ export default function AdminLoginPage() {
           initial={{ opacity: 0, y: 20, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full rounded-3xl border border-[#7a5f47]/10 p-6 sm:p-8 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,250,243,0.88) 100%)',
-            backdropFilter: 'blur(24px)',
-            boxShadow: '0 24px 64px rgba(122,95,71,0.1), 0 8px 24px rgba(122,95,71,0.06), inset 0 1px 0 rgba(255,255,255,0.6)',
-          }}
+          className="paper-card relative w-full overflow-hidden p-6 shadow-none sm:p-8"
         >
           {/* Inner glow decoration */}
           <div
-            className="absolute -top-24 -right-24 w-48 h-48 rounded-full pointer-events-none"
-            style={{
-              background: 'radial-gradient(circle, rgba(141,107,78,0.06) 0%, transparent 70%)',
-            }}
+            className="absolute -top-24 -right-24 h-48 w-48 rounded-full pointer-events-none bg-[radial-gradient(circle,rgba(141,107,78,0.08)_0%,transparent_70%)]"
           />
 
           <AnimatePresence mode="wait">
@@ -625,14 +614,14 @@ export default function AdminLoginPage() {
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* Badge */}
-                <div className="inline-flex rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a5f47]">
+                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
                   <span className="mr-1.5">🔐</span> Secure Portal
                 </div>
 
-                <h1 className="mt-4 text-2xl font-black text-[#2f241b] sm:text-3xl" style={{ letterSpacing: '-0.03em' }}>
+                <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
                   Admin Login
                 </h1>
-                <p className="mt-2 text-sm leading-relaxed text-[#6a5846] sm:text-base">
+                <p className="mt-2 text-sm leading-relaxed text-[var(--foreground)]/65 sm:text-base">
                   Sign in with your authorized admin credentials.
                 </p>
 
@@ -712,13 +701,7 @@ export default function AdminLoginPage() {
                   </div>
 
                   {/* Submit */}
-                  <button
-                    id="email-sign-in-btn"
-                    onClick={handleEmailPasswordLogin}
-                    disabled={loading || !email.trim() || !password}
-                    className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#7a5f47]/12 bg-white px-5 py-3.5 text-sm font-bold text-[#5f4a38] transition-all duration-200 hover:bg-[#f7efe4] hover:border-[#7a5f47]/20 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
-                    style={{ boxShadow: '0 2px 8px rgba(122,95,71,0.06)' }}
-                  >
+                  <button id="email-sign-in-btn" onClick={handleEmailPasswordLogin} disabled={loading || !email.trim() || !password} className="paper-button-primary flex w-full items-center justify-center gap-2 px-5 py-3.5 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60 sm:text-base">
                     {loading && (loadingStage === 'starting-email' || loadingStage === 'sending-otp') ? (
                       <>
                         <Spinner size={16} />
@@ -736,7 +719,7 @@ export default function AdminLoginPage() {
                   </button>
                 </div>
 
-                <p className="mt-5 text-center text-xs leading-relaxed text-[#9c8a78]">
+                  <p className="mt-5 text-center text-xs leading-relaxed text-[var(--foreground)]/55">
                   Access is restricted to the authorized admin email only.
                   <br />
                   OTP verification will be sent after credential check.
@@ -758,7 +741,7 @@ export default function AdminLoginPage() {
                 <button
                   onClick={handleBackToCredentials}
                   disabled={loading}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#8d6b4e] hover:text-[#6e5440] transition-colors disabled:opacity-50 mb-4"
+                  className="mb-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/65 transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="15 18 9 12 15 6" />
@@ -767,11 +750,11 @@ export default function AdminLoginPage() {
                 </button>
 
                 {/* Badge */}
-                <div className="inline-flex rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a5f47]">
+                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
                   <span className="mr-1.5">✉️</span> Verification
                 </div>
 
-                <h1 className="mt-4 text-2xl font-black text-[#2f241b] sm:text-3xl" style={{ letterSpacing: '-0.03em' }}>
+                <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
                   Enter Code
                 </h1>
                 <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">

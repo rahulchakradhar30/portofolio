@@ -164,23 +164,23 @@ export default function MessagesTab({ inboxType }: { inboxType: 'contact' | 'hir
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 rounded-2xl border border-cyan-100 bg-white p-4 shadow-sm sm:flex-row sm:items-end sm:justify-between">
+      <div className="paper-card flex flex-col gap-3 p-4 shadow-none sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">{inboxType === 'contact' ? 'Contact Messages' : 'Hire Requests'}</h2>
-          <p className="mt-1 text-sm text-gray-500">Separate contact and hiring requests with direct Gmail reply support.</p>
+          <h2 className="text-2xl font-black tracking-tight text-[var(--foreground)]">{inboxType === 'contact' ? 'Contact Messages' : 'Hire Requests'}</h2>
+          <p className="mt-1 text-sm text-[var(--foreground)]/65">Separate contact and hiring requests with direct Gmail reply support.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setActiveInbox('contact')}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeInbox === 'contact' ? 'bg-violet-600 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
+            className={`rounded-full border-2 px-4 py-2 text-sm font-semibold transition ${activeInbox === 'contact' ? 'border-[var(--foreground)] bg-[var(--accent)] text-white' : 'border-[var(--foreground)]/10 bg-[var(--surface)] text-[var(--foreground)]/70 hover:bg-[var(--surface-soft)]'}`}
           >
             Contact Messages ({contactMessages.length})
           </button>
           <button
             type="button"
             onClick={() => setActiveInbox('hire')}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition ${activeInbox === 'hire' ? 'bg-cyan-600 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
+            className={`rounded-full border-2 px-4 py-2 text-sm font-semibold transition ${activeInbox === 'hire' ? 'border-[var(--foreground)] bg-[var(--accent)] text-white' : 'border-[var(--foreground)]/10 bg-[var(--surface)] text-[var(--foreground)]/70 hover:bg-[var(--surface-soft)]'}`}
           >
             Hire Requests ({hireRequests.length})
           </button>
@@ -188,7 +188,7 @@ export default function MessagesTab({ inboxType }: { inboxType: 'contact' | 'hir
       </div>
 
       {loading ? (
-        <div className="text-center text-gray-500">Loading...</div>
+        <div className="text-center text-[var(--foreground)]/60">Loading...</div>
       ) : activeInbox === 'contact' ? (
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm text-gray-600">
@@ -197,35 +197,35 @@ export default function MessagesTab({ inboxType }: { inboxType: 'contact' | 'hir
           </div>
 
           {contactMessages.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500">No contact messages yet.</div>
+            <div className="paper-card border-dashed p-8 text-center text-[var(--foreground)]/60 shadow-none">No contact messages yet.</div>
           ) : (
             contactMessages.map((message) => (
               <motion.div
                 key={message.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`cursor-pointer rounded-lg border bg-white p-4 transition-colors ${message.read ? 'border-gray-200 hover:border-violet-300' : 'border-violet-300 bg-violet-50/40'}`}
+                className={`cursor-pointer paper-card p-4 transition-colors ${message.read ? 'border-[var(--foreground)]/10 hover:border-[var(--accent)]' : 'border-[var(--accent)]/40 bg-[var(--surface-soft)]/80'}`}
                 onClick={() => openContactMessage(message)}
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h3 className="font-semibold text-gray-800">{message.subject}</h3>
-                    <p className="text-sm text-gray-600">From: {[message.firstName, message.lastName].filter(Boolean).join(' ') || 'Unknown Sender'}</p>
-                    <p className="text-sm text-gray-600">Email: {message.email}</p>
-                    <p className="mt-2 text-sm text-gray-600">{(message.message || '').slice(0, 120)}{(message.message || '').length > 120 ? '...' : ''}</p>
-                    <p className="mt-2 text-xs text-gray-500">{formatDate(message.createdAt)}</p>
+                    <h3 className="font-semibold text-[var(--foreground)]">{message.subject}</h3>
+                    <p className="text-sm text-[var(--foreground)]/65">From: {[message.firstName, message.lastName].filter(Boolean).join(' ') || 'Unknown Sender'}</p>
+                    <p className="text-sm text-[var(--foreground)]/65">Email: {message.email}</p>
+                    <p className="mt-2 text-sm text-[var(--foreground)]/65">{(message.message || '').slice(0, 120)}{(message.message || '').length > 120 ? '...' : ''}</p>
+                    <p className="mt-2 text-xs text-[var(--foreground)]/55">{formatDate(message.createdAt)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    {!message.read && <span className="rounded-full bg-violet-600 px-2 py-1 text-xs font-semibold text-white">New</span>}
+                    {!message.read && <span className="rounded-full border-2 border-[var(--foreground)] bg-[var(--accent)] px-2 py-1 text-xs font-semibold text-white">New</span>}
                     <button
                       onClick={(e) => { e.stopPropagation(); toggleContactRead(message); }}
-                      className="rounded-lg border border-gray-200 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                      className="rounded-full border-2 border-[var(--foreground)]/10 px-3 py-1 text-xs font-semibold text-[var(--foreground)]/75 hover:bg-[var(--surface-soft)]"
                     >
                       {message.read ? 'Mark Unread' : 'Mark Read'}
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); deleteContactMessage(message.id); }}
-                      className="rounded-lg p-2 hover:bg-gray-100"
+                      className="rounded-full border-2 border-[var(--foreground)]/10 p-2 hover:bg-red-50"
                     >
                       <Trash2 className="w-5 h-5 text-red-600" />
                     </button>
@@ -243,14 +243,14 @@ export default function MessagesTab({ inboxType }: { inboxType: 'contact' | 'hir
           </div>
 
           {hireRequests.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-gray-300 bg-white p-8 text-center text-gray-500">No hire requests yet.</div>
+            <div className="paper-card border-dashed p-8 text-center text-[var(--foreground)]/60 shadow-none">No hire requests yet.</div>
           ) : (
             hireRequests.map((request) => (
               <motion.div
                 key={request.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`cursor-pointer rounded-lg border bg-white p-4 transition-colors ${request.read ? 'border-gray-200 hover:border-cyan-300' : 'border-cyan-300 bg-cyan-50/40'}`}
+                className={`cursor-pointer paper-card p-4 transition-colors ${request.read ? 'border-[var(--foreground)]/10 hover:border-[var(--accent)]' : 'border-[var(--accent)]/40 bg-[var(--surface-soft)]/80'}`}
                 onClick={() => openHireRequest(request)}
               >
                 <div className="flex items-start justify-between gap-4">
