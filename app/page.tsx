@@ -84,42 +84,42 @@ export default function Home() {
   return (
     <main>
       <Header />
-      <section id="home">
+      <section id="home" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Hero">
           <Hero />
         </SectionErrorBoundary>
       </section>
-      <section id="about">
+      <section id="about" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="About">
           <About />
         </SectionErrorBoundary>
       </section>
-      <section id="roadmap">
+      <section id="roadmap" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="StudyRoadmap">
           <StudyRoadmap />
         </SectionErrorBoundary>
       </section>
-      <section id="radar">
+      <section id="radar" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="PortfolioRadar">
           <PortfolioRadar />
         </SectionErrorBoundary>
       </section>
-      <section id="skills">
+      <section id="skills" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Skills">
           <Skills />
         </SectionErrorBoundary>
       </section>
-      <section id="projects">
+      <section id="projects" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Projects">
           <Projects />
         </SectionErrorBoundary>
       </section>
-      <section id="certifications">
+      <section id="certifications" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Certifications">
           <Certifications />
         </SectionErrorBoundary>
       </section>
-      <section id="contact">
+      <section id="contact" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Contact">
           <Contact />
         </SectionErrorBoundary>

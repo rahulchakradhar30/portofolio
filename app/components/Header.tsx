@@ -12,18 +12,58 @@ export default function Header() {
   const { content } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
 
   const navItems = [
-    { name: siteCopy.navHome, href: "#home" },
-    { name: siteCopy.navAbout, href: "#about" },
-    { name: siteCopy.navAcademic, href: "#roadmap" },
-    { name: siteCopy.navRadar, href: "#radar" },
-    { name: siteCopy.navSkills, href: "#skills" },
-    { name: siteCopy.navProjects, href: "#projects" },
-    { name: siteCopy.navContact, href: "#contact" },
+    { name: siteCopy.navHome, href: "#home", sectionId: "home" },
+    { name: siteCopy.navAbout, href: "#about", sectionId: "about" },
+    { name: siteCopy.navAcademic, href: "#roadmap", sectionId: "roadmap" },
+    { name: siteCopy.navRadar, href: "#radar", sectionId: "radar" },
+    { name: siteCopy.navSkills, href: "#skills", sectionId: "skills" },
+    { name: siteCopy.navProjects, href: "#projects", sectionId: "projects" },
+    { name: siteCopy.navContact, href: "#contact", sectionId: "contact" },
   ];
+
+  useEffect(() => {
+    const syncActiveSection = () => {
+      const nextSection = window.location.hash.replace(/^#/, "") || "home";
+      setActiveSection(nextSection);
+    };
+
+    syncActiveSection();
+    window.addEventListener("hashchange", syncActiveSection);
+
+    return () => window.removeEventListener("hashchange", syncActiveSection);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  const navigateToSection = (sectionId: string) => {
+    const target = document.getElementById(sectionId);
+    setActiveSection(sectionId);
+    setIsOpen(false);
+
+    if (!target) {
+      window.location.hash = sectionId;
+      return;
+    }
+
+    window.history.pushState(null, "", `#${sectionId}`);
+    window.requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    });
+  };
 
   return (
     <motion.header
@@ -94,17 +134,21 @@ export default function Header() {
             >
               <nav className="flex flex-col space-y-6 text-center">
                 {navItems.map((item) => (
-                  <a
+                  <button
                     key={item.name}
-                    href={item.href}
-                    onClick={() => setIsOpen(false)}
-                    className="font-bold text-xl text-[var(--foreground)] tracking-tight"
+                    type="button"
+                    onClick={() => navigateToSection(item.sectionId)}
+                    className={`rounded-2xl border-2 px-4 py-3 text-xl font-bold tracking-tight transition-colors ${
+                      activeSection === item.sectionId
+                        ? "border-[var(--foreground)] bg-[var(--surface-soft)] text-[var(--foreground)]"
+                        : "border-transparent text-[var(--foreground)]"
+                    }`}
                   >
                     {item.name}
-                  </a>
+                  </button>
                 ))}
                 <div className="pt-4">
-                  <Link href="/hire" className="paper-button-primary inline-block w-full max-w-xs mx-auto py-3">
+                  <Link href="/hire" onClick={() => setIsOpen(false)} className="paper-button-primary inline-block w-full max-w-xs mx-auto py-3">
                     {siteCopy.headerHireCta}
                   </Link>
                 </div>
