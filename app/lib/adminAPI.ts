@@ -332,5 +332,33 @@ export const adminAPI = {
       return { success: false, error: String(error) };
     }
   },
+
+  async uploadResumePdf(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload/resume', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to upload resume to Cloudinary');
+      }
+
+      const data = await res.json();
+      return {
+        success: true,
+        resumeUrl: data.resumeUrl || data.fileUrl,
+        fileUrl: data.fileUrl || data.resumeUrl,
+        publicId: data.publicId,
+        content: data.content,
+      };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
 };
 

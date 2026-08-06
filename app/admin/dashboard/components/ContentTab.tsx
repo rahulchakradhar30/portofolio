@@ -326,24 +326,48 @@ export default function ContentTab() {
     const file = e.target.files?.[0];
     if (!file || !content) return;
 
+    if (field === "resumeUrl") {
+      if (file.type !== "application/pdf") {
+        alert("Resume must be a PDF file");
+        e.target.value = "";
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert("Resume file size must be 10MB or less");
+        e.target.value = "";
+        return;
+      }
+    }
+
     setUploading(true);
     try {
-      const res = await adminAPI.uploadToCloudinary(file);
+      const res = field === "resumeUrl" ? await adminAPI.uploadResumePdf(file) : await adminAPI.uploadToCloudinary(file);
       if (res.success) {
-        const uploadedUrl = res.fileUrl || res.imageUrl;
-        setContent({ ...content, [field]: uploadedUrl });
+        const uploadedUrl = field === "resumeUrl"
+          ? (res as { resumeUrl?: string; fileUrl?: string; imageUrl?: string }).resumeUrl ||
+            (res as { resumeUrl?: string; fileUrl?: string; imageUrl?: string }).fileUrl ||
+            (res as { resumeUrl?: string; fileUrl?: string; imageUrl?: string }).imageUrl
+          : (res as { fileUrl?: string; imageUrl?: string }).fileUrl || (res as { fileUrl?: string; imageUrl?: string }).imageUrl;
+        const uploadedContent = (res as { content?: PortfolioContent }).content;
+        if (uploadedContent) {
+          setContent(uploadedContent);
+        } else {
+          setContent({ ...content, [field]: uploadedUrl });
+        }
         if (field === "resumeUrl") {
-          alert("Resume uploaded to Cloudinary successfully!");
+          alert("Resume PDF uploaded successfully and saved as the active resume.");
         } else {
           alert(`${field === "bannerImage" ? "Banner" : "Profile"} image uploaded to Cloudinary successfully!`);
         }
       } else {
-        alert(field === "resumeUrl" ? "Failed to upload resume" : "Failed to upload image");
+        alert(field === "resumeUrl" ? "Failed to upload resume PDF" : "Failed to upload image");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert(field === "resumeUrl" ? "Error uploading resume" : "Error uploading image");
+      alert(field === "resumeUrl" ? "Error uploading resume PDF" : "Error uploading image");
     } finally {
+      e.target.value = "";
       setUploading(false);
     }
   };
@@ -515,7 +539,7 @@ export default function ContentTab() {
                   type="url"
                   value={(content as PortfolioContent & { resumeUrl?: string })?.resumeUrl || ""}
                   onChange={(e) => setContent({ ...(content as PortfolioContent), resumeUrl: e.target.value })}
-                  placeholder="Paste resume PDF URL"
+                  placeholder="Direct PDF URL"
                   className="mb-2 w-full rounded-lg border-2 border-gray-300 bg-white px-4 py-2 text-black placeholder-gray-400 transition focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200"
                 />
 
