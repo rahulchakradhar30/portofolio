@@ -255,8 +255,11 @@ export default function ProjectsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">Manage Projects</h2>
+      <div className="paper-card flex items-center justify-between gap-3 p-4 shadow-none md:p-5">
+        <div>
+          <h2 className="text-2xl font-black tracking-tight text-[var(--foreground)]">Manage Projects</h2>
+          <p className="text-sm text-[var(--foreground)]/65">Create, edit, and organize featured portfolio projects.</p>
+        </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -268,7 +271,7 @@ export default function ProjectsTab() {
               setShowForm(true);
             }
           }}
-          className="flex items-center gap-2 rounded-lg bg-[#8d6b4e] px-4 py-2 text-white"
+          className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--foreground)] bg-[var(--accent)] px-4 py-2 text-white shadow-[4px_4px_0_0_rgba(47,36,27,0.12)]"
         >
           <Plus className="w-5 h-5" />
           {showForm ? "Close Form" : "Add Project"}
@@ -276,7 +279,7 @@ export default function ProjectsTab() {
       </div>
 
       {showForm && (
-        <div className="space-y-4 rounded-lg border border-[#eadbbf] bg-white p-6">
+        <div className="paper-card space-y-4 p-6 shadow-none">
           <input
             type="text"
             placeholder="Project Title"
@@ -465,10 +468,7 @@ export default function ProjectsTab() {
             />
             <span className="text-sm text-gray-700 font-medium">Featured</span>
           </label>
-          <button
-            onClick={handleAddProject}
-            className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-          >
+          <button onClick={handleAddProject} className="paper-button-primary w-full px-4 py-3 font-semibold">
             {editingProjectId ? "Update Project" : "Add Project"}
           </button>
           {editingProjectId && (
@@ -478,7 +478,7 @@ export default function ProjectsTab() {
                 resetProjectForm();
                 setShowForm(false);
               }}
-              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition"
+              className="paper-button w-full px-4 py-3 font-semibold"
             >
               Cancel Editing
             </button>
@@ -495,7 +495,7 @@ export default function ProjectsTab() {
               key={project.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white p-4 rounded-lg border border-gray-200 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:border-[#8d6b4e]/30"
+              className="paper-card flex flex-col gap-3 p-4 shadow-none md:flex-row md:items-center md:justify-between"
             >
               <div>
                 <h3 className="font-semibold text-gray-800">{project.title}</h3>

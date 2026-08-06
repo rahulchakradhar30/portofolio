@@ -7,6 +7,15 @@ import React, { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { X, Save, AlertCircle, CheckCircle, Copy } from "lucide-react";
 
+export const adminFieldClassName =
+  "w-full rounded-2xl border-2 border-[var(--foreground)]/15 bg-[var(--surface)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground)]/45 shadow-[4px_4px_0_0_rgba(47,36,27,0.08)] transition-all duration-300 focus:border-[var(--accent)] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:bg-[var(--surface-soft)] disabled:text-[var(--foreground)]/50";
+
+export const adminSubtleButtonClassName =
+  "inline-flex items-center justify-center rounded-full border-2 border-[var(--foreground)] bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-[var(--foreground)] shadow-[4px_4px_0_0_rgba(47,36,27,0.08)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[var(--surface-soft)] active:translate-y-0";
+
+export const adminPrimaryButtonClassName =
+  "inline-flex items-center justify-center rounded-full border-2 border-[var(--foreground)] bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-[4px_4px_0_0_rgba(47,36,27,0.14)] transition-transform duration-300 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50";
+
 // Container for admin form sections
 export function AdminCard({
   title,
@@ -31,13 +40,13 @@ export function AdminCard({
           {description && (
             <p className="mt-1 text-sm text-gray-600">{description}</p>
           )}
-        </div>
+              className="paper-card p-6 shadow-none transition-transform duration-300 hover:-translate-y-1"
         {actions && <div className="flex gap-2">{actions}</div>}
       </div>
       <div className="space-y-4">{children}</div>
-    </motion.div>
+                  <h3 className="text-lg font-black tracking-tight text-[var(--foreground)]">{title}</h3>
   );
-}
+                    <p className="mt-1 text-sm text-[var(--foreground)]/70">
 
 // Form text input field
 export function AdminTextInput({
@@ -71,19 +80,19 @@ export function AdminTextInput({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
-        className={`w-full px-4 py-3 rounded-xl border-2 transition-all bg-white text-gray-900 placeholder-gray-400 focus:outline-none ${
+        className={`${adminFieldClassName} ${
           error
-            ? "border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100"
-            : "border-gray-200 focus:border-violet-500 focus:ring-2 focus:ring-violet-100"
-        } ${disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""}`}
+            ? "border-red-300 focus:border-red-500"
+            : ""
+        }`}
       />
       {error && (
-        <p className="mt-1 text-sm text-red-600 flex items-center gap-1">
+        <p className="mt-1 flex items-center gap-1 text-sm text-red-700">
           <AlertCircle className="w-4 h-4" /> {error}
         </p>
       )}
       {helpText && !error && (
-        <p className="mt-1 text-xs text-gray-600">{helpText}</p>
+        <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>
       )}
     </div>
   );
@@ -121,9 +130,9 @@ export function AdminTextarea({
         disabled={disabled}
         placeholder={placeholder}
         rows={rows}
-        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-violet-500 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed resize-none"
+        className={`${adminFieldClassName} resize-none`}
       />
-      {helpText && <p className="mt-1 text-xs text-gray-600">{helpText}</p>}
+      {helpText && <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>}
     </div>
   );
 }
@@ -156,7 +165,7 @@ export function AdminSelect({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-900 focus:border-violet-500 focus:ring-2 focus:ring-violet-100 focus:outline-none transition-all disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+        className={adminFieldClassName}
       >
         <option value="">-- Select --</option>
         {options.map((opt) => (
@@ -165,7 +174,7 @@ export function AdminSelect({
           </option>
         ))}
       </select>
-      {helpText && <p className="mt-1 text-xs text-gray-600">{helpText}</p>}
+      {helpText && <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>}
     </div>
   );
 }
@@ -190,7 +199,7 @@ export function AdminList({
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
         {label}
       </label>
       <div className="space-y-2 mb-3">
@@ -200,14 +209,14 @@ export function AdminList({
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
-            className="flex items-center justify-between bg-gray-50 px-4 py-2 rounded-lg border border-gray-200"
+            className="flex items-center justify-between rounded-xl border-2 border-[var(--foreground)]/12 bg-[var(--surface)] px-4 py-2 shadow-[3px_3px_0_0_rgba(47,36,27,0.08)]"
           >
-            <span className="text-gray-700 text-sm">{item}</span>
+            <span className="text-sm text-[var(--foreground)]">{item}</span>
             <button
               type="button"
               onClick={() => onRemove(idx)}
               disabled={disabled}
-              className="p-1 hover:bg-red-100 text-red-600 rounded transition disabled:opacity-50"
+              className="rounded-full p-1 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
             >
               <X className="w-4 h-4" />
             </button>
@@ -227,7 +236,7 @@ export function AdminList({
               }
             }}
             placeholder={placeholder}
-            className="flex-1 px-4 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:border-violet-500 focus:ring-1 focus:ring-violet-200 focus:outline-none"
+            className={fieldClassName}
           />
           <button
             type="button"
@@ -237,7 +246,7 @@ export function AdminList({
                 setNewItem("");
               }
             }}
-            className="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 font-semibold transition"
+            className={adminPrimaryButtonClassName}
           >
             Add
           </button>
@@ -267,7 +276,7 @@ export function StatusBadge({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`border rounded-lg p-3 flex items-center gap-2 ${colorMap[type]}`}
+      className={`paper-card flex items-center gap-2 p-3 shadow-none ${colorMap[type]}`}
     >
       <Icon className="w-5 h-5 flex-shrink-0" />
       <span className="text-sm font-medium">{message}</span>
@@ -291,7 +300,7 @@ export function SaveButton({
       whileTap={{ scale: 0.95 }}
       onClick={onClick}
       disabled={loading || disabled}
-      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-xl font-semibold hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+      className={adminPrimaryButtonClassName}
     >
       <Save className="w-4 h-4" />
       {loading ? "Saving..." : "Save Changes"}
@@ -310,7 +319,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       }}
-      className="p-2 hover:bg-gray-200 rounded-lg text-gray-600 transition flex items-center gap-1 text-sm"
+      className={adminSubtleButtonClassName}
     >
       <Copy className="w-4 h-4" />
       {copied ? "Copied!" : label}

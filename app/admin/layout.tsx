@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Chatbot from "../components/Chatbot";
+import PaperBackground from "../components/PaperBackground";
 
 export default function AdminLayout({
   children,
@@ -9,6 +10,7 @@ export default function AdminLayout({
 }) {
   return (
     <>
+      <PaperBackground />
       {children}
       <Chatbot />
     </>

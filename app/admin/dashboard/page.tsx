@@ -76,7 +76,7 @@ export default function AdminDashboard() {
   };
 
   if (authChecking) {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Checking admin session...</div>;
+    return <div className="min-h-screen flex items-center justify-center text-[var(--foreground)]/60">Checking admin session...</div>;
   }
 
   const adminTabs = [
@@ -95,32 +95,32 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen text-[var(--foreground)]">
       {/* Mobile overlay when sidebar is open */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
 
       {/* Sidebar */}
       <motion.div
-        className={`fixed inset-y-0 left-0 z-40 h-screen w-64 bg-[#2f241b] text-[#fffaf3] transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 h-screen w-72 border-r-2 border-[var(--foreground)] bg-[var(--surface)] text-[var(--foreground)] shadow-[8px_0_0_0_rgba(47,36,27,0.08)] transition-transform duration-300 md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
         initial={false}
       >
-        <div className="border-b border-[#7a5f47]/20 p-4">
+        <div className="border-b-2 border-[var(--foreground)] p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-[#8d6b4e] to-[#b6926d] text-sm font-bold text-[#fffaf3]">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border-2 border-[var(--foreground)] bg-[var(--accent)] text-sm font-black text-white shadow-[4px_4px_0_0_rgba(47,36,27,0.14)]">
               RC
             </div>
-            <span className="hidden text-lg font-bold md:inline">Admin CMS</span>
+            <span className="hidden text-lg font-black tracking-tight md:inline">Admin CMS</span>
           </div>
         </div>
 
-        <nav className="p-2 md:p-4 space-y-2 overflow-y-auto max-h-[calc(100vh-140px)]">
+        <nav className="max-h-[calc(100vh-140px)] space-y-2 overflow-y-auto p-2 md:p-4">
           {adminTabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -130,10 +130,10 @@ export default function AdminDashboard() {
                   setActiveTab(tab.id);
                   setSidebarOpen(false);
                 }}
-                className={`w-full flex items-center gap-3 px-3 md:px-4 py-3 rounded-lg text-sm md:text-base transition-colors ${
+                className={`w-full flex items-center gap-3 rounded-2xl border-2 px-3 py-3 text-sm md:text-base font-semibold transition-all duration-300 ${
                   activeTab === tab.id
-                    ? "bg-[#8d6b4e] text-[#fffaf3]"
-                    : "text-[#d8cab9] hover:bg-[#3a2c21] hover:text-[#fffaf3]"
+                    ? "border-[var(--foreground)] bg-[var(--accent)] text-white shadow-[4px_4px_0_0_rgba(47,36,27,0.14)]"
+                    : "border-transparent bg-transparent text-[var(--foreground)]/70 hover:border-[var(--foreground)]/10 hover:bg-[var(--surface-soft)] hover:text-[var(--foreground)]"
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.95 }}
@@ -147,7 +147,7 @@ export default function AdminDashboard() {
 
         <button
           onClick={handleLogout}
-          className="absolute bottom-4 left-4 right-4 flex items-center justify-center gap-2 rounded-lg bg-[#8d6b4e] px-3 py-2 text-sm text-[#fffaf3] transition-colors hover:bg-[#7a5f47] md:justify-start md:px-4"
+          className="absolute bottom-4 left-4 right-4 flex items-center justify-center gap-2 rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] px-3 py-3 text-sm font-semibold text-[var(--foreground)] shadow-[4px_4px_0_0_rgba(47,36,27,0.08)] transition-transform duration-300 hover:-translate-y-0.5 md:justify-start md:px-4"
         >
           <LogOut className="w-5 h-5" />
           <span className="hidden md:inline">Logout</span>
@@ -157,19 +157,19 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="ml-0 transition-all duration-300 md:ml-64">
         {/* Top Bar */}
-        <div className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b border-[#7a5f47]/10 bg-[#fffaf3] p-3 md:p-4">
+        <div className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b-2 border-[var(--foreground)] bg-[var(--surface)]/95 p-3 backdrop-blur md:p-4">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="rounded-lg p-2 hover:bg-[#f4eadb] md:hidden"
+            className="rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] p-2 shadow-[3px_3px_0_0_rgba(47,36,27,0.08)] md:hidden"
           >
             {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
           <div className="flex items-center gap-2 md:gap-4 ml-auto">
-            <div className="text-right text-xs md:text-sm">
-              <p className="hidden text-[#8d6b4e] sm:block">Logged in as</p>
-              <p className="truncate font-medium text-[#2f241b]">{adminUser?.email}</p>
+            <div className="hidden text-right text-xs md:block md:text-sm">
+              <p className="text-[var(--foreground)]/55">Logged in as</p>
+              <p className="truncate font-semibold text-[var(--foreground)]">{adminUser?.email}</p>
             </div>
-            <div className="h-8 w-8 flex-shrink-0 rounded-full bg-gradient-to-br from-[#8d6b4e] to-[#b6926d] md:h-10 md:w-10"></div>
+            <div className="h-9 w-9 flex-shrink-0 rounded-full border-2 border-[var(--foreground)] bg-[var(--accent)] shadow-[3px_3px_0_0_rgba(47,36,27,0.14)] md:h-10 md:w-10"></div>
           </div>
         </div>
 
