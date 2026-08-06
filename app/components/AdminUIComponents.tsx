@@ -1,6 +1,5 @@
 /**
- * Enhanced Admin Dashboard - Premium UI Components
- * Provides modern, animated, and user-friendly admin controls
+ * Shared admin UI primitives styled to match the paper aesthetic.
  */
 
 import React, { ReactNode } from "react";
@@ -16,7 +15,6 @@ export const adminSubtleButtonClassName =
 export const adminPrimaryButtonClassName =
   "inline-flex items-center justify-center rounded-full border-2 border-[var(--foreground)] bg-[var(--accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-[4px_4px_0_0_rgba(47,36,27,0.14)] transition-transform duration-300 hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50";
 
-// Container for admin form sections
 export function AdminCard({
   title,
   description,
@@ -32,23 +30,20 @@ export function AdminCard({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl border border-gradient-to-r from-violet-200 to-pink-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-sm hover:shadow-md transition-shadow"
+      className="paper-card p-6 shadow-none transition-transform duration-300 hover:-translate-y-1"
     >
-      <div className="flex items-start justify-between mb-4">
+      <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-gray-900">{title}</h3>
-          {description && (
-            <p className="mt-1 text-sm text-gray-600">{description}</p>
-          )}
-              className="paper-card p-6 shadow-none transition-transform duration-300 hover:-translate-y-1"
+          <h3 className="text-lg font-black tracking-tight text-[var(--foreground)]">{title}</h3>
+          {description && <p className="mt-1 text-sm text-[var(--foreground)]/70">{description}</p>}
+        </div>
         {actions && <div className="flex gap-2">{actions}</div>}
       </div>
       <div className="space-y-4">{children}</div>
-                  <h3 className="text-lg font-black tracking-tight text-[var(--foreground)]">{title}</h3>
+    </motion.div>
   );
-                    <p className="mt-1 text-sm text-[var(--foreground)]/70">
+}
 
-// Form text input field
 export function AdminTextInput({
   label,
   value,
@@ -70,9 +65,9 @@ export function AdminTextInput({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="ml-1 text-red-500">*</span>}
       </label>
       <input
         type="text"
@@ -80,25 +75,18 @@ export function AdminTextInput({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder={placeholder}
-        className={`${adminFieldClassName} ${
-          error
-            ? "border-red-300 focus:border-red-500"
-            : ""
-        }`}
+        className={`${adminFieldClassName} ${error ? "border-red-300 focus:border-red-500" : ""}`}
       />
       {error && (
         <p className="mt-1 flex items-center gap-1 text-sm text-red-700">
-          <AlertCircle className="w-4 h-4" /> {error}
+          <AlertCircle className="h-4 w-4" /> {error}
         </p>
       )}
-      {helpText && !error && (
-        <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>
-      )}
+      {helpText && !error && <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>}
     </div>
   );
 }
 
-// Form textarea field
 export function AdminTextarea({
   label,
   value,
@@ -120,9 +108,9 @@ export function AdminTextarea({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="ml-1 text-red-500">*</span>}
       </label>
       <textarea
         value={value}
@@ -137,7 +125,6 @@ export function AdminTextarea({
   );
 }
 
-// Form select field
 export function AdminSelect({
   label,
   value,
@@ -157,16 +144,11 @@ export function AdminSelect({
 }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="ml-1 text-red-500">*</span>}
       </label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        className={adminFieldClassName}
-      >
+      <select value={value} onChange={(e) => onChange(e.target.value)} disabled={disabled} className={adminFieldClassName}>
         <option value="">-- Select --</option>
         {options.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -179,7 +161,6 @@ export function AdminSelect({
   );
 }
 
-// List editing component
 export function AdminList({
   label,
   items,
@@ -199,26 +180,19 @@ export function AdminList({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
-        {label}
-      </label>
-      <div className="space-y-2 mb-3">
-        {items.map((item, idx) => (
+      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">{label}</label>
+      <div className="mb-3 space-y-2">
+        {items.map((item, index) => (
           <motion.div
-            key={idx}
+            key={index}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 10 }}
             className="flex items-center justify-between rounded-xl border-2 border-[var(--foreground)]/12 bg-[var(--surface)] px-4 py-2 shadow-[3px_3px_0_0_rgba(47,36,27,0.08)]"
           >
             <span className="text-sm text-[var(--foreground)]">{item}</span>
-            <button
-              type="button"
-              onClick={() => onRemove(idx)}
-              disabled={disabled}
-              className="rounded-full p-1 text-red-700 transition hover:bg-red-50 disabled:opacity-50"
-            >
-              <X className="w-4 h-4" />
+            <button type="button" onClick={() => onRemove(index)} disabled={disabled} className="rounded-full p-1 text-red-700 transition hover:bg-red-50 disabled:opacity-50">
+              <X className="h-4 w-4" />
             </button>
           </motion.div>
         ))}
@@ -229,14 +203,14 @@ export function AdminList({
             type="text"
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
-            onKeyPress={(e) => {
+            onKeyDown={(e) => {
               if (e.key === "Enter" && newItem.trim()) {
                 onAdd(newItem.trim());
                 setNewItem("");
               }
             }}
             placeholder={placeholder}
-            className={fieldClassName}
+            className={adminFieldClassName}
           />
           <button
             type="button"
@@ -256,7 +230,6 @@ export function AdminList({
   );
 }
 
-// Status badge
 export function StatusBadge({
   type,
   message,
@@ -265,9 +238,9 @@ export function StatusBadge({
   message: string;
 }) {
   const colorMap = {
-    success: "bg-emerald-100 text-emerald-800 border-emerald-300",
-    error: "bg-red-100 text-red-800 border-red-300",
-    info: "bg-blue-100 text-blue-800 border-blue-300",
+    success: "border-emerald-300 bg-emerald-100 text-emerald-800",
+    error: "border-red-300 bg-red-100 text-red-800",
+    info: "border-blue-300 bg-blue-100 text-blue-800",
   };
 
   const Icon = type === "success" ? CheckCircle : AlertCircle;
@@ -278,13 +251,12 @@ export function StatusBadge({
       animate={{ opacity: 1, y: 0 }}
       className={`paper-card flex items-center gap-2 p-3 shadow-none ${colorMap[type]}`}
     >
-      <Icon className="w-5 h-5 flex-shrink-0" />
+      <Icon className="h-5 w-5 flex-shrink-0" />
       <span className="text-sm font-medium">{message}</span>
     </motion.div>
   );
 }
 
-// Save button
 export function SaveButton({
   onClick,
   loading = false,
@@ -302,13 +274,12 @@ export function SaveButton({
       disabled={loading || disabled}
       className={adminPrimaryButtonClassName}
     >
-      <Save className="w-4 h-4" />
+      <Save className="h-4 w-4" />
       {loading ? "Saving..." : "Save Changes"}
     </motion.button>
   );
 }
 
-// Copy to clipboard helper
 export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
   const [copied, setCopied] = React.useState(false);
 
@@ -321,7 +292,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
       }}
       className={adminSubtleButtonClassName}
     >
-      <Copy className="w-4 h-4" />
+      <Copy className="h-4 w-4" />
       {copied ? "Copied!" : label}
     </button>
   );
