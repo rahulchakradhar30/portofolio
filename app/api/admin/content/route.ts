@@ -157,57 +157,18 @@ export async function PUT(request: NextRequest) {
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
-    const {
-      heroTitle,
-      heroSubtitle,
-      heroTagline,
-      bannerImage,
-      profileImage,
-      resumeUrl,
-      aboutText,
-      email,
-      location,
-      instagram,
-      linkedin,
-      github,
-      studyRoadmapEnabled,
-      allowRoadmapExtension,
-      studyRoadmap,
-      studyRoadmapMetrics,
-      sectionVisibility,
-      aboutStats,
-      siteCopy,
-      radarConfig,
-    } = await request.json();
+    const body = await request.json();
+    
+    // Remove fields that shouldn't be overwritten directly from the body
+    const { id, created_at, updated_at, createdAt, updatedAt, ...updatePayload } = body;
 
-    const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({
-      heroTitle,
-      heroSubtitle,
-      heroTagline,
-      bannerImage,
-      profileImage,
-      resumeUrl,
-      aboutText,
-      email,
-      location,
-      instagram,
-      linkedin,
-      github,
-      studyRoadmapEnabled,
-      allowRoadmapExtension,
-      studyRoadmap,
-      studyRoadmapMetrics,
-      sectionVisibility,
-      aboutStats,
-      siteCopy,
-      radarConfig,
-    });
+    const updatedContent = await serverFirebaseHelpers.updatePortfolioContent(updatePayload);
 
     await logAdminAudit({
       request,
       email: auth.decoded.email || 'admin',
       action: 'content.update',
-      details: { heroTitle, email, location },
+      details: { email: updatePayload.email, location: updatePayload.location },
     });
 
     return NextResponse.json(
