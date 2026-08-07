@@ -12,6 +12,8 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
   const { content, loading } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   
+  const [mounted, setMounted] = useState(false);
+  
   // 'ssr': Server-side or initial hydration, where we hide children to prevent layout flashes.
   // 'playing': Intro is active and playing.
   // 'done': Intro has finished or was skipped, show homepage normally.
@@ -21,6 +23,10 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
   
   // Guard references to ensure body scroll is restored
   const bodyLockedRef = useRef(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (loading) return;
@@ -177,9 +183,8 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     );
   };
 
-  if (status === "ssr" || status === "playing") {
-    // During SSR or while intro plays, keep the homepage hidden visually but in the DOM for SEO.
-    // Use pointerEvents none and height 100vh to ensure it doesn't affect the overlay experience.
+  // During SSR or initial hydration, render children hidden to ensure SEO and match hydration.
+  if (!mounted) {
     return (
       <>
         {renderIntroOverlay()}
@@ -190,6 +195,16 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     );
   }
 
-  // Done phase
+  // After hydration, while the intro is evaluating or playing, UNMOUNT the homepage children.
+  // This prevents Framer Motion from executing animations invisibly behind the overlay.
+  if (status === "ssr" || status === "playing") {
+    return (
+      <>
+        {renderIntroOverlay()}
+      </>
+    );
+  }
+
+  // Done phase: Mount the homepage children. They will now execute their initial animations visibly!
   return <>{children}</>;
 }

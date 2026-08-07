@@ -22,23 +22,23 @@ const MAGNIFIER_STORAGE_KEY = "portfolio-magnifier-enabled";
 export function MotionProvider({ children }: { children: React.ReactNode }) {
   const { content } = usePortfolioContent();
 
-  const [motionMode, setMotionMode] = useState<MotionMode>(() => {
-    if (typeof window === "undefined") return "full";
-    const saved = window.localStorage.getItem(STORAGE_KEY) as MotionMode | null;
-    return saved === "full" || saved === "system" || saved === "reduced" ? saved : "full";
-  });
-  const [magnifierEnabled, setMagnifierEnabled] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    const saved = window.localStorage.getItem(MAGNIFIER_STORAGE_KEY);
-    return saved !== null ? saved === "true" : true;
-  });
-  const [systemReduced, setSystemReduced] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
+  const [motionMode, setMotionMode] = useState<MotionMode>("full");
+  const [magnifierEnabled, setMagnifierEnabled] = useState<boolean>(true);
+  const [systemReduced, setSystemReduced] = useState<boolean>(false);
 
   useEffect(() => {
+    const savedMotion = window.localStorage.getItem(STORAGE_KEY) as MotionMode | null;
+    if (savedMotion === "full" || savedMotion === "system" || savedMotion === "reduced") {
+      setMotionMode(savedMotion);
+    }
+    const savedMagnifier = window.localStorage.getItem(MAGNIFIER_STORAGE_KEY);
+    if (savedMagnifier !== null) {
+      setMagnifierEnabled(savedMagnifier === "true");
+    }
+    
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setSystemReduced(media.matches);
+
     const update = () => setSystemReduced(media.matches);
     media.addEventListener("change", update);
 
