@@ -136,6 +136,15 @@ export interface PortfolioContent {
   animationType?: 'fade' | 'slide' | 'zoom';
   animationDelay?: number;
   scrollEffects?: boolean;
+  
+  // Cinematic Intro Experience
+  introEnabled?: boolean;
+  introBrandText?: string;
+  introSubtitle?: string;
+  introLogoUrl?: string;
+  introDuration?: number;
+  introFirstLoadOnly?: boolean;
+  introAccentColor?: string;
 }
 
 export interface SectionVisibility {

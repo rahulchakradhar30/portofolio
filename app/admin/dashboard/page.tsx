@@ -18,6 +18,7 @@ import {
   Edit2,
   Globe,
   Sparkles,
+  Film,
 } from "lucide-react";
 import AIAssistant from "@/app/components/AIAssistant";
 import type { AdminUser } from "@/app/lib/types";
@@ -34,6 +35,7 @@ import ActivityTab from "./components/ActivityTab";
 import SettingsTab from "./components/SettingsTab";
 import SEOTab from "./components/SEOTab";
 import AnimationsTab from "./components/AnimationsTab";
+import IntroTab from "./components/IntroTab";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -87,6 +89,7 @@ export default function AdminDashboard() {
     { id: "certifications", label: "Certifications", icon: Award },
     { id: "messages", label: "Contact Messages", icon: Mail },
     { id: "hireRequests", label: "Hire Requests", icon: Briefcase },
+    { id: "intro", label: "Cinematic Intro", icon: Film },
     { id: "seo", label: "SEO Settings", icon: Globe },
     { id: "animations", label: "Animation Prefs", icon: Sparkles },
     { id: "users", label: "Admin Users", icon: Users },
@@ -182,6 +185,7 @@ export default function AdminDashboard() {
           {activeTab === "certifications" && <CertificationsTab />}
           {activeTab === "messages" && <MessagesTab inboxType="contact" />}
           {activeTab === "hireRequests" && <MessagesTab inboxType="hire" />}
+          {activeTab === "intro" && <IntroTab />}
           {activeTab === "seo" && <SEOTab />}
           {activeTab === "animations" && <AnimationsTab />}
           {activeTab === "users" && <UsersTab />}

@@ -13,6 +13,7 @@ import Certifications from "./components/Certifications";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import SectionErrorBoundary from "./components/SectionErrorBoundary";
+import IntroOverlay from "./components/IntroOverlay";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +84,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function Home() {
   return (
     <main>
+      <IntroOverlay />
       <Header />
       <section id="home" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Hero">
