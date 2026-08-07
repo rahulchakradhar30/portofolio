@@ -50,7 +50,17 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen overflow-hidden pt-24 pb-16 sm:pt-32 lg:pt-40 lg:pb-24">
-      {heroData.bannerImage ? <div className="absolute inset-0 opacity-[0.05]"><Image src={heroData.bannerImage} alt="Hero backdrop" fill className="object-cover" priority /></div> : null}
+      {heroData.bannerImage ? (
+        <div 
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            maskImage: "linear-gradient(to bottom, black 60%, transparent 100%)",
+            WebkitMaskImage: "linear-gradient(to bottom, black 60%, transparent 100%)"
+          }}
+        >
+          <Image src={heroData.bannerImage} alt="Hero backdrop" fill className="object-cover" priority />
+        </div>
+      ) : null}
 
       <div className="relative z-10 mx-auto grid max-w-[1600px] grid-cols-1 items-center gap-12 px-4 sm:px-6 md:px-10 lg:grid-cols-[1.1fr_0.9fr] lg:px-14 2xl:px-24">
         <div className="order-2 lg:order-1">

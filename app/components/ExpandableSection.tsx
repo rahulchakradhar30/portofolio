@@ -62,14 +62,19 @@ export default function ExpandableSection({
         <div
           ref={contentRef}
           className={contentClassName}
-          style={expanded || !hasOverflow ? undefined : { maxHeight: `${collapsedMaxHeightPx}px`, overflow: "hidden" }}
+          style={
+            expanded || !hasOverflow 
+              ? undefined 
+              : { 
+                  maxHeight: `${collapsedMaxHeightPx}px`, 
+                  overflow: "hidden",
+                  maskImage: "linear-gradient(to top, transparent, black 6rem)",
+                  WebkitMaskImage: "linear-gradient(to top, transparent, black 6rem)",
+                }
+          }
         >
           {children}
         </div>
-
-        {!expanded && hasOverflow ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[var(--surface-strong)] via-[var(--surface-strong)]/80 to-transparent" />
-        ) : null}
       </div>
 
       {hasOverflow ? (
