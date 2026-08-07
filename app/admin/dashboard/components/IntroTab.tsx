@@ -20,6 +20,7 @@ export default function IntroTab() {
     introDuration: 3.5,
     introLogoUrl: "",
     introAccentColor: "",
+    introEnableLogoAnimation: true,
   });
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export default function IntroTab() {
           introDuration: Number(res.content.introDuration) || 3.5,
           introLogoUrl: res.content.introLogoUrl || "",
           introAccentColor: res.content.introAccentColor || "",
+          introEnableLogoAnimation: res.content.introEnableLogoAnimation !== false,
         });
       }
     } catch (error) {
@@ -235,7 +237,18 @@ export default function IntroTab() {
           </div>
 
           <div className="pt-2">
-            <label className="block text-sm font-bold text-[var(--foreground)] mb-2">Transformation Logo</label>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-bold text-[var(--foreground)]">Transformation Logo</label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <span className="text-xs font-semibold text-[var(--foreground)]/70">Enable Animation</span>
+                <input
+                  type="checkbox"
+                  checked={formData.introEnableLogoAnimation}
+                  onChange={(e) => setFormData({ ...formData, introEnableLogoAnimation: e.target.checked })}
+                  className="h-4 w-4 accent-[var(--accent)]"
+                />
+              </label>
+            </div>
             <div className="flex items-start gap-4">
               <div className="relative flex h-24 w-24 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] overflow-hidden">
                 {formData.introLogoUrl ? (

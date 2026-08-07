@@ -145,6 +145,7 @@ export interface PortfolioContent {
   introDuration?: number;
   introFirstLoadOnly?: boolean;
   introAccentColor?: string;
+  introEnableLogoAnimation?: boolean;
 }
 
 export interface SectionVisibility {

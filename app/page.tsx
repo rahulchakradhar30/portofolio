@@ -84,8 +84,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function Home() {
   return (
     <main>
-      <IntroOverlay />
-      <Header />
+      <IntroOverlay>
+        <Header />
       <section id="home" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
         <SectionErrorBoundary sectionName="Hero">
           <Hero />
@@ -127,6 +127,7 @@ export default function Home() {
         </SectionErrorBoundary>
       </section>
       <Footer />
+      </IntroOverlay>
     </main>
   );
 }

@@ -8,11 +8,16 @@ import { useMotionPreferences } from "./MotionProvider";
 import { SITE_NAME, PRIMARY_NAME } from "@/app/lib/seoSchemas";
 import styles from "./IntroOverlay.module.css";
 
-export default function IntroOverlay() {
+export default function IntroOverlay({ children }: { children?: React.ReactNode }) {
   const { content, loading } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
-  const [shouldPlay, setShouldPlay] = useState(false);
-  const [phase, setPhase] = useState<"loading" | "text" | "logo" | "exit" | "complete">("loading");
+  
+  // 'ssr': Server-side or initial hydration, where we hide children to prevent layout flashes.
+  // 'playing': Intro is active and playing.
+  // 'done': Intro has finished or was skipped, show homepage normally.
+  const [status, setStatus] = useState<"ssr" | "playing" | "done">("ssr");
+  
+  const [phase, setPhase] = useState<"text" | "logo" | "exit" | "complete">("text");
   
   // Guard references to ensure body scroll is restored
   const bodyLockedRef = useRef(false);
@@ -20,11 +25,9 @@ export default function IntroOverlay() {
   useEffect(() => {
     if (loading) return;
     
-    const introEnabled = content?.introEnabled !== false; // Default true if undefined? Actually, we'll assume it's disabled if not configured, or let's default to false unless explicitly enabled. Wait, let's default to false to be safe, or true for demonstration. The user asked for "Enable / Disable intro", let's default to true if it's the first time setting up. Let's do `content?.introEnabled === true`. Or `!== false` for default true. Let's use `!== false` for a premium feel by default.
-    const isEnabled = content?.introEnabled === true || content?.introEnabled === undefined;
-    
+    const isEnabled = content?.introEnabled !== false;
     if (!isEnabled) {
-      setPhase("complete");
+      setStatus("done");
       return;
     }
 
@@ -32,19 +35,18 @@ export default function IntroOverlay() {
     const hasPlayed = sessionStorage.getItem("introPlayed");
 
     if (firstLoadOnly && hasPlayed) {
-      setPhase("complete");
+      setStatus("done");
       return;
     }
 
-    // Play intro
-    setShouldPlay(true);
+    // Initialize Intro
+    setStatus("playing");
     setPhase("text");
     
     // Lock body scroll
     document.body.style.overflow = "hidden";
     bodyLockedRef.current = true;
     
-    // Cleanup function to ensure scroll is unlocked
     return () => {
       if (bodyLockedRef.current) {
         document.body.style.overflow = "";
@@ -55,19 +57,25 @@ export default function IntroOverlay() {
 
   // Sequence timing
   useEffect(() => {
-    if (!shouldPlay || phase === "complete") return;
+    if (status !== "playing" || phase === "complete") return;
 
-    // Use admin-configured duration, default to 3s total flow (text: 1.5s, logo: 1s, pause: 0.5s)
-    // If they set a custom duration, we scale the internal phases relatively.
     const customDuration = content?.introDuration ? Number(content.introDuration) * 1000 : 3500;
-    const textTime = customDuration * 0.45;
-    const logoTime = customDuration * 0.35;
+    
+    const logoUrl = content?.introLogoUrl || content?.profileImage;
+    const enableLogoAnimation = content?.introEnableLogoAnimation !== false;
+    const hasLogoPhase = enableLogoAnimation && !!logoUrl;
+
+    // Adjust timing based on whether logo phase exists
+    const textTime = hasLogoPhase ? customDuration * 0.45 : customDuration * 0.8;
+    const logoTime = hasLogoPhase ? customDuration * 0.35 : 0;
     const exitDelay = customDuration * 0.2;
 
     let timeout: NodeJS.Timeout;
 
     if (phase === "text") {
-      timeout = setTimeout(() => setPhase("logo"), textTime);
+      timeout = setTimeout(() => {
+        setPhase(hasLogoPhase ? "logo" : "exit");
+      }, textTime);
     } else if (phase === "logo") {
       timeout = setTimeout(() => setPhase("exit"), logoTime);
     } else if (phase === "exit") {
@@ -78,76 +86,78 @@ export default function IntroOverlay() {
           document.body.style.overflow = "";
           bodyLockedRef.current = false;
         }
+        setStatus("done");
       }, exitDelay);
     }
 
     return () => clearTimeout(timeout);
-  }, [phase, shouldPlay, content?.introDuration]);
-
-  if (phase === "loading" || phase === "complete") return null;
+  }, [phase, status, content]);
 
   const brandText = content?.introBrandText || content?.siteCopy?.headerBrand || PRIMARY_NAME;
   const subtitle = content?.introSubtitle || "Portfolio";
   const logoUrl = content?.introLogoUrl || content?.profileImage;
+  const hasLogoPhase = (content?.introEnableLogoAnimation !== false) && !!logoUrl;
 
-  return (
-    <AnimatePresence>
-      {phase !== "exit" && (
-        <motion.div
-          key="intro-overlay"
-          className={styles.overlay}
-          initial={{ opacity: 1 }}
-          exit={{ 
-            opacity: 0,
-            y: reducedMotion ? 0 : "-100%", 
-          }}
-          transition={{ 
-            duration: reducedMotion ? 0.8 : 1.2, 
-            ease: [0.76, 0, 0.24, 1] // Custom smooth bezier (similar to Apple/Linear)
-          }}
-        >
-          <div className={styles.texture} />
-          
-          <div className={styles.content}>
-            <AnimatePresence mode="wait">
-              {phase === "text" && (
-                <motion.div
-                  key="text-phase"
-                  initial={{ opacity: 0, filter: reducedMotion ? "none" : "blur(10px)", scale: reducedMotion ? 1 : 0.95 }}
-                  animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
-                  exit={{ opacity: 0, filter: reducedMotion ? "none" : "blur(10px)", scale: reducedMotion ? 1 : 1.05 }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="flex flex-col items-center"
-                >
-                  <motion.h1 
-                    className={styles.brandText}
-                    style={{ color: content?.introAccentColor || "var(--foreground)" }}
+  const renderIntroOverlay = () => {
+    if (status !== "playing") return null;
+
+    return (
+      <AnimatePresence>
+        {phase !== "exit" && phase !== "complete" && (
+          <motion.div
+            key="intro-overlay"
+            className={styles.overlay}
+            initial={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0,
+              y: reducedMotion ? 0 : "-100%", 
+            }}
+            transition={{ 
+              duration: reducedMotion ? 0.8 : 1.2, 
+              ease: [0.76, 0, 0.24, 1] 
+            }}
+          >
+            <div className={styles.texture} />
+            
+            <div className={styles.content}>
+              <AnimatePresence mode="wait">
+                {phase === "text" && (
+                  <motion.div
+                    key="text-phase"
+                    initial={{ opacity: 0, filter: reducedMotion ? "none" : "blur(10px)", scale: reducedMotion ? 1 : 0.95 }}
+                    animate={{ opacity: 1, filter: "blur(0px)", scale: 1 }}
+                    exit={{ opacity: 0, filter: reducedMotion ? "none" : "blur(10px)", scale: reducedMotion ? 1 : 1.05 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="flex flex-col items-center"
                   >
-                    {brandText}
-                  </motion.h1>
-                  {subtitle && (
-                    <motion.p 
-                      className={styles.subtitle}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 0.8, y: 0 }}
-                      transition={{ delay: 0.3, duration: 0.6 }}
+                    <motion.h1 
+                      className={styles.brandText}
+                      style={{ color: content?.introAccentColor || "var(--foreground)" }}
                     >
-                      {subtitle}
-                    </motion.p>
-                  )}
-                </motion.div>
-              )}
+                      {brandText}
+                    </motion.h1>
+                    {subtitle && (
+                      <motion.p 
+                        className={styles.subtitle}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 0.8, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                      >
+                        {subtitle}
+                      </motion.p>
+                    )}
+                  </motion.div>
+                )}
 
-              {phase === "logo" && (
-                <motion.div
-                  key="logo-phase"
-                  initial={{ opacity: 0, scale: reducedMotion ? 1 : 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: reducedMotion ? 1 : 1.1 }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className={styles.logoWrapper}
-                >
-                  {logoUrl ? (
+                {phase === "logo" && hasLogoPhase && (
+                  <motion.div
+                    key="logo-phase"
+                    initial={{ opacity: 0, scale: reducedMotion ? 1 : 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: reducedMotion ? 1 : 1.1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className={styles.logoWrapper}
+                  >
                     <div className="relative h-24 w-24 md:h-32 md:w-32">
                       <Image 
                         src={logoUrl} 
@@ -157,19 +167,29 @@ export default function IntroOverlay() {
                         priority
                       />
                     </div>
-                  ) : (
-                    <div className="flex h-24 w-24 md:h-32 md:w-32 items-center justify-center rounded-2xl bg-[var(--foreground)] text-[var(--background)] shadow-2xl">
-                      <span className="text-4xl md:text-5xl font-black">
-                        {brandText.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
+
+  if (status === "ssr" || status === "playing") {
+    // During SSR or while intro plays, keep the homepage hidden visually but in the DOM for SEO.
+    // Use pointerEvents none and height 100vh to ensure it doesn't affect the overlay experience.
+    return (
+      <>
+        {renderIntroOverlay()}
+        <div style={{ opacity: 0, visibility: 'hidden', height: '100vh', overflow: 'hidden', pointerEvents: 'none' }}>
+          {children}
+        </div>
+      </>
+    );
+  }
+
+  // Done phase
+  return <>{children}</>;
 }
