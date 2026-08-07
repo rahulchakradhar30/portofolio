@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Film, Play, ToggleLeft, RefreshCw, Upload, Sparkles, X } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
-import type { PortfolioContent } from "@/app/lib/types";
+import { usePortfolioContent } from "@/app/components/PortfolioContentProvider";
 import Image from "next/image";
 
 export default function IntroTab() {
-  const [content, setContent] = useState<PortfolioContent | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { content, loading } = usePortfolioContent();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const hasInitialized = useRef(false);
   
   const [formData, setFormData] = useState({
     introEnabled: true,
@@ -24,42 +24,32 @@ export default function IntroTab() {
   });
 
   useEffect(() => {
-    loadContent();
-  }, []);
-
-  const loadContent = async () => {
-    try {
-      const res = await adminAPI.getPortfolioContent();
-      if (res.success && res.content) {
-        setContent(res.content);
-        setFormData({
-          introEnabled: res.content.introEnabled !== false,
-          introFirstLoadOnly: res.content.introFirstLoadOnly !== false,
-          introBrandText: res.content.introBrandText || "",
-          introSubtitle: res.content.introSubtitle || "",
-          introDuration: Number(res.content.introDuration) || 3.5,
-          introLogoUrl: res.content.introLogoUrl || "",
-          introAccentColor: res.content.introAccentColor || "",
-          introEnableLogoAnimation: res.content.introEnableLogoAnimation !== false,
-        });
-      }
-    } catch (error) {
-      console.error("Error loading intro configuration:", error);
-    } finally {
-      setLoading(false);
+    if (!loading && content && !hasInitialized.current) {
+      setFormData({
+        introEnabled: content.introEnabled !== false,
+        introFirstLoadOnly: content.introFirstLoadOnly !== false,
+        introBrandText: content.introBrandText || "",
+        introSubtitle: content.introSubtitle || "",
+        introDuration: Number(content.introDuration) || 3.5,
+        introLogoUrl: content.introLogoUrl || "",
+        introAccentColor: content.introAccentColor || "",
+        introEnableLogoAnimation: content.introEnableLogoAnimation !== false,
+      });
+      hasInitialized.current = true;
     }
-  };
+  }, [content, loading]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const res = await adminAPI.updatePortfolioContent({
-        ...content,
+        ...(content || {}),
         ...formData,
       });
       if (res.success) {
         alert("Intro configurations updated successfully!");
-        loadContent();
+        // We do not need to call loadContent() because usePortfolioContent 
+        // listens to Firestore real-time updates and will sync automatically.
       } else {
         alert("Failed to save intro settings: " + (res.error || "Unknown error"));
       }

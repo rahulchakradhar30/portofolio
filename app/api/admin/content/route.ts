@@ -5,6 +5,8 @@ import { logAdminAudit } from '@/app/lib/adminAudit';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
 import { DEFAULT_SITE_COPY } from '@/app/lib/siteCopy';
 
+export const dynamic = 'force-dynamic';
+
 const DEFAULT_RADAR_CONFIG = {
   enabledKinds: ['skill', 'project', 'certification'],
   skillIds: [],
