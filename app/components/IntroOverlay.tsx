@@ -183,28 +183,26 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     );
   };
 
-  // During SSR or initial hydration, render children hidden to ensure SEO and match hydration.
-  if (!mounted) {
-    return (
-      <>
-        {renderIntroOverlay()}
-        <div style={{ opacity: 0, visibility: 'hidden', height: '100vh', overflow: 'hidden', pointerEvents: 'none' }}>
-          {children}
-        </div>
-      </>
-    );
-  }
-
-  // After hydration, while the intro is evaluating or playing, UNMOUNT the homepage children.
-  // This prevents Framer Motion from executing animations invisibly behind the overlay.
-  if (status === "ssr" || status === "playing") {
-    return (
-      <>
-        {renderIntroOverlay()}
-      </>
-    );
-  }
-
-  // Done phase: Mount the homepage children. They will now execute their initial animations visibly!
-  return <>{children}</>;
+  return (
+    <>
+      {status !== "done" && renderIntroOverlay()}
+      
+      {/* 
+        Instead of unmounting children while the intro plays (which breaks Framer Motion's whileInView state when remounted),
+        we keep them mounted but use display: 'none' during the 'ssr' and 'playing' phases.
+        Because display: 'none' removes the elements from the layout tree, Intersection Observer does NOT fire.
+        When the intro finishes, display becomes 'contents', the elements get layout boxes, Intersection Observer fires,
+        and Framer Motion triggers the initial animations precisely when they become visible!
+      */}
+      <div 
+        style={
+          status !== "done" 
+            ? { display: 'none' } 
+            : { display: 'contents' }
+        }
+      >
+        {children}
+      </div>
+    </>
+  );
 }
