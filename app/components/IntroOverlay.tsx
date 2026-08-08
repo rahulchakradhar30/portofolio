@@ -28,19 +28,30 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     setMounted(true);
   }, []);
 
+  // Global cleanup for body lock in case component unmounts early
   useEffect(() => {
-    if (loading) return;
+    return () => {
+      if (bodyLockedRef.current) {
+        document.body.style.overflow = "";
+        bodyLockedRef.current = false;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Only initialize once on client mount. Do NOT wait for loading to finish!
+    if (status !== "ssr") return;
     
-    const isEnabled = content?.introEnabled !== false;
-    if (!isEnabled) {
+    const isEnabled = content ? content.introEnabled !== false : true;
+    const firstLoadOnly = content ? content.introFirstLoadOnly !== false : true;
+    const hasPlayed = sessionStorage.getItem("introPlayed");
+
+    if (firstLoadOnly && hasPlayed) {
       setStatus("done");
       return;
     }
 
-    const firstLoadOnly = content?.introFirstLoadOnly !== false; // Default true
-    const hasPlayed = sessionStorage.getItem("introPlayed");
-
-    if (firstLoadOnly && hasPlayed) {
+    if (!isEnabled) {
       setStatus("done");
       return;
     }
@@ -52,14 +63,7 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     // Lock body scroll
     document.body.style.overflow = "hidden";
     bodyLockedRef.current = true;
-    
-    return () => {
-      if (bodyLockedRef.current) {
-        document.body.style.overflow = "";
-        bodyLockedRef.current = false;
-      }
-    };
-  }, [loading, content]);
+  }, [status, content]);
 
   // Sequence timing
   useEffect(() => {
@@ -105,8 +109,6 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
   const hasLogoPhase = (content?.introEnableLogoAnimation !== false) && !!logoUrl;
 
   const renderIntroOverlay = () => {
-    if (status !== "playing") return null;
-
     return (
       <AnimatePresence>
         {phase !== "exit" && phase !== "complete" && (
