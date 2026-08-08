@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -16,12 +17,17 @@ export default function PageTransition({ children }: { children: React.ReactNode
     ? { duration: 0.05 }
     : { type: "spring" as const, stiffness: isMobile ? 220 : 180, damping: isMobile ? 26 : 22, mass: 0.85 };
 
+  const isFirstMount = useRef(true);
+  useEffect(() => {
+    isFirstMount.current = false;
+  }, []);
+
   return (
     <>
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="wait">
         <motion.div
           key={pathname}
-          initial={reducedMotion ? { opacity: 1 } : { opacity: 0, y: enterY }}
+          initial={reducedMotion || isFirstMount.current ? { opacity: 1, y: 0 } : { opacity: 0, y: enterY }}
           animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           exit={reducedMotion ? { opacity: 1 } : { opacity: 0, y: exitY }}
           transition={transition}
