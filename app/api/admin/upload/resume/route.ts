@@ -8,7 +8,7 @@ import { getAdminDb } from "@/app/lib/firebaseAdmin";
 
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const RESUME_FOLDER = "portfolio/resume";
-const RESUME_PUBLIC_ID = "current";
+const RESUME_PUBLIC_ID = "current.pdf";
 
 function addCorsHeaders(response: NextResponse) {
   const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -85,23 +85,27 @@ export async function POST(request: NextRequest) {
 
     if (!duplicateAssetSnap.empty) {
       const existingAsset = duplicateAssetSnap.docs[0].data();
-      const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({ resumeUrl: existingAsset.url });
+      
+      // Only reuse the asset if it has the correct .pdf extension from our fix
+      if (existingAsset.url && existingAsset.url.endsWith(".pdf")) {
+        const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({ resumeUrl: existingAsset.url });
 
-      const response = NextResponse.json(
-        {
-          success: true,
-          resumeUrl: existingAsset.url,
-          fileUrl: existingAsset.url,
-          publicId: existingAsset.publicId,
-          fileName: file.name,
-          size: file.size,
-          isDuplicate: true,
-          content: updatedContent,
-        },
-        { status: 200 }
-      );
+        const response = NextResponse.json(
+          {
+            success: true,
+            resumeUrl: existingAsset.url,
+            fileUrl: existingAsset.url,
+            publicId: existingAsset.publicId,
+            fileName: file.name,
+            size: file.size,
+            isDuplicate: true,
+            content: updatedContent,
+          },
+          { status: 200 }
+        );
 
-      return addCorsHeaders(response);
+        return addCorsHeaders(response);
+      }
     }
 
     const timestamp = Math.floor(Date.now() / 1000).toString();
