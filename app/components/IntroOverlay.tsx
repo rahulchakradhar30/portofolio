@@ -39,8 +39,8 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
   }, []);
 
   useEffect(() => {
-    // Only initialize once on client mount. Do NOT wait for loading to finish!
-    if (status !== "ssr") return;
+    // Wait for the Admin configuration to load before deciding to play or skip.
+    if (loading || status !== "ssr") return;
     
     const isEnabled = content ? content.introEnabled !== false : true;
     const firstLoadOnly = content ? content.introFirstLoadOnly !== false : true;
@@ -63,7 +63,7 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     // Lock body scroll
     document.body.style.overflow = "hidden";
     bodyLockedRef.current = true;
-  }, [status, content]);
+  }, [loading, status, content]);
 
   // Sequence timing
   useEffect(() => {
@@ -129,7 +129,7 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
             
             <div className={styles.content}>
               <AnimatePresence mode="wait">
-                {phase === "text" && (
+                {status === "playing" && phase === "text" && (
                   <motion.div
                     key="text-phase"
                     initial={{ opacity: 0, filter: reducedMotion ? "none" : "blur(10px)", scale: reducedMotion ? 1 : 0.95 }}
@@ -157,7 +157,7 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
                   </motion.div>
                 )}
 
-                {phase === "logo" && hasLogoPhase && (
+                {status === "playing" && phase === "logo" && hasLogoPhase && (
                   <motion.div
                     key="logo-phase"
                     initial={{ opacity: 0, scale: reducedMotion ? 1 : 0.9 }}
