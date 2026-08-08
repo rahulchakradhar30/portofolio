@@ -8,7 +8,7 @@ import { getAdminDb } from "@/app/lib/firebaseAdmin";
 
 const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const RESUME_FOLDER = "portfolio/resume";
-const RESUME_PUBLIC_ID = "current.pdf";
+const RESUME_PUBLIC_ID = "current";
 
 function addCorsHeaders(response: NextResponse) {
   const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
       const existingAsset = duplicateAssetSnap.docs[0].data();
       
       // Only reuse the asset if it has the correct .pdf extension from our fix
-      if (existingAsset.url && existingAsset.url.endsWith(".pdf")) {
+      // AND is not a raw resource (so it's delivered properly)
+      if (existingAsset.url && existingAsset.url.endsWith(".pdf") && existingAsset.url.includes("/image/upload/")) {
         const updatedContent = await serverFirebaseHelpers.updatePortfolioContent({ resumeUrl: existingAsset.url });
 
         const response = NextResponse.json(
@@ -130,7 +131,7 @@ export async function POST(request: NextRequest) {
     uploadFormData.append("signature", signature);
 
     const cloudinaryResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       {
         method: "POST",
         body: uploadFormData,
@@ -159,7 +160,7 @@ export async function POST(request: NextRequest) {
       fileHash,
       url: secureUrl,
       publicId: data.public_id || publicId,
-      resourceType: "raw",
+      resourceType: "image",
       created_at: new Date().toISOString(),
     });
 
