@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import type { ComponentType, FormEvent } from "react";
+import { BackButton } from "@/app/components/NavigationContext";
 import { ArrowLeft, Building2, Briefcase, CalendarDays, Mail, Phone, Globe, DollarSign, Users } from "lucide-react";
 
 const PROJECT_TYPES = [
@@ -81,10 +81,10 @@ export default function HirePageClient() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_15%_10%,rgba(235,216,188,0.6)_0%,transparent_30%),radial-gradient(circle_at_85%_15%,rgba(196,168,132,0.25)_0%,transparent_28%),linear-gradient(140deg,#fbf7f0_0%,#f4eadb_52%,#ede0cf_100%)] px-4 pb-16 pt-28 text-[#2f241b] sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <Link href="/" className="inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] backdrop-blur transition hover:bg-[#f7efe4]">
+        <BackButton fallback="/" className="inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] backdrop-blur transition hover:bg-[#f7efe4]">
           <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Link>
+          Back
+        </BackButton>
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
           <motion.section

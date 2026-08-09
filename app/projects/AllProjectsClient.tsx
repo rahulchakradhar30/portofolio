@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import type { Project } from "@/app/lib/types";
 import { useMotionPreferences } from "../components/MotionProvider";
+import { BackButton } from "../components/NavigationContext";
 
 interface AllProjectsClientProps {
   initialProjects: Project[];
@@ -39,13 +40,13 @@ export default function AllProjectsClient({ initialProjects }: AllProjectsClient
           transition={reducedMotion ? undefined : { duration: 0.8 }}
           className="mb-12 sm:mb-16"
         >
-          <Link
-            href="/"
+          <BackButton
+            fallback="/"
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] transition hover:border-[#8d6b4e]/30 hover:text-[#8d6b4e] sm:mb-8"
           >
             <ArrowLeft className="h-5 w-5" />
-            Back to Home
-          </Link>
+            Back
+          </BackButton>
 
           <div className="mb-10 text-center sm:mb-12">
             <h1 className="mb-4 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:mb-6 md:text-6xl">

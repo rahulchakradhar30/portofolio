@@ -14,6 +14,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import { BackButton } from "@/app/components/NavigationContext";
 import PaperBackground from "@/app/components/PaperBackground";
 import LoadingSkeleton from "@/app/components/LoadingSkeleton";
 import InteractiveProofVisualizer from "@/app/components/InteractiveProofVisualizer";
@@ -94,12 +95,12 @@ export default function ProofModePage() {
       <main className="flex-grow pt-28 pb-20 px-4 sm:px-6 lg:px-10 max-w-[1600px] mx-auto w-full z-10">
         {/* Header Breadcrumb & Title */}
         <div className="mb-10">
-          <Link
-            href="/#home"
+          <BackButton
+            fallback="/"
             className="paper-button inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-wider mb-6 font-bold"
           >
             <ArrowLeft className="h-4 w-4" /> Back to Portfolio
-          </Link>
+          </BackButton>
 
           <div className="paper-chip inline-flex items-center gap-2 uppercase tracking-[0.24em] font-mono text-xs bg-[var(--surface-strong)] text-[var(--accent)] mb-4">
             <Sparkles className="h-3.5 w-3.5" />

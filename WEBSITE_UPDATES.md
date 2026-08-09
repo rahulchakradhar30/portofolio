@@ -79,3 +79,81 @@ The `FrozenRouter` implementation successfully bridges `framer-motion` page tran
 - `WEBSITE_FEATURES.md`
 - `WEBSITE_UPDATES.md`
 
+---
+
+# Context-Preserving Navigation
+
+## What it does
+The Context-Preserving Navigation system allows website subpages and modal destinations (`/hire`, `/skills`, `/certifications`, `/certifications/[id]`, `/projects`, `/projects/[id]`, `/proof-mode`) to remember the user's previous navigation context (pathname, section anchor, and scroll position) and return them to that exact position when clicking "Back", rather than resetting back to the Homepage root (`/`).
+
+## Why it was implemented
+Previously, all subpages contained hardcoded `<Link href="/">` or `<Link href="/#home">` back links. For instance:
+- A user viewing the **Certifications** section on the homepage who clicked **Hire Me** and then **Back** was forced back to the top of the homepage (`/`), losing their scroll position and requiring manual scrolling back to Certifications.
+- A user navigating `Home → Projects → Project Details → Hire Me → Back` was sent directly to Home root (`/`), destroying their browsing history stack.
+
+This system eliminates context loss and makes navigation behave naturally across browser history.
+
+## How it works
+The conceptual flow operates as a contextual history stack integrated with Next.js App Router and native browser history:
+
+```
+Previous Context (Route, Hash, ScrollY)
+           ↕
+  Navigation Provider (History & Scroll Tracker)
+           ↕
+Current Destination Page
+           ↕
+     Back Button
+   ├─ Internal History Exists → router.back() [Restores Route + Hash + Scroll]
+   └─ Direct Access / No History → Safe Fallback Route (e.g. / for Hire, /projects for Project Detail)
+```
+
+## Scroll Restoration
+1. **Section Anchor Tracking**: On the Homepage (`/`), an `IntersectionObserver` continuously updates `window.location.hash` (e.g., `/#certifications`, `/#skills`, `/#projects`) in browser history as the user scrolls into view.
+2. **Scroll Position Saving**: As the user scrolls, `window.scrollY` for the current path is saved in `sessionStorage`.
+3. **Contextual Restoration**: When navigating back via `router.back()`, `NavigationProvider` intercepts route mounting and `popstate` events:
+   - If a section hash exists in the URL (e.g. `/#certifications`), it scrolls to `document.getElementById(hash)`.
+   - If no hash exists, it restores the saved `scrollY` position after layout rendering settles.
+
+## Fallback Behavior
+When a user accesses a subpage directly (e.g. typing `https://site.com/hire` or opening a link in a fresh tab), no internal history context exists.
+In this case, the `goBack()` action triggers a safe, context-appropriate fallback route:
+- `/hire` → `/`
+- `/skills` → `/`
+- `/certifications` → `/`
+- `/certifications/[id]` → `/certifications`
+- `/projects` → `/`
+- `/projects/[id]` → `/projects`
+- `/proof-mode` → `/`
+
+## Pages/Components Using It
+- `app/hire/HirePageClient.tsx`
+- `app/skills/SkillsPageClient.tsx`
+- `app/certifications/CertificationsPageClient.tsx`
+- `app/certifications/[id]/CertificationDetailClient.tsx`
+- `app/projects/AllProjectsClient.tsx`
+- `app/projects/[id]/ProjectDetailClient.tsx`
+- `app/proof-mode/page.tsx`
+
+## Technical Implementation
+- **`app/components/NavigationContext.tsx`**:
+  - `NavigationProvider`: React context provider wrapping the app in `app/layout.tsx`.
+  - `SearchParamsTracker`: Suspense-wrapped search parameter listener preventing static SSG pre-render bails.
+  - `useBackNavigation()`: Custom React hook exposing `goBack(fallbackUrl)` and `canGoBack`.
+  - `<BackButton>`: Reusable component replacing static `<Link>` elements without altering UI styling.
+- **`app/layout.tsx`**: Wraps `<AppShell>` inside `<NavigationProvider>`.
+
+## Verification
+The following navigation paths and edge cases were verified with 0 TypeScript/build errors:
+1. `Home → Certifications section → Hire Me → Back` → Returned to Certifications section.
+2. `Home → Skills section → Hire Me → Back` → Returned to Skills section.
+3. `Projects → Project Details → Back` → Returned to Projects page.
+4. `Project Details → Hire Me → Back` → Returned to Project Details.
+5. `Proof Mode → Hire Me → Back` → Returned to Proof Mode.
+6. `Direct URL Access to /hire → Back` → Safely fell back to Home.
+7. `Browser Back / Forward Buttons` → Restored route, section, and scroll position.
+8. `Mobile Navigation` → Section restored, body scroll lock restored, no menu leak.
+9. `Cinematic Intro` → Did not replay on back navigation.
+10. `Framer Motion & FrozenRouter` → Maintained smooth exit/enter transitions without reload.
+
+

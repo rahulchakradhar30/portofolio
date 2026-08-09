@@ -8,6 +8,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import type { Certification } from "@/app/lib/types";
 import ImageLightbox from "@/app/components/ImageLightbox";
 import { getYouTubeId } from "@/app/lib/youtube";
+import { BackButton } from "@/app/components/NavigationContext";
 
 interface CertificationDetailClientProps {
   certification: Certification;
@@ -29,10 +30,10 @@ export default function CertificationDetailClient({ certification }: Certificati
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#fbf7f0] to-[#f4eadb] px-4 pb-20 pt-24 text-[#2f241b] sm:px-6 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
-        <Link href="/certifications" className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-3 py-2 text-sm text-[#5f4a38] hover:text-[#8d6b4e] sm:mb-8">
+        <BackButton fallback="/certifications" className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-3 py-2 text-sm text-[#5f4a38] hover:text-[#8d6b4e] sm:mb-8">
           <ArrowLeft className="h-4 w-4" />
-          Back to Certifications
-        </Link>
+          Back
+        </BackButton>
 
         <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-[#7a5f47]/12 bg-white p-5 shadow-2xl sm:p-6 md:p-8">
           <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl">{certification.title}</h1>

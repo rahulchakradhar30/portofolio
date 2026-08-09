@@ -8,6 +8,7 @@ import Image from "next/image";
 import type { Project } from "@/app/lib/types";
 import ImageLightbox from "@/app/components/ImageLightbox";
 import { getYouTubeEmbedUrl, getYouTubeId } from "@/app/lib/youtube";
+import { BackButton } from "@/app/components/NavigationContext";
 
 interface ProjectDetailClientProps {
   project: Project;
@@ -40,13 +41,13 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
 
       <div className="relative z-10 mx-auto max-w-[1600px] px-4 md:px-8 lg:px-10 2xl:px-16">
         {/* Header */}
-        <Link
-          href="/"
+        <BackButton
+          fallback="/projects"
           className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-3 py-2 text-sm font-semibold text-[#5f4a38] transition group hover:text-[#8d6b4e] sm:mb-8"
         >
           <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition" />
-          Back to Home
-        </Link>
+          Back
+        </BackButton>
 
         {/* Hero Section */}
         <motion.section

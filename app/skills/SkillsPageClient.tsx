@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import type { Skill } from "@/app/lib/types";
 import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
+import { BackButton } from "@/app/components/NavigationContext";
 
 interface SkillsPageClientProps {
   initialSkills: Skill[];
@@ -17,10 +17,10 @@ export default function SkillsPageClient({ initialSkills }: SkillsPageClientProp
   return (
     <main className="section-soft min-h-screen px-4 pb-20 pt-24 sm:px-6 sm:pt-28 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <Link href="/" className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] hover:bg-[#f7efe4] sm:mb-8">
+        <BackButton fallback="/" className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] hover:bg-[#f7efe4] sm:mb-8">
           <ArrowLeft className="h-4 w-4" />
-          Back to Home
-        </Link>
+          Back
+        </BackButton>
 
         <h1 className="mb-3 bg-gradient-to-r from-[#7a5f47] via-[#b6926d] to-[#9b7a5b] bg-clip-text text-4xl font-black text-transparent sm:text-5xl md:text-6xl">All Skills</h1>
         <p className="mb-10 max-w-2xl text-sm leading-relaxed text-[#6a5846] sm:text-base">A complete list of technical and creative capabilities.</p>

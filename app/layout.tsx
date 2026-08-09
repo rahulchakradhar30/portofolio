@@ -6,6 +6,7 @@ import AppShell from "./components/AppShell";
 import DevtoolsGuard from "./components/DevtoolsGuard";
 import PaperBackground from "./components/PaperBackground";
 import { PortfolioContentProvider } from "./components/PortfolioContentProvider";
+import { NavigationProvider } from "./components/NavigationContext";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS, getGlobalJsonLdGraph } from "@/app/lib/seoSchemas";
 
 export const metadata: Metadata = {
@@ -98,7 +99,9 @@ export default function RootLayout({
           <MotionProvider>
             <PaperBackground />
             <DevtoolsGuard />
-            <AppShell>{children}</AppShell>
+            <NavigationProvider>
+              <AppShell>{children}</AppShell>
+            </NavigationProvider>
             <CookieConsent />
           </MotionProvider>
         </PortfolioContentProvider>
