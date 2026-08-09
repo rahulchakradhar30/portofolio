@@ -13,7 +13,7 @@ export const NAME_VARIATIONS = [
   "Rahul P Chakradhar",
 ];
 
-export const PRIMARY_NAME = "Rahul Chakradhar Perepogu";
+export const PRIMARY_NAME = "Rahul Chakradhar";
 
 export const JOB_TITLES = [
   "AI Engineer",
@@ -33,6 +33,7 @@ export function getPersonEntity(content?: PortfolioContent | null) {
     "@type": "Person",
     "@id": `${SITE_URL}/#person`,
     "name": PRIMARY_NAME,
+    "legalName": "Rahul Chakradhar Perepogu",
     "givenName": "Rahul Chakradhar",
     "familyName": "Perepogu",
     "alternateName": NAME_VARIATIONS.filter((name) => name !== PRIMARY_NAME),
@@ -75,7 +76,7 @@ export function getWebSiteEntity() {
     "name": SITE_NAME,
     "alternateName": NAME_VARIATIONS.map((name) => `${name} Portfolio`),
     "description":
-      "Official personal portfolio, AI engineering projects, research, credentials, and interactive hub of Rahul Chakradhar Perepogu.",
+      "Official personal portfolio, AI engineering projects, research, credentials, and interactive hub of Rahul Chakradhar.",
     "publisher": { "@id": `${SITE_URL}/#person` },
     "author": { "@id": `${SITE_URL}/#person` },
     "potentialAction": {

@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Rahul Chakradhar Portfolio',
     short_name: 'Rahul Portfolio',
-    description: 'Official portfolio of Rahul Chakradhar Perepogu - AI Engineer, Full Stack Developer, and Student Researcher.',
+    description: 'Portfolio of Rahul Chakradhar — AI/ML student, Full Stack Developer, and Creative Technologist building AI-powered digital products, web experiences, and innovative technology projects.',
     start_url: '/',
     display: 'standalone',
     orientation: 'portrait',

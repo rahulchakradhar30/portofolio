@@ -20,10 +20,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://rahulchakradhar.vercel.app"),
   title: {
-    default: `${PRIMARY_NAME} | AI Engineer & Full Stack Developer`,
+    default: "Rahul Chakradhar | AI/ML Engineer & Full Stack Developer",
     template: `%s | ${SITE_NAME}`,
   },
-  description: `Official portfolio of ${PRIMARY_NAME} (P Rahul Chakradhar) - AI Engineer, Full Stack Developer, and Student Researcher specializing in AI-powered systems and high-trust web applications.`,
+  description: "Portfolio of Rahul Chakradhar — AI/ML student, Full Stack Developer, and Creative Technologist building AI-powered digital products, web experiences, and innovative technology projects.",
   applicationName: SITE_NAME,
   authors: [{ name: PRIMARY_NAME, url: SITE_URL }],
   creator: PRIMARY_NAME,
@@ -47,8 +47,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: `${PRIMARY_NAME} | AI Engineer & Full Stack Developer`,
-    description: `Official portfolio of ${PRIMARY_NAME} - AI Engineer, Full Stack Developer, and Student Researcher.`,
+    title: "Rahul Chakradhar | AI/ML Engineer & Full Stack Developer",
+    description: "Portfolio of Rahul Chakradhar — AI/ML student, Full Stack Developer, and Creative Technologist building AI-powered digital products, web experiences, and innovative technology projects.",
     url: SITE_URL,
     locale: "en_US",
     images: [
@@ -63,8 +63,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${PRIMARY_NAME} | AI Engineer & Full Stack Developer`,
-    description: `Official portfolio of ${PRIMARY_NAME} - AI Engineer & Full Stack Developer.`,
+    title: "Rahul Chakradhar | AI/ML Engineer & Full Stack Developer",
+    description: "Portfolio of Rahul Chakradhar — AI/ML student, Full Stack Developer, and Creative Technologist building AI-powered digital products, web experiences, and innovative technology projects.",
     site: "@rahulchakradhar",
     creator: "@rahulchakradhar",
     // Absolute URL required for Twitter card image crawlers

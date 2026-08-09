@@ -22,10 +22,12 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata(): Promise<Metadata> {
   const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
 
-  const title = content?.seoTitle || `${PRIMARY_NAME} | AI Engineer, Full Stack Developer & Researcher`;
-  const description =
-    content?.seoDescription ||
-    `Official portfolio of ${PRIMARY_NAME} (P Rahul Chakradhar, Rahul Chakradhar) - AI Engineer, Full Stack Developer, and Student Researcher building AI systems and high-impact software.`;
+  const defaultTitle = "Rahul Chakradhar | AI/ML Engineer & Full Stack Developer";
+  const defaultDescription =
+    "Portfolio of Rahul Chakradhar — AI/ML student, Full Stack Developer, and Creative Technologist building AI-powered digital products, web experiences, and innovative technology projects.";
+
+  const title = content?.seoTitle || defaultTitle;
+  const description = content?.seoDescription || defaultDescription;
   
   const keywords = content?.seoKeywords
     ? content.seoKeywords.split(',').map((k: string) => k.trim())
@@ -33,6 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
         ...NAME_VARIATIONS,
         "AI Engineer",
         "Full Stack Developer",
+        "AI/ML Engineer",
         "Rahul Chakradhar Portfolio",
         "AI Systems",
         "Next.js Developer",

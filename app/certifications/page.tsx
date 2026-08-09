@@ -6,7 +6,7 @@ import { SITE_URL, SITE_NAME, PRIMARY_NAME, getBreadcrumbListEntity } from '@/ap
 
 export const metadata: Metadata = {
   title: `All Certifications | ${SITE_NAME}`,
-  description: `Explore the complete directory of professional credentials, certifications, achievements, and technical milestones earned by ${PRIMARY_NAME} (P Rahul Chakradhar).`,
+  description: `Explore the complete directory of professional credentials, certifications, achievements, and technical milestones earned by ${PRIMARY_NAME}.`,
   alternates: {
     canonical: `${SITE_URL}/certifications`,
   },
