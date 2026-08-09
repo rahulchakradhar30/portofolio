@@ -63,6 +63,18 @@ export default function Security2FASection() {
     fetch2FAStatus();
   }, [fetch2FAStatus]);
 
+  // Lock background scrolling when any modal is open
+  useEffect(() => {
+    if (showTotpModal || showPasskeyModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showTotpModal, showPasskeyModal]);
+
   // ── Switch Method ──────────────────────────────────────────────────
   const handleSelectMethod = async (targetMethod: Active2FAMethod) => {
     if (status?.active2FAMethod === targetMethod) return;
@@ -552,33 +564,42 @@ export default function Security2FASection() {
 
       {/* ═══════════ MODAL: GOOGLE AUTHENTICATOR SETUP ═══════════ */}
       {showTotpModal && totpSetupData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
-            <div className="flex items-start justify-between border-b pb-3">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 md:p-6 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="totp-modal-title"
+        >
+          <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)] rounded-2xl bg-white shadow-2xl flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-gray-100 px-5 py-4 shrink-0 bg-white">
               <div>
-                <h3 className="font-bold text-[#2f241b] text-lg">Set up Google Authenticator</h3>
+                <h3 id="totp-modal-title" className="font-bold text-[#2f241b] text-base sm:text-lg">Set up Google Authenticator</h3>
                 <p className="text-xs text-gray-500">Scan QR code or enter manual key in your app</p>
               </div>
               <button
+                type="button"
                 onClick={() => {
                   setShowTotpModal(false);
                   setTotpSetupData(null);
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg transition"
+                aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Scrollable Modal Content */}
+            <div className="p-5 overflow-y-auto flex-1 min-h-0 space-y-4">
               {/* Step 1: Scan QR */}
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-[#8d6b4e] mb-2">
                   1. Scan this QR code
                 </p>
-                <div className="flex justify-center rounded-2xl border bg-gray-50 p-4">
+                <div className="flex justify-center rounded-2xl border bg-gray-50 p-3 sm:p-4">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={totpSetupData.qrCodeUrl} alt="Google Authenticator QR Code" className="h-44 w-44 rounded-lg" />
+                  <img src={totpSetupData.qrCodeUrl} alt="Google Authenticator QR Code" className="h-36 w-36 sm:h-44 sm:w-44 rounded-lg object-contain" />
                 </div>
               </div>
 
@@ -587,11 +608,12 @@ export default function Security2FASection() {
                 <p className="text-xs font-bold uppercase tracking-wider text-[#8d6b4e] mb-1">
                   2. Or enter this setup key manually
                 </p>
-                <div className="flex items-center justify-between rounded-xl border bg-gray-50 px-3 py-2 text-xs font-mono font-bold text-slate-800">
-                  <span>{formatKeyDisplay(totpSetupData.manualKey)}</span>
+                <div className="flex items-center justify-between gap-2 rounded-xl border bg-gray-50 px-3 py-2 text-xs font-mono font-bold text-slate-800">
+                  <span className="truncate">{formatKeyDisplay(totpSetupData.manualKey)}</span>
                   <button
+                    type="button"
                     onClick={copyManualKey}
-                    className="flex items-center gap-1 rounded-lg border bg-white px-2 py-1 text-[11px] font-sans font-semibold text-gray-700 hover:bg-gray-100"
+                    className="flex items-center gap-1 rounded-lg border bg-white px-2 py-1 text-[11px] font-sans font-semibold text-gray-700 hover:bg-gray-100 shrink-0"
                   >
                     {copiedKey ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
                     {copiedKey ? "Copied" : "Copy Key"}
@@ -616,7 +638,8 @@ export default function Security2FASection() {
               </div>
             </div>
 
-            <div className="pt-2 flex gap-3">
+            {/* Sticky Action Footer */}
+            <div className="border-t border-gray-100 p-4 shrink-0 bg-white flex gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -642,19 +665,31 @@ export default function Security2FASection() {
 
       {/* ═══════════ MODAL: PASSKEY REGISTRATION ═══════════ */}
       {showPasskeyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-5">
-            <div className="flex items-start justify-between border-b pb-3">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-3 sm:p-4 md:p-6 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="passkey-modal-title"
+        >
+          <div className="relative w-full max-w-md max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100dvh-3rem)] rounded-2xl bg-white shadow-2xl flex flex-col my-auto overflow-hidden animate-in fade-in zoom-in duration-200">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-gray-100 px-5 py-4 shrink-0 bg-white">
               <div>
-                <h3 className="font-bold text-[#2f241b] text-lg">Register a Passkey</h3>
+                <h3 id="passkey-modal-title" className="font-bold text-[#2f241b] text-base sm:text-lg">Register a Passkey</h3>
                 <p className="text-xs text-gray-500">Use TouchID, FaceID, Security Key, or device lock</p>
               </div>
-              <button onClick={() => setShowPasskeyModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button
+                type="button"
+                onClick={() => setShowPasskeyModal(false)}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg transition"
+                aria-label="Close modal"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            {/* Scrollable Modal Content */}
+            <div className="p-5 overflow-y-auto flex-1 min-h-0 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-[#8d6b4e] uppercase tracking-wider mb-1">
                   Passkey Name / Description
@@ -673,7 +708,8 @@ export default function Security2FASection() {
               </div>
             </div>
 
-            <div className="pt-2 flex gap-3">
+            {/* Sticky Action Footer */}
+            <div className="border-t border-gray-100 p-4 shrink-0 bg-white flex gap-3">
               <button
                 type="button"
                 onClick={() => setShowPasskeyModal(false)}
