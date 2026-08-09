@@ -9,14 +9,18 @@ import {
   type User,
 } from 'firebase/auth';
 import { assertFirebaseClientConfig, firebaseAuth } from '@/app/lib/firebaseClient';
+import { startAuthentication } from '@simplewebauthn/browser';
 
 // ── Types ───────────────────────────────────────────────────────────
-type LoginStep = 'credentials' | 'otp' | 'forgot-password';
+type LoginStep = 'credentials' | 'otp' | 'totp' | 'passkey' | 'forgot-password';
 type LoadingStage =
   | 'idle'
   | 'starting-email'
+  | 'fetching-2fa'
   | 'sending-otp'
   | 'verifying-otp'
+  | 'verifying-totp'
+  | 'verifying-passkey'
   | 'verifying'
   | 'redirecting'
   | 'sending-reset';
@@ -353,10 +357,15 @@ export default function AdminLoginPage() {
     };
   }, [loading]);
 
+  const [totpCode, setTotpCode] = useState('');
+
   const loadingMessage = (() => {
     if (loadingStage === 'starting-email') return 'Validating credentials...';
+    if (loadingStage === 'fetching-2fa') return 'Checking 2FA security profile...';
     if (loadingStage === 'sending-otp') return 'Sending verification code...';
     if (loadingStage === 'verifying-otp') return 'Verifying code...';
+    if (loadingStage === 'verifying-totp') return 'Verifying authenticator code...';
+    if (loadingStage === 'verifying-passkey') return 'Verifying passkey...';
     if (loadingStage === 'sending-reset') return 'Sending reset link...';
     if (loadingStage === 'verifying') {
       if (loadingHintLevel === 0) return 'Verifying secure session...';
@@ -368,7 +377,7 @@ export default function AdminLoginPage() {
   })();
 
 
-  // ── Email/Password Login → Send OTP ───────────────────────────────
+  // ── Email/Password Login → Resolve 2FA Method ──────────────────────
   const handleEmailPasswordLogin = async () => {
     setLoading(true);
     setLoadingStage('starting-email');
@@ -390,34 +399,170 @@ export default function AdminLoginPage() {
       const credential = await signInWithEmailAndPassword(firebaseAuth, normalizedEmail, password);
       firebaseUserRef.current = credential.user;
 
-      // Get ID token for OTP request
+      // Get ID token for 2FA checks
       const idToken = await credential.user.getIdToken(true);
       idTokenRef.current = idToken;
 
-      // Send OTP
-      setLoadingStage('sending-otp');
-      const otpRes = await fetch('/api/admin/auth/send-otp', {
+      // Query server for Admin's active 2FA method
+      setLoadingStage('fetching-2fa');
+      const statusRes = await fetch('/api/admin/auth/2fa-status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
-        credentials: 'include',
       });
-
-      const otpData = await otpRes.json();
-      if (!otpRes.ok) {
-        throw new Error(otpData.error || 'Failed to send OTP');
+      const statusData = await statusRes.json();
+      if (!statusRes.ok) {
+        throw new Error(statusData.error || 'Failed to determine 2FA configuration');
       }
 
-      // Move to OTP step
-      setOtpExpiresAt(Date.now() + (otpData.expiresInMs || 300000));
-      setMaskedEmail(otpData.maskedEmail || normalizedEmail);
-      setOtpExpired(false);
-      setOtp('');
-      setStep('otp');
+      const activeMethod: 'EMAIL_OTP' | 'TOTP' | 'PASSKEY' = statusData.active2FAMethod || 'EMAIL_OTP';
+
+      if (activeMethod === 'EMAIL_OTP') {
+        // Send Email OTP
+        setLoadingStage('sending-otp');
+        const otpRes = await fetch('/api/admin/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+          credentials: 'include',
+        });
+
+        const otpData = await otpRes.json();
+        if (!otpRes.ok) {
+          throw new Error(otpData.error || 'Failed to send OTP');
+        }
+
+        setOtpExpiresAt(Date.now() + (otpData.expiresInMs || 300000));
+        setMaskedEmail(otpData.maskedEmail || normalizedEmail);
+        setOtpExpired(false);
+        setOtp('');
+        setStep('otp');
+      } else if (activeMethod === 'TOTP') {
+        // ABSOLUTE RULE: DO NOT send email OTP!
+        setTotpCode('');
+        setStep('totp');
+      } else if (activeMethod === 'PASSKEY') {
+        // ABSOLUTE RULE: DO NOT send email OTP!
+        setStep('passkey');
+      }
+
       setLoading(false);
       setLoadingStage('idle');
     } catch (e) {
       setError(getReadableAuthError(e));
+      setLoading(false);
+      setLoadingStage('idle');
+    }
+  };
+
+  // ── Verify Google Authenticator (TOTP) Login ─────────────────────
+  const handleVerifyTotpLogin = async () => {
+    if (totpCode.replace(/\s/g, '').length !== OTP_LENGTH) {
+      setError('Please enter the complete 6-digit code.');
+      return;
+    }
+
+    setLoading(true);
+    setLoadingStage('verifying-totp');
+    setError(null);
+
+    try {
+      if (firebaseUserRef.current) {
+        idTokenRef.current = await firebaseUserRef.current.getIdToken(true);
+      }
+
+      if (!idTokenRef.current) {
+        throw new Error('Session expired. Please sign in again.');
+      }
+
+      const res = await fetch('/api/admin/auth/totp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idToken: idTokenRef.current,
+          code: totpCode.trim(),
+        }),
+        credentials: 'include',
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Authenticator code verification failed');
+      }
+
+      setLoadingStage('redirecting');
+      await waitForAdminSession();
+      await new Promise((resolve) => setTimeout(resolve, 220));
+      router.replace('/admin/dashboard');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Verification failed. Please try again.');
+      setLoading(false);
+      setLoadingStage('idle');
+    }
+  };
+
+  // ── Verify Passkey (WebAuthn) Login ──────────────────────────────
+  const handleVerifyPasskeyLogin = async () => {
+    if (typeof window === 'undefined' || !window.PublicKeyCredential) {
+      setError('Passkeys are not available in this browser or device.');
+      return;
+    }
+
+    setLoading(true);
+    setLoadingStage('verifying-passkey');
+    setError(null);
+
+    try {
+      if (firebaseUserRef.current) {
+        idTokenRef.current = await firebaseUserRef.current.getIdToken(true);
+      }
+
+      if (!idTokenRef.current) {
+        throw new Error('Session expired. Please sign in again.');
+      }
+
+      // 1. Get WebAuthn options from server
+      const optionsRes = await fetch('/api/admin/auth/passkey/login-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: idTokenRef.current }),
+      });
+
+      const options = await optionsRes.json();
+      if (!optionsRes.ok) {
+        throw new Error(options.error || 'Failed to initiate passkey verification');
+      }
+
+      // 2. Browser WebAuthn prompt
+      const authResponse = await startAuthentication({ optionsJSON: options });
+
+      // 3. Verify assertion response on server
+      const verifyRes = await fetch('/api/admin/auth/passkey/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          idToken: idTokenRef.current,
+          authResponse,
+        }),
+        credentials: 'include',
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) {
+        throw new Error(verifyData.error || 'Passkey authentication failed');
+      }
+
+      setLoadingStage('redirecting');
+      await waitForAdminSession();
+      await new Promise((resolve) => setTimeout(resolve, 220));
+      router.replace('/admin/dashboard');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Passkey verification failed.';
+      if (msg.includes('cancelled') || msg.includes('not allowed')) {
+        setError('Passkey verification was cancelled.');
+      } else {
+        setError(msg);
+      }
       setLoading(false);
       setLoadingStage('idle');
     }
@@ -866,6 +1011,171 @@ export default function AdminLoginPage() {
                 <p className="mt-5 text-center text-xs leading-relaxed text-[#9c8a78]">
                   Check your inbox and spam folder. The code expires in 5 minutes.
                 </p>
+              </motion.div>
+            )}
+
+            {/* ═══════════ STEP: GOOGLE AUTHENTICATOR (TOTP) ═══════════ */}
+            {step === 'totp' && (
+              <motion.div
+                key="totp"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Back button */}
+                <button
+                  onClick={handleBackToCredentials}
+                  disabled={loading}
+                  className="mb-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/65 transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  Back to login
+                </button>
+
+                {/* Badge */}
+                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <span className="mr-1.5">📱</span> Authenticator
+                </div>
+
+                <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
+                  Google Authenticator
+                </h1>
+                <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">
+                  Enter the 6-digit verification code generated by your authenticator app.
+                </p>
+
+                {/* Error */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 rounded-2xl border border-red-200/60 px-4 py-3 text-sm"
+                    style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 100%)' }}
+                  >
+                    <p className="text-red-600/90 text-[13px]">{error}</p>
+                  </motion.div>
+                )}
+
+                {/* TOTP Input */}
+                <div className="mt-6">
+                  <OtpInput
+                    value={totpCode}
+                    onChange={setTotpCode}
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Verify Button */}
+                <button
+                  id="verify-totp-btn"
+                  onClick={handleVerifyTotpLogin}
+                  disabled={loading || totpCode.replace(/\s/g, '').length !== OTP_LENGTH}
+                  className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-2xl px-5 py-3.5 text-sm font-bold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
+                  style={{
+                    background: loading || totpCode.replace(/\s/g, '').length !== OTP_LENGTH
+                      ? '#c4a884'
+                      : 'linear-gradient(135deg, #8d6b4e 0%, #6e5440 100%)',
+                    color: '#fffaf3',
+                    boxShadow: totpCode.replace(/\s/g, '').length === OTP_LENGTH
+                      ? '0 8px 24px rgba(141,107,78,0.25)'
+                      : 'none',
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <Spinner size={16} light />
+                      {loadingMessage}
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                      </svg>
+                      Verify &amp; Sign In
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            )}
+
+            {/* ═══════════ STEP: PASSKEY (WEBAUTHN) ═══════════ */}
+            {step === 'passkey' && (
+              <motion.div
+                key="passkey"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Back button */}
+                <button
+                  onClick={handleBackToCredentials}
+                  disabled={loading}
+                  className="mb-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/65 transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  Back to login
+                </button>
+
+                {/* Badge */}
+                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <span className="mr-1.5">🔑</span> Passkey
+                </div>
+
+                <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
+                  Passkey Verification
+                </h1>
+                <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">
+                  Authenticate using your registered device passkey, biometric, PIN, or security key.
+                </p>
+
+                {/* Error */}
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 rounded-2xl border border-red-200/60 px-4 py-3 text-sm"
+                    style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 100%)' }}
+                  >
+                    <p className="text-red-600/90 text-[13px]">{error}</p>
+                  </motion.div>
+                )}
+
+                {/* Trigger Button */}
+                <button
+                  id="verify-passkey-btn"
+                  onClick={handleVerifyPasskeyLogin}
+                  disabled={loading}
+                  className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-2xl px-5 py-4 text-sm font-bold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
+                  style={{
+                    background: 'linear-gradient(135deg, #8d6b4e 0%, #6e5440 100%)',
+                    color: '#fffaf3',
+                    boxShadow: '0 8px 24px rgba(141,107,78,0.25)',
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <Spinner size={16} light />
+                      {loadingMessage}
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
+                      Sign in with Passkey
+                    </>
+                  )}
+                </button>
               </motion.div>
             )}
 

@@ -12,6 +12,9 @@
     "setup": "npm run setup:firebase && firebase deploy --only firestore:rules"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^13.3.0",
+    "@simplewebauthn/server": "^13.3.2",
+    "@types/qrcode": "^1.5.6",
     "dotenv": "^17.4.1",
     "firebase": "^12.12.0",
     "firebase-admin": "^13.8.0",
@@ -20,6 +23,8 @@
     "next": "16.2.3",
     "nodemailer": "^9.0.3",
     "openai": "^6.34.0",
+    "otplib": "^13.4.1",
+    "qrcode": "^1.5.4",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

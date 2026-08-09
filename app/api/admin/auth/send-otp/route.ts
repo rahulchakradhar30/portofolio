@@ -3,6 +3,8 @@ import { getAdminAuth, getAdminDb } from '@/app/lib/firebaseAdmin';
 import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 import { sendMail } from '@/app/lib/mail';
+import { getActive2FAMethod } from '@/app/lib/admin2FA';
+
 // ── OTP types & configs ─────────────────────────────────────────────
 export type OtpEntry = {
   code: string;
@@ -74,6 +76,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'This account is not authorized for admin access.' },
         { status: 403 }
+      );
+    }
+
+    // ABSOLUTE RULE: Verify active 2FA method on the SERVER
+    const activeMethod = await getActive2FAMethod(decodedIdToken.uid);
+    if (activeMethod !== 'EMAIL_OTP') {
+      return NextResponse.json(
+        { error: 'Email OTP is not enabled for your account. Use your configured 2FA method.' },
+        { status: 400 }
       );
     }
 

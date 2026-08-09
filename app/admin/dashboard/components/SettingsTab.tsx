@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Copy, Trash2, Search, Link2, FileText, Image as ImageIcon, Settings, Upload, Check } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type { PortfolioContent } from "@/app/lib/types";
+import Security2FASection from "./Security2FASection";
 
 interface MediaAsset {
   id: string;
@@ -153,6 +154,9 @@ export default function SettingsTab() {
 
   return (
     <div className="space-y-8">
+      {/* Two-Factor Authentication Security Section */}
+      <Security2FASection />
+
       {/* Social Links & System Settings */}
       <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
         <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
