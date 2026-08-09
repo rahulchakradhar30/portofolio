@@ -137,6 +137,10 @@ export interface PortfolioContent {
   animationDelay?: number;
   scrollEffects?: boolean;
   
+  // Dynamic Configuration Extensions
+  animationConfig?: UnifiedAnimationConfig;
+  themeConfig?: UnifiedThemeConfig;
+  
   // Cinematic Intro Experience
   introEnabled?: boolean;
   introBrandText?: string;
@@ -146,6 +150,58 @@ export interface PortfolioContent {
   introFirstLoadOnly?: boolean;
   introAccentColor?: string;
   introEnableLogoAnimation?: boolean;
+}
+
+export type SupportedAnimationType = 'fade' | 'slide' | 'scale' | 'reveal' | 'stagger' | 'float' | 'rotate';
+export type SupportedEasing = 'easeOut' | 'easeInOut' | 'linear' | 'anticipate';
+
+export interface BaseAnimationParams {
+  type: SupportedAnimationType;
+  duration: number;
+  delay: number;
+  staggerStep?: number;
+  easing?: SupportedEasing;
+  scrollEffect?: boolean;
+}
+
+export interface SectionAnimationOverride extends Partial<BaseAnimationParams> {
+  enabled?: boolean;
+}
+
+export interface ComponentAnimationOverride extends Partial<BaseAnimationParams> {
+  enabled?: boolean;
+}
+
+export interface UnifiedAnimationConfig {
+  enabled: boolean;
+  global: BaseAnimationParams;
+  sections?: Record<string, SectionAnimationOverride>;
+  components?: Record<string, ComponentAnimationOverride>;
+}
+
+export interface ThemeTokens {
+  background: string;
+  foreground: string;
+  surface: string;
+  surfaceStrong: string;
+  surfaceSoft: string;
+  accent: string;
+  accentStrong: string;
+  dotPattern: string;
+}
+
+export interface ThemeConfigItem {
+  id: string;
+  name: string;
+  isPermanent?: boolean;
+  tokens: ThemeTokens;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UnifiedThemeConfig {
+  activeThemeId: string;
+  customThemes: ThemeConfigItem[];
 }
 
 export interface SectionVisibility {

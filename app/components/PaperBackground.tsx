@@ -15,7 +15,7 @@ export default function PaperBackground() {
       <div 
         className="absolute inset-0 opacity-[0.4]"
         style={{
-          backgroundImage: "radial-gradient(circle, #2a241f 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, var(--dot-pattern, var(--foreground)) 1px, transparent 1px)",
           backgroundSize: "32px 32px"
         }}
       />

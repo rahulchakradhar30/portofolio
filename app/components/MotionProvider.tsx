@@ -1,7 +1,9 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import { getResolvedAnimation, ResolvedAnimationResult } from "@/app/lib/animationResolver";
+import { getActiveTheme, applyThemeTokensToDOM } from "@/app/lib/themeResolver";
 
 type MotionMode = "system" | "full" | "reduced";
 
@@ -12,6 +14,7 @@ interface MotionContextValue {
   magnifierEnabled: boolean;
   cycleMotionMode: () => void;
   toggleMagnifier: () => void;
+  getAnimation: (sectionId?: string, componentId?: string) => ResolvedAnimationResult;
 }
 
 const MotionContext = createContext<MotionContextValue | null>(null);
@@ -25,6 +28,16 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
   const [motionMode, setMotionMode] = useState<MotionMode>("full");
   const [magnifierEnabled, setMagnifierEnabled] = useState<boolean>(true);
   const [systemReduced, setSystemReduced] = useState<boolean>(false);
+
+  // Apply active paper theme to document :root whenever portfolio content updates
+  useEffect(() => {
+    try {
+      const activeTheme = getActiveTheme(content?.themeConfig || content);
+      applyThemeTokensToDOM(activeTheme.tokens);
+    } catch (err) {
+      console.error("Failed to apply theme tokens:", err);
+    }
+  }, [content]);
 
   useEffect(() => {
     const savedMotion = window.localStorage.getItem(STORAGE_KEY) as MotionMode | null;
@@ -74,9 +87,36 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
     setMagnifierEnabled((prev) => !prev);
   };
 
+  const getAnimation = useCallback(
+    (sectionId?: string, componentId?: string): ResolvedAnimationResult => {
+      if (reducedMotion) {
+        return {
+          params: { type: "fade", duration: 0, delay: 0 },
+          inheritance: "default",
+          enabled: false,
+          variants: {
+            initial: { opacity: 1, y: 0, scale: 1 },
+            animate: { opacity: 1, y: 0, scale: 1 },
+            transition: { duration: 0 },
+          },
+        };
+      }
+      return getResolvedAnimation(content?.animationConfig || content, sectionId, componentId);
+    },
+    [content, reducedMotion]
+  );
+
   const value = useMemo(
-    () => ({ motionMode, reducedMotion, scrollEffectsEnabled, magnifierEnabled, cycleMotionMode, toggleMagnifier }),
-    [motionMode, reducedMotion, scrollEffectsEnabled, magnifierEnabled]
+    () => ({
+      motionMode,
+      reducedMotion,
+      scrollEffectsEnabled,
+      magnifierEnabled,
+      cycleMotionMode,
+      toggleMagnifier,
+      getAnimation,
+    }),
+    [motionMode, reducedMotion, scrollEffectsEnabled, magnifierEnabled, getAnimation]
   );
 
   return <MotionContext.Provider value={value}>{children}</MotionContext.Provider>;

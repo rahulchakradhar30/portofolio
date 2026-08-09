@@ -24,6 +24,9 @@ import AIAssistant from "@/app/components/AIAssistant";
 import type { AdminUser } from "@/app/lib/types";
 
 // Import modular tab components
+import { Palette } from "lucide-react";
+import SessionGuard from "./components/SessionGuard";
+import ThemesTab from "./components/ThemesTab";
 import OverviewTab from "./components/OverviewTab";
 import ContentTab from "./components/ContentTab";
 import ProjectsTab from "./components/ProjectsTab";
@@ -95,6 +98,7 @@ export default function AdminDashboard() {
     { id: "proofMode", label: "Proof Mode", icon: Sparkles },
     { id: "seo", label: "SEO Settings", icon: Globe },
     { id: "animations", label: "Animation Prefs", icon: Sparkles },
+    { id: "themes", label: "Color Themes", icon: Palette },
     { id: "users", label: "Admin Users", icon: Users },
     { id: "activity", label: "Audit Logs", icon: Activity },
     { id: "settings", label: "System & Media", icon: SettingsIcon },
@@ -103,6 +107,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen text-[var(--foreground)]">
+      <SessionGuard />
       {/* Mobile overlay when sidebar is open */}
       {sidebarOpen && (
         <div
@@ -194,6 +199,7 @@ export default function AdminDashboard() {
           {activeTab === "seo" && <SEOTab />}
 
           {activeTab === "animations" && <AnimationsTab />}
+          {activeTab === "themes" && <ThemesTab />}
           {activeTab === "users" && <UsersTab />}
           {activeTab === "activity" && <ActivityTab />}
           {activeTab === "settings" && <SettingsTab />}

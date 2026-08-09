@@ -152,3 +152,60 @@ mlMetadata?: {
 - `app/components/ProofModeEntry.tsx`: Homepage banner section.
 - `app/proof-mode/page.tsx`: Public Proof Mode route page.
 - `WEBSITE_FEATURES.md`: Comprehensive documentation.
+
+---
+
+# Admin Control & Configuration Upgrade
+
+## Admin Performance Optimization
+- **Root Causes**: Inputs in monolithic tab components caused full tab re-renders on every keystroke.
+- **Optimizations**: Created `LocalInput` primitive using localized React state (`useState`) to render keystrokes instantly (0ms input latency) while debouncing parent state updates.
+- **Typing Responsiveness**: Input controls no longer block the main UI thread, fire network requests, or trigger heavy Framer Motion re-renders during editing.
+
+## Animation Configuration System
+- **Global Control**: Sets default website animation type (`slide`, `fade`, `scale`, `reveal`, `stagger`, `float`, `rotate`), duration, delay, easing, and scroll effects.
+- **Section Override**: Enables section-specific animation overrides (e.g. Hero, Projects, Certifications, Radar, Proof Mode).
+- **Component Override**: Enables item-specific animation overrides using stable IDs (e.g. individual Project cards).
+- **Override Hierarchy**: Component Override → Section Override → Global Override → Built-in Safe Default.
+- **Preview System**: Integrated live Motion Settings Studio inside Admin with interactive timeline sliders (`duration`, `delay`) and replay controls.
+- **Database Synchronization**: Updates save to Firestore `portfolio_content.animationConfig` and instantly sync across all clients via `PortfolioContentProvider` and `MotionProvider` without requiring page reloads or hard refreshes.
+
+## Theme System
+- **Permanent Default Theme**: The classic paper layout theme is permanent and serves as the un-deletable safe fallback.
+- **Custom Theme Limit**: Admin can manage up to 5 custom color themes.
+- **Theme CRUD**: Create, read, edit, delete (custom themes only), and activate themes in real-time.
+- **Active Theme & Synchronization**: Theme changes apply design tokens (`--background`, `--foreground`, `--surface`, `--surface-strong`, `--surface-soft`, `--accent`, `--accent-strong`, `--dot-pattern`) directly to `:root` across all homepage sections and admin cards.
+- **Fallback Behavior**: If a custom theme fails to load, the system automatically falls back to the permanent default paper theme.
+
+## Session Security
+- **Inactivity Timeout**: Default 15-minute inactivity session expiration.
+- **Activity Detection**: Tracks `mousemove`, `mousedown`, `keydown`, `touchstart`, `scroll`, and `click` to reset the timer during active work.
+- **Session Expiration & Logout**: Automatically calls `/api/admin/auth/logout`, clears session state, and redirects to `/admin/login`.
+- **Multi-Tab Behavior**: Uses `BroadcastChannel('admin_session_sync')` to synchronize session expiration across all open Admin browser tabs simultaneously.
+
+## Architecture & Data Flow
+```
+Admin CMS Input
+      ↓
+Firestore (portfolio_content.animationConfig & themeConfig)
+      ↓
+PortfolioContentProvider (Real-time onSnapshot)
+      ↓
+AnimationResolver & ThemeResolver
+      ↓
+Dynamic CSS Variables (:root) & Framer Motion Components
+```
+
+## Files Modified & Created
+- `app/lib/types.ts`: Extended with `UnifiedAnimationConfig` and `UnifiedThemeConfig`.
+- `app/lib/animationResolver.ts`: Resolved animation rules and Framer Motion variant builder.
+- `app/lib/themeResolver.ts`: Paper theme resolver, token applicator, and fallback logic.
+- `app/components/LocalInput.tsx`: Zero-latency local input component.
+- `app/components/AdminUIComponents.tsx`: Updated with `LocalInput` integration.
+- `app/admin/dashboard/components/AnimationsTab.tsx`: Interactive Motion Control Studio.
+- `app/admin/dashboard/components/ThemesTab.tsx`: Paper Color Theme Studio.
+- `app/admin/dashboard/components/SessionGuard.tsx`: 15-minute inactivity session security.
+- `app/components/MotionProvider.tsx`: Provided `getAnimation` resolver and real-time theme CSS token applicator.
+- `app/components/PaperBackground.tsx`: Applied dynamic theme dot pattern variable.
+- `app/components/Projects.tsx` & `Certifications.tsx`: Consumed dynamic animation resolver.
+

@@ -30,11 +30,13 @@ import { usePortfolioContent } from "./PortfolioContentProvider";
 
 export default function Certifications() {
   const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
-  const { reducedMotion } = useMotionPreferences();
+  const { reducedMotion, getAnimation } = useMotionPreferences();
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCert, setSelectedCert] = useState<Certification | null>(null);
   const [error, setError] = useState<Error | null>(null);
+
+  const sectionAnim = useMemo(() => getAnimation("certifications"), [getAnimation]);
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
   const isVisible = content ? content.sectionVisibility?.certifications !== false : true;
@@ -83,9 +85,9 @@ export default function Certifications() {
     <section className="relative px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
-          whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
+          initial={sectionAnim.variants.initial}
+          whileInView={sectionAnim.variants.whileInView || sectionAnim.variants.animate}
+          transition={sectionAnim.variants.transition}
           viewport={{ once: true, amount: 0.2 }}
           className="mb-16 text-center"
         >
@@ -110,18 +112,23 @@ export default function Certifications() {
               {visibleCertifications.length === 0 ? (
                 <div className="col-span-full text-center font-bold text-lg">{siteCopy.certificationsEmpty}</div>
               ) : (
-                visibleCertifications.map((cert, index) => (
-                  <motion.button
-                    key={cert.id}
-                    type="button"
-                    initial={reducedMotion ? false : { opacity: 0, y: 30, scale: 0.98 }}
-                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-                    transition={reducedMotion ? undefined : { duration: 0.6, delay: index * 0.05, ease: [0.42, 0, 0.58, 1] }}
-                    whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    className="paper-card group flex h-full flex-col overflow-hidden text-left"
-                    onClick={() => setSelectedCert(cert)}
-                  >
+                visibleCertifications.map((cert, index) => {
+                  const cardAnim = getAnimation("certifications", cert.id);
+                  return (
+                    <motion.button
+                      key={cert.id}
+                      type="button"
+                      initial={cardAnim.variants.initial}
+                      whileInView={cardAnim.variants.whileInView || cardAnim.variants.animate}
+                      transition={{
+                        ...cardAnim.variants.transition,
+                        delay: (cardAnim.params.delay || 0) + index * (cardAnim.params.staggerStep || 0.05),
+                      }}
+                      whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      className="paper-card group flex h-full flex-col overflow-hidden text-left"
+                      onClick={() => setSelectedCert(cert)}
+                    >
                     <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-soft)] border-b-2 border-[var(--foreground)]">
                       {cert.image ? (
                         <Image
@@ -180,7 +187,8 @@ export default function Certifications() {
                       </div>
                     </div>
                   </motion.button>
-                ))
+                );
+              })
               )}
             </div>
           </ExpandableSection>

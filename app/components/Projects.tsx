@@ -42,10 +42,12 @@ import { usePortfolioContent } from "./PortfolioContentProvider";
 
 export default function Projects() {
   const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
-  const { reducedMotion } = useMotionPreferences();
+  const { reducedMotion, getAnimation } = useMotionPreferences();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const sectionAnim = useMemo(() => getAnimation("projects"), [getAnimation]);
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
   const isVisible = content ? content.sectionVisibility?.projects !== false : true;
@@ -87,9 +89,9 @@ export default function Projects() {
     <section className="relative px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="mx-auto max-w-[1600px]">
         <motion.div
-          initial={reducedMotion ? false : { opacity: 0, y: 30 }}
-          whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
+          initial={sectionAnim.variants.initial}
+          whileInView={sectionAnim.variants.whileInView || sectionAnim.variants.animate}
+          transition={sectionAnim.variants.transition}
           viewport={{ once: true, amount: 0.2 }}
           className="mb-16 text-center"
         >
@@ -114,16 +116,21 @@ export default function Projects() {
               {visibleProjects.length === 0 ? (
                 <div className="col-span-full text-center font-bold text-lg">{siteCopy.projectsEmpty}</div>
               ) : (
-                visibleProjects.map((project, index) => (
-                  <motion.div
-                    key={project.id || index}
-                    initial={reducedMotion ? false : { opacity: 0, y: 30, scale: 0.98 }}
-                    whileInView={reducedMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-                    transition={reducedMotion ? undefined : { duration: 0.6, delay: index * 0.05, ease: [0.42, 0, 0.58, 1] }}
-                    whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    className="paper-card group overflow-hidden"
-                  >
+                visibleProjects.map((project, index) => {
+                  const cardAnim = getAnimation("projects", project.id);
+                  return (
+                    <motion.div
+                      key={project.id || index}
+                      initial={cardAnim.variants.initial}
+                      whileInView={cardAnim.variants.whileInView || cardAnim.variants.animate}
+                      transition={{
+                        ...cardAnim.variants.transition,
+                        delay: (cardAnim.params.delay || 0) + index * (cardAnim.params.staggerStep || 0.05),
+                      }}
+                      whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      className="paper-card group overflow-hidden"
+                    >
                     <div className="relative h-48 overflow-hidden bg-[var(--surface-soft)] sm:h-56 border-b-2 border-[var(--foreground)]">
                       {project.image ? (
                         <Image 
@@ -229,7 +236,8 @@ export default function Projects() {
                       </div>
                     </div>
                   </motion.div>
-                ))
+                );
+              })
               )}
             </div>
           </ExpandableSection>

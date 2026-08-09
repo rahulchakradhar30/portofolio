@@ -40,3 +40,42 @@ The `FrozenRouter` implementation successfully bridges `framer-motion` page tran
 - Verified popup scrolling across different devices. Body locks when open, un-locks when closed.
 - Verified dynamic navigation to `/projects/[id]` triggers exit animation and seamlessly mounts the project detail without hanging or showing a blank page.
 - Checked console for hydration warnings (none found).
+
+---
+
+# Update — Admin Control & Architecture Upgrade (2026-08-09)
+
+## Key Upgrades Implemented
+
+### 1. Admin Performance & Localized Form State
+- Integrated `LocalInput` primitive into `AdminUIComponents` and Admin forms to eliminate typing latency (0ms input lag).
+- Isolated input state via `useState` and debounced parent state updates (250ms), preventing unnecessary dashboard-wide re-renders.
+
+### 2. Hierarchical Animation Control & Live Studio
+- Created `app/lib/animationResolver.ts` supporting `Global` → `Section` → `Component` → `Safe Built-in Default` animation hierarchy.
+- Built interactive Motion Control Studio (`AnimationsTab.tsx`) with target scope selector, inheritance status badges, drag-and-drop timeline sliders (`duration`, `delay`), and live motion preview powered by the Homepage Framer Motion engine.
+
+### 3. Paper Color Theme Studio
+- Created `app/lib/themeResolver.ts` & `ThemesTab.tsx` supporting 1 permanent default theme + up to 5 custom color themes.
+- Implemented real-time token application (`--background`, `--foreground`, `--surface`, `--surface-strong`, `--surface-soft`, `--accent`, `--accent-strong`, `--dot-pattern`) to `:root` across Homepage and Admin UI.
+
+### 4. Admin Session Security & Inactivity Timeout
+- Implemented `SessionGuard.tsx` with a 15-minute inactivity timer tracking mouse, keyboard, touch, and click events.
+- Added multi-tab logout synchronization via `BroadcastChannel('admin_session_sync')`.
+
+## Files Created & Updated
+- `app/lib/animationResolver.ts`
+- `app/lib/themeResolver.ts`
+- `app/components/LocalInput.tsx`
+- `app/admin/dashboard/components/ThemesTab.tsx`
+- `app/admin/dashboard/components/SessionGuard.tsx`
+- `app/components/AdminUIComponents.tsx`
+- `app/admin/dashboard/components/AnimationsTab.tsx`
+- `app/admin/dashboard/page.tsx`
+- `app/components/MotionProvider.tsx`
+- `app/components/PaperBackground.tsx`
+- `app/components/Projects.tsx`
+- `app/components/Certifications.tsx`
+- `WEBSITE_FEATURES.md`
+- `WEBSITE_UPDATES.md`
+

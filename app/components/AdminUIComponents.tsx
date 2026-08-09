@@ -5,6 +5,7 @@
 import React, { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { X, Save, AlertCircle, CheckCircle, Copy } from "lucide-react";
+import { LocalInput } from "./LocalInput";
 
 export const adminFieldClassName =
   "w-full rounded-2xl border-2 border-[var(--foreground)]/15 bg-[var(--surface)] px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--foreground)]/45 shadow-[4px_4px_0_0_rgba(47,36,27,0.08)] transition-all duration-300 focus:border-[var(--accent)] focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:bg-[var(--surface-soft)] disabled:text-[var(--foreground)]/50";
@@ -64,26 +65,16 @@ export function AdminTextInput({
   error?: string;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
-        {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
-      </label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        placeholder={placeholder}
-        className={`${adminFieldClassName} ${error ? "border-red-300 focus:border-red-500" : ""}`}
-      />
-      {error && (
-        <p className="mt-1 flex items-center gap-1 text-sm text-red-700">
-          <AlertCircle className="h-4 w-4" /> {error}
-        </p>
-      )}
-      {helpText && !error && <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>}
-    </div>
+    <LocalInput
+      label={label}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      placeholder={placeholder}
+      helpText={helpText}
+      required={required}
+      error={error}
+    />
   );
 }
 
@@ -107,21 +98,17 @@ export function AdminTextarea({
   required?: boolean;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
-        {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
-      </label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        placeholder={placeholder}
-        rows={rows}
-        className={`${adminFieldClassName} resize-none`}
-      />
-      {helpText && <p className="mt-1 text-xs text-[var(--foreground)]/60">{helpText}</p>}
-    </div>
+    <LocalInput
+      label={label}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      placeholder={placeholder}
+      rows={rows}
+      isTextarea={true}
+      helpText={helpText}
+      required={required}
+    />
   );
 }
 
