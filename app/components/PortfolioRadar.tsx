@@ -11,6 +11,7 @@ import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import { useIsMobile } from "./useViewport";
 
 type RadarNode = {
   id: string;
@@ -67,7 +68,8 @@ export default function PortfolioRadar() {
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
   const [pointer, setPointer] = useState({ x: 0, y: 0, active: false });
-  const [isCompactViewport, setIsCompactViewport] = useState(false);
+  // Re-use the shared viewport hook instead of duplicating resize listener logic
+  const isCompactViewport = useIsMobile(1024);
 
   const isVisible = content ? content.sectionVisibility?.radar !== false : true;
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
@@ -99,16 +101,6 @@ export default function PortfolioRadar() {
     };
 
     loadRadar();
-  }, []);
-
-  useEffect(() => {
-    const syncViewportMode = () => {
-      setIsCompactViewport(window.innerWidth < 1024);
-    };
-
-    syncViewportMode();
-    window.addEventListener("resize", syncViewportMode);
-    return () => window.removeEventListener("resize", syncViewportMode);
   }, []);
 
   const radarNodes = useMemo<RadarNode[]>(() => {

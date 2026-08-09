@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import CookieConsent from "./components/CookieConsent";
 import { MotionProvider } from "./components/MotionProvider";
@@ -8,6 +8,14 @@ import PaperBackground from "./components/PaperBackground";
 import { PortfolioContentProvider } from "./components/PortfolioContentProvider";
 import { NavigationProvider } from "./components/NavigationContext";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS, getGlobalJsonLdGraph } from "@/app/lib/seoSchemas";
+
+// Explicit viewport export — required by Next.js 14+ for themeColor and other viewport controls
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#fdfbf7",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://rahulchakradhar.vercel.app"),
@@ -48,7 +56,8 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/api/og",
+        // Absolute URL required for OG image crawlers to fetch reliably
+        url: `${SITE_URL}/api/og`,
         width: 1200,
         height: 630,
         alt: `${PRIMARY_NAME} Portfolio`,
@@ -61,7 +70,8 @@ export const metadata: Metadata = {
     description: `Official portfolio of ${PRIMARY_NAME} - AI Engineer & Full Stack Developer.`,
     site: "@rahulchakradhar",
     creator: "@rahulchakradhar",
-    images: ["/api/og"],
+    // Absolute URL required for Twitter card image crawlers
+    images: [`${SITE_URL}/api/og`],
   },
   robots: {
     index: true,
@@ -89,6 +99,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
+        {/* DNS prefetch & preconnect for Cloudinary CDN — reduces image load latency */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(globalJsonLd) }}

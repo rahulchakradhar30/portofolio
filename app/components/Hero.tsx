@@ -168,6 +168,7 @@ export default function Hero() {
             <motion.div
               animate={reducedMotion ? undefined : { y: [0, -15, 0], rotate: [0, 1, 0] }}
               transition={reducedMotion ? undefined : { duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              style={reducedMotion ? undefined : { willChange: "transform" }}
               className="absolute inset-[10%] overflow-hidden rounded-3xl editorial-border editorial-shadow bg-[var(--surface)] z-10"
             >
               {heroData.profileImage ? (
@@ -185,12 +186,14 @@ export default function Hero() {
             <motion.div
               animate={reducedMotion ? undefined : { rotate: 360 }}
               transition={reducedMotion ? undefined : { duration: 30, ease: "linear", repeat: Infinity }}
+              style={reducedMotion ? undefined : { willChange: "transform" }}
               className="absolute inset-[2%] rounded-full border-2 border-dashed border-[var(--foreground)] opacity-20"
             />
             
             <motion.div
               animate={reducedMotion ? undefined : { y: [0, 10, 0] }}
               transition={reducedMotion ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              style={reducedMotion ? undefined : { willChange: "transform" }}
               className="absolute -bottom-6 -left-6 z-20 rounded-2xl editorial-border editorial-shadow bg-[var(--surface)] p-5 text-center sm:-bottom-8 sm:left-4"
             >
               <div className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">{siteCopy.heroCurrentFocusLabel}</div>

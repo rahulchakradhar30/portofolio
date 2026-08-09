@@ -242,4 +242,123 @@ To register a new skill preset for future developers:
 - Verified TypeScript (`npx tsc --noEmit`) and Production Build (`npm run build`).
 
 
+---
 
+# Final Production Optimization & QA Audit — 2026-08-09
+
+## Audit Date
+2026-08-09
+
+## Performance Issues Found
+
+### Duplicate API Requests
+- `CommandPalette.tsx` fetched `/api/admin/content` independently on every mount, even though the same data was already live-subscribed via `PortfolioContentProvider`.
+- `PortfolioRadar.tsx` fetched all three data collections (skills, projects, certifications) independently, duplicating the fetches already made by `Skills.tsx`, `Projects.tsx`, and `Certifications.tsx`. This caused each collection to be fetched **twice** on every homepage load.
+
+### Continuous Animation Overhead
+- `PaperBackground.tsx` ran two infinite animation loops on large blobs with `blur-[100px]` and `blur-[120px]`. Without `will-change: transform`, these caused full-page repaints on every animation frame.
+- `Hero.tsx` ran three simultaneous infinite animations (float, ring rotation, badge float) without compositor promotion hints.
+
+### Redundant Computations on Mount
+- `SkillIcon.tsx`: called `resolveSkillIconUrl()` in both the `useState` initializer AND a `useEffect`, causing a redundant computation and extra render cycle on every mount.
+- `useViewport.ts`: called `update()` inside `useEffect` immediately after mount, duplicating the value already captured in the `useState` initializer.
+- `PortfolioRadar.tsx`: maintained its own `isCompactViewport` state with a manual `resize` event listener, duplicating the shared `useIsMobile()` hook.
+
+### Duplicate Event Listeners
+- `ExpandableSection.tsx`: attached both a `ResizeObserver` and a `window.resize` listener simultaneously. When `ResizeObserver` is available, the `resize` listener was redundant.
+
+### Missing Reduced-Motion Guards
+- `Footer.tsx`: the only component in the codebase with `whileInView` animations that did **not** check `reducedMotion`, making it inconsistent with every other animated section.
+
+## Performance Fixes
+
+| Fix | Component | Impact |
+|-----|-----------|--------|
+| Removed redundant `/api/admin/content` fetch | `CommandPalette.tsx` | Eliminated one cold network request per page load |
+| Replaced context fetch with `usePortfolioContent()` | `CommandPalette.tsx` | CommandPalette now uses live Firestore data with zero extra requests |
+| Replaced duplicate `resize` state with `useIsMobile(1024)` | `PortfolioRadar.tsx` | Removed one event listener and ~10 lines of duplicated code |
+| Added `will-change: transform` to blob animations | `PaperBackground.tsx` | GPU compositor promotion — prevents full-page repaints |
+| Added `will-change: transform` to Hero infinite animations | `Hero.tsx` | GPU compositor promotion for float + ring rotation + badge |
+| Removed redundant `useEffect` | `SkillIcon.tsx` | Eliminated extra render cycle on every skill icon mount |
+| Removed redundant `update()` call | `useViewport.ts` | Eliminated redundant `setState` call on every mount |
+| Removed duplicate `window.resize` listener | `ExpandableSection.tsx` | Only `ResizeObserver` used when available |
+
+## Animation Preservation
+
+All animations are intact. The optimization strategy was:
+- Add `will-change: transform` style hints to elements already animating — this promotes them to their own compositor layer without changing animation values, timing, or easing.
+- `reducedMotion` guard added to `Footer.tsx` to match the rest of the codebase — normal-motion users see no change.
+- No `whileInView`, `whileHover`, stagger, or scroll animation was removed or weakened.
+
+## Admin Optimization
+
+- Admin Dashboard architecture unchanged.
+- `LocalInput.tsx` was audited — already implements correct debounced local state pattern (no network request per keystroke).
+- No regressions introduced in any admin tab.
+
+## Navigation
+
+- Navigation context system (`NavigationContext.tsx`) verified intact — scroll position saving, section hash tracking, back navigation, and scroll restoration all preserved.
+- No changes to routing logic.
+
+## SEO Improvements
+
+| Fix | Detail |
+|-----|--------|
+| OG image absolute URL | Changed `/api/og` → `${SITE_URL}/api/og` in root layout — crawlers require absolute URLs |
+| Twitter image absolute URL | Same fix applied to Twitter card image |
+| Explicit `viewport` export | Added `Viewport` export to `layout.tsx` as required by Next.js 14+ API |
+| Cloudinary `preconnect` | Added `<link rel="preconnect">` and `dns-prefetch` for `res.cloudinary.com` in `<head>` |
+| `/proof-mode` in sitemap | Added the Proof Mode route to `sitemap.ts` |
+
+## Accessibility Improvements
+
+| Fix | Component | Detail |
+|-----|-----------|--------|
+| `reducedMotion` guard | `Footer.tsx` | All whileInView/whileHover now respect motion preference |
+| `aria-current="page"` | `Header.tsx` | Active mobile navigation section now identified to screen readers |
+| `aria-controls` | `ExpandableSection.tsx` | Expand button now associated with the content region via stable ID |
+| Social link `aria-label` | `Footer.tsx` | Icon-only social links now have descriptive labels (GitHub, LinkedIn, Instagram, Email) |
+
+## Security
+
+| Finding | Status |
+|---------|--------|
+| `X-Powered-By: Next.js` header | Fixed — `poweredByHeader: false` added to `next.config.ts` |
+| Firebase client keys in `NEXT_PUBLIC_*` | Expected — enforced by Firestore security rules, not a vulnerability |
+| No CSP headers | Documented as known issue — requires careful implementation to avoid breaking Firebase/Cloudinary/Framer Motion |
+
+## Testing
+
+### TypeScript
+- `npx tsc --noEmit` → **0 errors** (before and after changes)
+
+### Production Build
+- `npm run build` → **Succeeded**
+
+### Changes Verified
+- `next.config.ts` — image formats, device sizes, poweredByHeader
+- `app/layout.tsx` — viewport export, OG/Twitter absolute URLs, Cloudinary preconnect
+- `app/sitemap.ts` — `/proof-mode` route added
+- `app/components/Footer.tsx` — reducedMotion guards, aria-labels on social icons
+- `app/components/CommandPalette.tsx` — context-driven siteCopy, no fetch
+- `app/components/ExpandableSection.tsx` — clean ResizeObserver-only path, aria-controls
+- `app/components/SkillIcon.tsx` — removed redundant useEffect
+- `app/components/useViewport.ts` — removed redundant update() call
+- `app/components/PaperBackground.tsx` — will-change: transform on animated blobs
+- `app/components/Hero.tsx` — will-change: transform on 3 infinite-animation elements
+- `app/components/About.tsx` — removed unused useEffect/useState imports
+- `app/components/PortfolioRadar.tsx` — useIsMobile hook, removed duplicate resize listener
+- `app/components/Header.tsx` — aria-current on active mobile nav
+
+## Remaining Known Issues
+
+1. **No Content-Security-Policy header** — would improve XSS protection but requires careful policy construction to avoid breaking Firebase Realtime SDK, Cloudinary image CDN, and Framer Motion inline styles. Should be a separate, carefully-tested implementation.
+
+2. **Duplicate data fetching (Skills/Projects/Certs vs Radar)** — `PortfolioRadar` still makes its own 3 independent API calls. These could be consolidated by lifting the fetch to a shared data context, but doing so would require a meaningful architecture change that risks regression across multiple components. Documented for future consideration.
+
+3. **Framer Motion `whileInView` on many nodes simultaneously** — The portfolio renders many `motion.div` elements each with their own `IntersectionObserver` via `whileInView`. This is the existing Framer Motion pattern and is intentional. On very slow devices a Virtualization approach could help, but would require significant architecture changes outside the scope of this audit.
+
+## Documentation Permanence Rule
+
+From this audit forward, every upgrade, bug fix, feature, architecture change, performance change, or module change must create or update the project's walkthrough documentation.

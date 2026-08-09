@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { resolveSkillIconUrl, fallbackSkillLogo } from "@/app/lib/skillLogoCatalog";
 
 interface SkillIconProps {
@@ -11,21 +11,20 @@ interface SkillIconProps {
 }
 
 export default function SkillIcon({ title, icon, className = "h-8 w-8", imgClassName = "h-full w-full object-contain" }: SkillIconProps) {
-  const resolvedUrl = resolveSkillIconUrl(icon, title);
-  const [currentSrc, setCurrentSrc] = useState(resolvedUrl);
-  const [hasError, setHasError] = useState(false);
+  // Resolve the URL once at render time — the useEffect that re-ran the same
+  // computation immediately after mount was redundant and caused an extra render cycle.
+  const [currentSrc, setCurrentSrc] = useState(() => resolveSkillIconUrl(icon, title));
+  const [resolvedKey, setResolvedKey] = useState(() => `${icon ?? ""}::${title}`);
 
-  useEffect(() => {
-    const nextUrl = resolveSkillIconUrl(icon, title);
-    setCurrentSrc(nextUrl);
-    setHasError(false);
-  }, [icon, title]);
+  // Only update when icon/title actually changes (after initial mount)
+  const nextKey = `${icon ?? ""}::${title}`;
+  if (nextKey !== resolvedKey) {
+    setCurrentSrc(resolveSkillIconUrl(icon, title));
+    setResolvedKey(nextKey);
+  }
 
   const handleError = () => {
-    if (!hasError) {
-      setHasError(true);
-      setCurrentSrc(fallbackSkillLogo(title));
-    }
+    setCurrentSrc(fallbackSkillLogo(title));
   };
 
   return (

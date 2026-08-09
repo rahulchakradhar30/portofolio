@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { Command, Search, Sparkles } from "lucide-react";
 import { getSiteCopy } from "@/app/lib/siteCopy";
+import { usePortfolioContent } from "./PortfolioContentProvider";
 
 type PaletteAction = {
   id: string;
@@ -15,9 +15,13 @@ type PaletteAction = {
 
 export default function CommandPalette() {
   const router = useRouter();
+  // Use the already-subscribed Firestore content — no redundant fetch needed
+  const { content } = usePortfolioContent();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [siteCopy, setSiteCopy] = useState(getSiteCopy(null));
+
+  // Derive siteCopy from context — live, no extra request
+  const siteCopy = useMemo(() => getSiteCopy(content), [content]);
 
   const closePalette = useCallback(() => {
     setOpen(false);
@@ -46,25 +50,6 @@ export default function CommandPalette() {
       window.removeEventListener("open-command-palette", onOpenEvent);
     };
   }, [closePalette]);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const contentRes = await fetch("/api/admin/content");
-
-        if (contentRes.ok) {
-          const contentData = await contentRes.json();
-          if (contentData.content) {
-            setSiteCopy(getSiteCopy(contentData.content));
-          }
-        }
-      } catch {
-        // Keep command palette functional even if remote actions cannot be fetched.
-      }
-    };
-
-    loadData();
-  }, [router]);
 
   const staticActions = useMemo<PaletteAction[]>(
     () => [

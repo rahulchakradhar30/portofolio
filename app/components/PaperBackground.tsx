@@ -33,6 +33,11 @@ export default function PaperBackground() {
       {/* Abstract Floating Shapes (Subtle Depth) */}
       {scrollEffectsEnabled ? (
         <>
+          {/*
+            will-change: transform promotes these elements to their own GPU compositor
+            layer, preventing the heavy blur from triggering repaints on the rest of
+            the page during the infinite animation loop.
+          */}
           <motion.div
             animate={{
               y: [0, -20, 0],
@@ -44,6 +49,7 @@ export default function PaperBackground() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
+            style={{ willChange: "transform" }}
             className="absolute -top-[10%] -right-[5%] h-[40vw] w-[40vw] rounded-full bg-[#f0e9dd] opacity-30 blur-[100px]"
           />
           <motion.div
@@ -58,6 +64,7 @@ export default function PaperBackground() {
               ease: "easeInOut",
               delay: 2,
             }}
+            style={{ willChange: "transform" }}
             className="absolute top-[40%] -left-[10%] h-[50vw] w-[50vw] rounded-full bg-[#f7f3ea] opacity-40 blur-[120px]"
           />
         </>

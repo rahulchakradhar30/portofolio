@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Camera, Code2, Heart, Link2, Mail } from "lucide-react";
 import { useMemo } from "react";
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 
 const DEFAULT_SOCIALS = {
@@ -16,6 +17,7 @@ const DEFAULT_SOCIALS = {
 
 export default function Footer() {
   const { content } = usePortfolioContent();
+  const { reducedMotion } = useMotionPreferences();
   const currentYear = new Date().getFullYear();
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
@@ -36,9 +38,9 @@ export default function Footer() {
         <div className="mx-auto max-w-[1600px]">
           <div className="mb-16 grid gap-12 md:grid-cols-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
+              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
               viewport={{ once: true }}
               className="md:col-span-2"
             >
@@ -50,39 +52,43 @@ export default function Footer() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <motion.a
-                  whileHover={{ y: -4 }}
-                  whileTap={{ y: 0 }}
+                  whileHover={reducedMotion ? undefined : { y: -4 }}
+                  whileTap={reducedMotion ? undefined : { y: 0 }}
                   href={socials.github}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="GitHub profile"
                   className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
                   <Code2 className="h-6 w-6" />
                 </motion.a>
                 <motion.a
-                  whileHover={{ y: -4 }}
-                  whileTap={{ y: 0 }}
+                  whileHover={reducedMotion ? undefined : { y: -4 }}
+                  whileTap={reducedMotion ? undefined : { y: 0 }}
                   href={socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="LinkedIn profile"
                   className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
                   <Link2 className="h-6 w-6" />
                 </motion.a>
                 <motion.a
-                  whileHover={{ y: -4 }}
-                  whileTap={{ y: 0 }}
+                  whileHover={reducedMotion ? undefined : { y: -4 }}
+                  whileTap={reducedMotion ? undefined : { y: 0 }}
                   href={socials.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Instagram profile"
                   className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
                   <Camera className="h-6 w-6" />
                 </motion.a>
                 <motion.a
-                  whileHover={{ y: -4 }}
-                  whileTap={{ y: 0 }}
+                  whileHover={reducedMotion ? undefined : { y: -4 }}
+                  whileTap={reducedMotion ? undefined : { y: 0 }}
                   href={`mailto:${socials.email}`}
+                  aria-label="Send email"
                   className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
                 >
                   <Mail className="h-6 w-6" />
@@ -91,9 +97,9 @@ export default function Footer() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.42, 0, 0.58, 1] }}
+              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.1, ease: [0.42, 0, 0.58, 1] }}
               viewport={{ once: true }}
             >
               <h4 className="mb-6 text-xl font-bold tracking-tight">{siteCopy.footerQuickLinksTitle}</h4>
@@ -108,9 +114,9 @@ export default function Footer() {
             </motion.div>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: [0.42, 0, 0.58, 1] }}
+              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+              transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.2, ease: [0.42, 0, 0.58, 1] }}
               viewport={{ once: true }}
             >
               <h4 className="mb-6 text-xl font-bold tracking-tight">{siteCopy.footerServicesTitle}</h4>
@@ -123,9 +129,9 @@ export default function Footer() {
           </div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            initial={reducedMotion ? false : { opacity: 0 }}
+            whileInView={reducedMotion ? undefined : { opacity: 1 }}
+            transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.3 }}
             viewport={{ once: true }}
             className="flex flex-col items-start justify-between gap-4 border-t-2 border-[var(--foreground)] pt-8 md:flex-row md:items-center"
           >

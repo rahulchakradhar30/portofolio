@@ -155,6 +155,7 @@ export default function Header() {
                     key={item.name}
                     type="button"
                     onClick={() => navigateToSection(item.sectionId)}
+                    aria-current={activeSection === item.sectionId ? "page" : undefined}
                     className={`rounded-2xl border-2 px-4 py-3 text-xl font-bold tracking-tight transition-colors ${
                       activeSection === item.sectionId
                         ? "border-[var(--foreground)] bg-[var(--surface-soft)] text-[var(--foreground)]"
