@@ -28,7 +28,7 @@ export default function PageTransition({ children }: { children: React.ReactNode
       <AnimatePresence mode="wait">
         <motion.div
           key={pathname}
-          initial={reducedMotion || isFirstMount.current ? { opacity: 1, y: 0 } : { opacity: 0, y: enterY }}
+          initial={reducedMotion || isFirstMount ? { opacity: 1, y: 0 } : { opacity: 0, y: enterY }}
           animate={reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           exit={reducedMotion ? { opacity: 1 } : { opacity: 0, y: exitY }}
           transition={transition}
