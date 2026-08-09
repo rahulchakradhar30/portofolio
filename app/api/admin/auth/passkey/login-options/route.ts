@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
 import { getAdminAuth } from '@/app/lib/firebaseAdmin';
-import { getAdminSecurityDoc, saveAdminSecurityDoc } from '@/app/lib/admin2FA';
+import { getAdminSecurityDoc, saveAdminSecurityDoc, resolveUsable2FAMethods } from '@/app/lib/admin2FA';
 import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 
@@ -39,9 +39,10 @@ export async function POST(request: NextRequest) {
 
     const uid = decodedIdToken.uid;
     const doc = await getAdminSecurityDoc(uid);
+    const usableMethods = resolveUsable2FAMethods(doc);
 
-    if (doc.active2FAMethod !== 'PASSKEY' || !doc.passkeys || doc.passkeys.length === 0) {
-      return NextResponse.json({ error: 'Passkey is not configured or active for this account.' }, { status: 400 });
+    if (!usableMethods.includes('PASSKEY') || !doc.passkeys || doc.passkeys.length === 0) {
+      return NextResponse.json({ error: 'Passkey is not configured or enabled for this account.' }, { status: 400 });
     }
 
     const hostname = request.nextUrl.hostname;

@@ -58,15 +58,15 @@ export async function DELETE(request: NextRequest) {
 
     const remainingPasskeys = existingPasskeys.filter((pk) => pk.id !== passkeyId);
 
-    // Lockout protection: Do not allow removing the last passkey if PASSKEY is active
-    if (doc.active2FAMethod === 'PASSKEY' && remainingPasskeys.length === 0) {
-      return NextResponse.json(
-        { error: 'Cannot remove your last passkey while Passkey is your active 2FA method. Switch to Email OTP or Google Authenticator first.' },
-        { status: 400 }
-      );
-    }
+    // If removing the last passkey, automatically disable passkey method
+    const enabledMethods = {
+      emailOtp: doc.enabledMethods?.emailOtp ?? true,
+      totp: doc.enabledMethods?.totp ?? false,
+      passkey: remainingPasskeys.length > 0 ? Boolean(doc.enabledMethods?.passkey) : false,
+    };
 
     await saveAdminSecurityDoc(uid, {
+      enabledMethods,
       passkeys: remainingPasskeys,
     });
 

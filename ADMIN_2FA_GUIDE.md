@@ -109,5 +109,47 @@ The `/api/admin/auth/send-otp` endpoint checks `resolveUsable2FAMethods` on the 
 - [2fa-status/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/2fa-status/route.ts) — Endpoint returning `usableMethods` & `enabledMethods`.
 - [2fa-config/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/2fa-config/route.ts) — Endpoint to enable/disable 2FA methods in Admin Settings.
 - [send-otp/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/send-otp/route.ts) — Email OTP endpoint enforced to execute only when Email OTP is selected.
+- [totp/verify/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/totp/verify/route.ts) — TOTP setup verification and login verification endpoint.
 - [Security2FASection.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/Security2FASection.tsx) — Admin Settings UI with independent method enablement toggles.
 - [page.tsx (Admin Login)](file:///r:/Repo/portofolio/app/admin/login/page.tsx) — Multi-step login flow with method selection screen.
+
+---
+
+# TOTP Configuration Synchronization Fix
+
+1. **Root Cause Discovered**:
+   During TOTP login verification (MODE B in `/api/admin/auth/totp/verify`), the server checked `if (doc.active2FAMethod !== 'TOTP' || !doc.totp?.enabled || !doc.totp?.encryptedSecret)`. Under the new multi-method 2FA architecture, `doc.enabledMethods.totp` was set to `true`, but `doc.active2FAMethod` remained `'EMAIL_OTP'` (or un-updated). The obsolete check `doc.active2FAMethod !== 'TOTP'` failed and rejected login attempts with `"Google Authenticator is not configured or active for this account."`
+
+2. **Why Setup Appeared Successful**:
+   Setup verification (MODE A in `/api/admin/auth/totp/verify`) successfully decrypted the pending secret, validated the TOTP code, and persisted `totp: { enabled: true, encryptedSecret }` and `enabledMethods.totp = true` into Firestore (`admin_security/{uid}`). When loading Admin Settings or querying `/api/admin/auth/2fa-status`, `resolveUsable2FAMethods` correctly identified Google Authenticator as usable.
+
+3. **Why Login Could Not Find Configuration**:
+   When the Admin selected "Google Authenticator" on the login screen, `/api/admin/auth/totp/verify` evaluated `doc.active2FAMethod !== 'TOTP'` instead of resolving `usableMethods.includes('TOTP')`. Because `active2FAMethod` was not set to `'TOTP'`, the server incorrectly reported that Google Authenticator was not active.
+
+4. **Canonical Admin Identity Used**:
+   Admin identity is consistently resolved using the Firebase Auth `uid` (`decodedIdToken.uid` extracted from verified Firebase ID tokens or session cookies) across setup, status queries, and login verification.
+
+5. **Database Path / Field Synchronization**:
+   All 2FA configurations persist under `admin_security/{uid}` in Firestore. The schema includes:
+   - `enabledMethods: { emailOtp, totp, passkey }`
+   - `totp: { enabled: true, encryptedSecret: AES256_GCM_PAYLOAD }`
+   - `passkeys: PasskeyCredential[]`
+
+6. **Enabled vs Configured Logic**:
+   - Google Authenticator login requires `usableMethods.includes('TOTP')` AND `doc.totp.encryptedSecret` to exist.
+   - Passkey login requires `usableMethods.includes('PASSKEY')` AND `doc.passkeys.length > 0`.
+   - Email OTP login requires `usableMethods.includes('EMAIL_OTP')`.
+
+7. **Stale Cache / Read Synchronization**:
+   Next.js API routes perform real-time Firestore document lookups using `getAdminSecurityDoc(uid)` without stale caching.
+
+8. **Files Modified**:
+   - `app/api/admin/auth/totp/verify/route.ts`: Replaced `doc.active2FAMethod !== 'TOTP'` with `usableMethods.includes('TOTP')`.
+   - `app/api/admin/auth/passkey/login-options/route.ts`: Replaced `doc.active2FAMethod !== 'PASSKEY'` with `usableMethods.includes('PASSKEY')`.
+   - `app/api/admin/auth/passkey/login-verify/route.ts`: Replaced `doc.active2FAMethod !== 'PASSKEY'` with `usableMethods.includes('PASSKEY')`.
+   - `app/api/admin/auth/passkey/manage/route.ts`: Replaced `doc.active2FAMethod === 'PASSKEY'` check with `enabledMethods.passkey` auto-disable when last key deleted.
+
+9. **Tests Performed**:
+   - Verified TOTP setup -> refresh -> logout -> login -> select Google Authenticator -> valid TOTP code accepted -> session created.
+   - Verified multi-method enablement (Email OTP + TOTP + Passkey) with per-login selection.
+

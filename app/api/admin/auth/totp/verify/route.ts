@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifySync } from 'otplib';
 import { getAdminAuth } from '@/app/lib/firebaseAdmin';
 import { assertAdminSession, ADMIN_SESSION_COOKIE } from '@/app/lib/adminAuth';
-import { getAdminSecurityDoc, saveAdminSecurityDoc, decryptSecret, encryptSecret } from '@/app/lib/admin2FA';
+import { getAdminSecurityDoc, saveAdminSecurityDoc, decryptSecret, encryptSecret, resolveUsable2FAMethods } from '@/app/lib/admin2FA';
 import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 
@@ -96,9 +96,10 @@ export async function POST(request: NextRequest) {
 
     const uid = decodedIdToken.uid;
     const doc = await getAdminSecurityDoc(uid);
+    const usableMethods = resolveUsable2FAMethods(doc);
 
-    if (doc.active2FAMethod !== 'TOTP' || !doc.totp?.enabled || !doc.totp?.encryptedSecret) {
-      return NextResponse.json({ error: 'Google Authenticator is not configured or active for this account.' }, { status: 400 });
+    if (!usableMethods.includes('TOTP') || !doc.totp?.encryptedSecret) {
+      return NextResponse.json({ error: 'Google Authenticator is not configured or enabled for this account.' }, { status: 400 });
     }
 
     let secret: string;
