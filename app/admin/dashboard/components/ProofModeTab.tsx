@@ -116,6 +116,19 @@ export default function ProofModeTab() {
     fetchData();
   }, []);
 
+  // Lock body scroll when modal is open to prevent background scroll conflicts
+  useEffect(() => {
+    if (!editingExperience && !previewExperience) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [editingExperience, previewExperience]);
+
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -431,14 +444,16 @@ export default function ProofModeTab() {
       {/* Edit / Create Form Modal */}
       <AnimatePresence>
         {editingExperience && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm p-4 sm:p-6 text-center">
+            <div className="fixed inset-0 pointer-events-auto" onClick={() => setEditingExperience(null)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="paper-card w-full max-w-3xl my-8 p-6 sm:p-8 bg-[var(--surface)] max-h-[90vh] overflow-y-auto space-y-6"
+              className="relative inline-block w-full max-w-3xl my-8 text-left align-middle paper-card p-6 sm:p-8 bg-[var(--surface)] shadow-[8px_8px_0_0_rgba(42,36,31,0.2)] space-y-6 pointer-events-auto"
             >
               <div className="flex items-center justify-between pb-4 border-b border-[var(--foreground)]/15">
+
                 <h3 className="text-xl font-black text-[var(--foreground)]">
                   {editingExperience.id ? "Edit Proof Experience" : "Create Proof Experience"}
                 </h3>
@@ -633,14 +648,16 @@ export default function ProofModeTab() {
       {/* Live Preview Modal */}
       <AnimatePresence>
         {previewExperience && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:p-6 text-center">
+            <div className="fixed inset-0 pointer-events-auto" onClick={() => setPreviewExperience(null)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="paper-card w-full max-w-4xl my-8 p-6 sm:p-10 bg-[var(--surface)] max-h-[90vh] overflow-y-auto space-y-6"
+              className="relative inline-block w-full max-w-4xl my-8 text-left align-middle paper-card p-6 sm:p-10 bg-[var(--surface)] shadow-[8px_8px_0_0_rgba(42,36,31,0.2)] space-y-6 pointer-events-auto"
             >
               <div className="flex items-center justify-between pb-4 border-b border-[var(--foreground)]/15">
+
                 <div>
                   <span className="paper-chip text-[10px] uppercase font-mono bg-[var(--surface-strong)]">
                     Live Public Preview

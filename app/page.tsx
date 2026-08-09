@@ -14,7 +14,7 @@ import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import SectionErrorBoundary from "./components/SectionErrorBoundary";
 import IntroOverlay from "./components/IntroOverlay";
-import ProofModeEntry from "./components/ProofModeEntry";
+
 
 
 export const dynamic = "force-dynamic";
@@ -113,12 +113,8 @@ export default function Home() {
           <Skills />
         </SectionErrorBoundary>
       </section>
-      <section id="proof-mode" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="ProofModeEntry">
-          <ProofModeEntry />
-        </SectionErrorBoundary>
-      </section>
       <section id="projects" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+
 
         <SectionErrorBoundary sectionName="Projects">
           <Projects />

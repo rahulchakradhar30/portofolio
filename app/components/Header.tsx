@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { Command, Menu, X } from "lucide-react";
+import { Command, Menu, X, Sparkles } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 import { usePortfolioContent } from "./PortfolioContentProvider";
@@ -23,10 +23,8 @@ export default function Header() {
     { name: siteCopy.navRadar, href: "#radar", sectionId: "radar" },
     { name: siteCopy.navSkills, href: "#skills", sectionId: "skills" },
     { name: siteCopy.navProjects, href: "#projects", sectionId: "projects" },
-    { name: "Proof Mode", href: "/proof-mode", sectionId: "proof-mode", isRoute: true },
     { name: siteCopy.navContact, href: "#contact", sectionId: "contact" },
   ];
-
 
   useEffect(() => {
     const syncActiveSection = () => {
@@ -86,40 +84,46 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8 items-center">
-            {navItems.map((item) =>
-              item.isRoute ? (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)] flex items-center gap-1"
-                >
-                  {item.name}
-                </Link>
-              ) : (
-                <motion.a
-                  key={item.name}
-                  href={item.href}
-                  whileHover={{ y: -2 }}
-                  whileTap={{ y: 0 }}
-                  className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)]"
-                >
-                  {item.name}
-                </motion.a>
-              )
-            )}
+            {navItems.map((item) => (
+              <motion.a
+                key={item.name}
+                href={item.href}
+                whileHover={{ y: -2 }}
+                whileTap={{ y: 0 }}
+                className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)]"
+              >
+                {item.name}
+              </motion.a>
+            ))}
           </nav>
 
-
-          <div className="hidden items-center gap-4 md:flex">
+          {/* Desktop Actions */}
+          <div className="hidden items-center gap-3 md:flex">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
-              className="paper-button inline-flex items-center gap-2 px-5 py-2.5 text-sm"
+              className="paper-button inline-flex items-center gap-2 px-4 py-2.5 text-sm"
             >
               <Command className="h-4 w-4" />
               Quick Search
-              <span className="ml-1 rounded border-2 border-[var(--foreground)] px-1.5 py-0.5 text-[10px] font-bold">Ctrl K</span>
+              <span className="ml-1 rounded border-2 border-[var(--foreground)]/30 px-1.5 py-0.5 text-[10px] font-bold">Ctrl K</span>
             </button>
+
+            {/* Proof Mode Destination Button */}
+            <motion.div
+              whileHover={reducedMotion ? undefined : { y: -2, scale: 1.03 }}
+              whileTap={reducedMotion ? undefined : { scale: 0.97 }}
+              transition={reducedMotion ? undefined : { type: "spring", stiffness: 400, damping: 25 }}
+            >
+              <Link
+                href="/proof-mode"
+                className="group relative inline-flex items-center gap-2 rounded-full border-2 border-[var(--foreground)] bg-[var(--surface-strong)] px-5 py-2.5 text-sm font-extrabold text-[var(--foreground)] shadow-[4px_4px_0_0_rgba(42,36,31,0.9)] transition-all duration-300 hover:bg-[var(--foreground)] hover:text-[var(--surface)] hover:shadow-[6px_6px_0_0_rgba(42,36,31,1)]"
+              >
+                <Sparkles className="h-4 w-4 text-[var(--accent)] transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
+                <span>Proof Mode</span>
+              </Link>
+            </motion.div>
+
             <Link href="/hire" className="paper-button hover:!bg-[var(--accent)] hover:!border-[var(--accent)] hover:!text-[var(--surface)] px-6 py-2.5 text-sm">
               {siteCopy.headerHireCta}
             </Link>
@@ -145,35 +149,37 @@ export default function Header() {
               transition={reducedMotion ? undefined : { duration: 0.25, ease: [0.42, 0, 0.58, 1] }}
               className="mt-4 border-t-2 border-[var(--foreground)] pt-6 pb-4 md:hidden"
             >
-              <nav className="flex flex-col space-y-6 text-center">
-                {navItems.map((item) =>
-                  item.isRoute ? (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className="rounded-2xl border-2 border-transparent px-4 py-3 text-xl font-bold tracking-tight text-[var(--foreground)] hover:border-[var(--foreground)]"
-                    >
-                      {item.name}
-                    </Link>
-                  ) : (
-                    <button
-                      key={item.name}
-                      type="button"
-                      onClick={() => navigateToSection(item.sectionId)}
-                      className={`rounded-2xl border-2 px-4 py-3 text-xl font-bold tracking-tight transition-colors ${
-                        activeSection === item.sectionId
-                          ? "border-[var(--foreground)] bg-[var(--surface-soft)] text-[var(--foreground)]"
-                          : "border-transparent text-[var(--foreground)]"
-                      }`}
-                    >
-                      {item.name}
-                    </button>
-                  )
-                )}
+              <nav className="flex flex-col space-y-4 text-center">
+                {navItems.map((item) => (
+                  <button
+                    key={item.name}
+                    type="button"
+                    onClick={() => navigateToSection(item.sectionId)}
+                    className={`rounded-2xl border-2 px-4 py-3 text-xl font-bold tracking-tight transition-colors ${
+                      activeSection === item.sectionId
+                        ? "border-[var(--foreground)] bg-[var(--surface-soft)] text-[var(--foreground)]"
+                        : "border-transparent text-[var(--foreground)]"
+                    }`}
+                  >
+                    {item.name}
+                  </button>
+                ))}
 
-                <div className="pt-4">
-                  <Link href="/hire" onClick={() => setIsOpen(false)} className="paper-button hover:!bg-[var(--accent)] hover:!border-[var(--accent)] hover:!text-[var(--surface)] inline-block w-full max-w-xs mx-auto py-3">
+                <div className="pt-4 flex flex-col items-center gap-3 max-w-xs mx-auto w-full">
+                  <Link
+                    href="/proof-mode"
+                    onClick={() => setIsOpen(false)}
+                    className="group inline-flex items-center justify-center gap-2 w-full rounded-full border-2 border-[var(--foreground)] bg-[var(--surface-strong)] py-3 text-base font-extrabold text-[var(--foreground)] shadow-[4px_4px_0_0_rgba(42,36,31,0.9)] transition-all duration-300 hover:bg-[var(--foreground)] hover:text-[var(--surface)]"
+                  >
+                    <Sparkles className="h-4 w-4 text-[var(--accent)]" />
+                    <span>Proof Mode</span>
+                  </Link>
+
+                  <Link
+                    href="/hire"
+                    onClick={() => setIsOpen(false)}
+                    className="paper-button hover:!bg-[var(--accent)] hover:!border-[var(--accent)] hover:!text-[var(--surface)] inline-block w-full py-3 text-center"
+                  >
                     {siteCopy.headerHireCta}
                   </Link>
                 </div>
@@ -184,4 +190,4 @@ export default function Header() {
       </div>
     </motion.header>
   );
-}
+}

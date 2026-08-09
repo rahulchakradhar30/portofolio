@@ -209,3 +209,20 @@ Dynamic CSS Variables (:root) & Framer Motion Components
 - `app/components/PaperBackground.tsx`: Applied dynamic theme dot pattern variable.
 - `app/components/Projects.tsx` & `Certifications.tsx`: Consumed dynamic animation resolver.
 
+---
+
+# Proof Mode Navigation & Admin UX Update
+
+## Overview & Architecture Refinement
+- **Homepage Clean-up**: Removed the standalone `#proof-mode` homepage section from `app/page.tsx`. The homepage now flows seamlessly from `Skills` directly to `Projects` and `Certifications` without an artificial section break or visual gaps.
+- **Dedicated Navbar Destination**: Proof Mode transitioned to a dedicated navigation destination in `Header.tsx` placed immediately alongside the `Hire Me` CTA on desktop and inside the mobile drawer.
+- **Visual Identity & Animation**: Styled with a distinct paper surface-strong background (`var(--surface-strong)`), dark border, crisp shadow, a subtle Sparkles icon, and Framer Motion spring elevation (`whileHover={{ y: -2, scale: 1.03 }}`).
+- **Admin Editor Scrolling Fix**: Resolved nested scroll container conflicts in `ProofModeTab.tsx` by using a single backdrop scroll container and adding automatic body scroll locking (`document.body.style.overflow = "hidden"`) when forms or preview modals are active.
+
+## Files Modified
+- `app/admin/dashboard/components/ProofModeTab.tsx`: Modal scroll architecture and body scroll locking.
+- `app/page.tsx`: Standalone section removal.
+- `app/components/Header.tsx`: Navbar positioning, visual identity, and mobile menu scroll handling.
+- `WEBSITE_FEATURES.md`: Updated feature documentation.
+
+
