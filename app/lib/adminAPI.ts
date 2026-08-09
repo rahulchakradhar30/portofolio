@@ -360,5 +360,63 @@ export const adminAPI = {
       return { success: false, error: String(error) };
     }
   },
+
+  // Proof Experiences
+  async getProofExperiences(includeDrafts: boolean = false) {
+    try {
+      const res = await fetch(`/api/admin/proof-mode${includeDrafts ? '?includeDrafts=true' : ''}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Failed to fetch proof experiences');
+      const data = await res.json();
+      return { success: true, proofExperiences: data.proofExperiences || [] };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async createProofExperience(data: Record<string, unknown>) {
+    try {
+      const res = await fetch('/api/admin/proof-mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error('Failed to create proof experience');
+      const resData = await res.json();
+      return { success: true, proofExperience: resData.proofExperience };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async updateProofExperience(id: string, updateData: Record<string, unknown>) {
+    try {
+      const res = await fetch(`/api/admin/proof-mode/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
+      if (!res.ok) throw new Error('Failed to update proof experience');
+      const data = await res.json();
+      return { success: true, proofExperience: data.proofExperience };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async deleteProofExperience(id: string) {
+    try {
+      const res = await fetch(`/api/admin/proof-mode/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete proof experience');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
 };
+
 

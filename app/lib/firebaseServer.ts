@@ -635,7 +635,93 @@ const serverFirebaseHelpers = {
       throw error;
     }
   },
+
+  // Proof Experiences management
+  getAllProofExperiences: async (publishedOnly: boolean = false) => {
+    try {
+      debugLog('Server: Getting proof experiences, publishedOnly:', publishedOnly);
+      const db = getAdminDb();
+      let queryRef: any = db.collection('proof_experiences');
+      if (publishedOnly) {
+        queryRef = queryRef.where('published', '==', true);
+      }
+      const snapshot = await queryRef.get();
+      const items = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+      items.sort((a: any, b: any) => (a.order ?? 99) - (b.order ?? 99));
+      debugLog('Server: Found', items.length, 'proof experiences');
+      return items;
+    } catch (error) {
+      console.error('Server: Error getting proof experiences:', error);
+      return [];
+    }
+  },
+
+  getProofExperienceById: async (id: string) => {
+    try {
+      debugLog('Server: Getting proof experience:', id);
+      const db = getAdminDb();
+      const docSnap = await db.collection('proof_experiences').doc(id).get();
+      if (!docSnap.exists) {
+        debugLog('Server: Proof experience not found');
+        return null;
+      }
+      return { id: docSnap.id, ...docSnap.data() };
+    } catch (error) {
+      console.error('Server: Error getting proof experience by ID:', error);
+      return null;
+    }
+  },
+
+  createProofExperience: async (data: Record<string, any>) => {
+    try {
+      debugLog('Server: Creating proof experience:', data.title);
+      const db = getAdminDb();
+      const now = new Date().toISOString();
+      const safeData = removeUndefinedValues(data);
+      const docRef = await db.collection('proof_experiences').add({
+        ...safeData,
+        created_at: now,
+        updated_at: now,
+      });
+      debugLog('Server: Proof experience created with ID:', docRef.id);
+      return { id: docRef.id, ...safeData, created_at: now, updated_at: now };
+    } catch (error) {
+      console.error('Server: Error creating proof experience:', error);
+      throw error;
+    }
+  },
+
+  updateProofExperience: async (id: string, data: Record<string, any>) => {
+    try {
+      debugLog('Server: Updating proof experience:', id);
+      const db = getAdminDb();
+      const now = new Date().toISOString();
+      const safeData = removeUndefinedValues(data);
+      await db.collection('proof_experiences').doc(id).update({
+        ...safeData,
+        updated_at: now,
+      });
+      debugLog('Server: Proof experience updated');
+      return { id, ...safeData, updated_at: now };
+    } catch (error) {
+      console.error('Server: Error updating proof experience:', error);
+      throw error;
+    }
+  },
+
+  deleteProofExperience: async (id: string) => {
+    try {
+      debugLog('Server: Deleting proof experience:', id);
+      const db = getAdminDb();
+      await db.collection('proof_experiences').doc(id).delete();
+      debugLog('Server: Proof experience deleted');
+    } catch (error) {
+      console.error('Server: Error deleting proof experience:', error);
+      throw error;
+    }
+  },
 };
+
 
 function serializeDbDoc<T>(doc: T): T {
   if (doc === null || doc === undefined) return doc;

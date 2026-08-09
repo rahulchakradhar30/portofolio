@@ -274,3 +274,54 @@ export interface Certification {
   updated_at?: string;
 }
 
+export type DemonstrationType =
+  | 'architecture_visualizer'
+  | 'before_after'
+  | 'decision_simulation'
+  | 'system_flow'
+  | 'interactive_demo';
+
+export interface EvidenceLink {
+  label: string;
+  url: string;
+  type?: 'github' | 'demo' | 'paper' | 'metrics';
+}
+
+export interface DemonstrationConfig {
+  nodes?: { id: string; label: string; description?: string; status?: string }[];
+  connections?: { from: string; to: string; label?: string }[];
+  beforeLabel?: string;
+  beforeMetrics?: { label: string; value: string }[];
+  afterLabel?: string;
+  afterMetrics?: { label: string; value: string }[];
+  decisionSteps?: { question: string; options: { label: string; outcome: string; recommended?: boolean }[] }[];
+  flowSteps?: { step: number; title: string; detail: string }[];
+}
+
+export interface ProofExperience {
+  id: string;
+  title: string;
+  category: string;
+  shortDescription: string;
+  projectId?: string;
+  problem: string;
+  approach: string;
+  technicalDetails: string;
+  demonstrationType: DemonstrationType;
+  demonstrationConfig?: DemonstrationConfig;
+  result: string;
+  evidenceLinks?: EvidenceLink[];
+  images?: string[];
+  published: boolean;
+  order?: number;
+  mlMetadata?: {
+    tags?: string[];
+    similarityVector?: number[];
+    capabilityMapping?: string[];
+    targetAudience?: string;
+  };
+  created_at?: string;
+  updated_at?: string;
+}
+
+

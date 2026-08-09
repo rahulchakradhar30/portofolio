@@ -36,6 +36,8 @@ import SettingsTab from "./components/SettingsTab";
 import SEOTab from "./components/SEOTab";
 import AnimationsTab from "./components/AnimationsTab";
 import IntroTab from "./components/IntroTab";
+import ProofModeTab from "./components/ProofModeTab";
+
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -90,12 +92,14 @@ export default function AdminDashboard() {
     { id: "messages", label: "Contact Messages", icon: Mail },
     { id: "hireRequests", label: "Hire Requests", icon: Briefcase },
     { id: "intro", label: "Cinematic Intro", icon: Film },
+    { id: "proofMode", label: "Proof Mode", icon: Sparkles },
     { id: "seo", label: "SEO Settings", icon: Globe },
     { id: "animations", label: "Animation Prefs", icon: Sparkles },
     { id: "users", label: "Admin Users", icon: Users },
     { id: "activity", label: "Audit Logs", icon: Activity },
     { id: "settings", label: "System & Media", icon: SettingsIcon },
   ];
+
 
   return (
     <div className="min-h-screen text-[var(--foreground)]">
@@ -186,7 +190,9 @@ export default function AdminDashboard() {
           {activeTab === "messages" && <MessagesTab inboxType="contact" />}
           {activeTab === "hireRequests" && <MessagesTab inboxType="hire" />}
           {activeTab === "intro" && <IntroTab />}
+          {activeTab === "proofMode" && <ProofModeTab />}
           {activeTab === "seo" && <SEOTab />}
+
           {activeTab === "animations" && <AnimationsTab />}
           {activeTab === "users" && <UsersTab />}
           {activeTab === "activity" && <ActivityTab />}

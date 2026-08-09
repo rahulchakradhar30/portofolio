@@ -51,6 +51,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     
+    // Proof Experiences Collection (Readable by public, writable by admins)
+    match /proof_experiences/{proofId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    
     // Contact Messages (Readable by admins, writable by anyone)
     match /contact_messages/{messageId} {
       allow create: if true;

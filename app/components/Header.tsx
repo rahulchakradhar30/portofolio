@@ -23,8 +23,10 @@ export default function Header() {
     { name: siteCopy.navRadar, href: "#radar", sectionId: "radar" },
     { name: siteCopy.navSkills, href: "#skills", sectionId: "skills" },
     { name: siteCopy.navProjects, href: "#projects", sectionId: "projects" },
+    { name: "Proof Mode", href: "/proof-mode", sectionId: "proof-mode", isRoute: true },
     { name: siteCopy.navContact, href: "#contact", sectionId: "contact" },
   ];
+
 
   useEffect(() => {
     const syncActiveSection = () => {
@@ -83,19 +85,30 @@ export default function Header() {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {navItems.map((item) => (
-              <motion.a
-                key={item.name}
-                href={item.href}
-                whileHover={{ y: -2 }}
-                whileTap={{ y: 0 }}
-                className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)]"
-              >
-                {item.name}
-              </motion.a>
-            ))}
+          <nav className="hidden md:flex space-x-8 items-center">
+            {navItems.map((item) =>
+              item.isRoute ? (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)] flex items-center gap-1"
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <motion.a
+                  key={item.name}
+                  href={item.href}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ y: 0 }}
+                  className="font-bold text-[var(--foreground)] tracking-tight transition-all duration-300 hover:text-[var(--accent)]"
+                >
+                  {item.name}
+                </motion.a>
+              )
+            )}
           </nav>
+
 
           <div className="hidden items-center gap-4 md:flex">
             <button
@@ -133,20 +146,32 @@ export default function Header() {
               className="mt-4 border-t-2 border-[var(--foreground)] pt-6 pb-4 md:hidden"
             >
               <nav className="flex flex-col space-y-6 text-center">
-                {navItems.map((item) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => navigateToSection(item.sectionId)}
-                    className={`rounded-2xl border-2 px-4 py-3 text-xl font-bold tracking-tight transition-colors ${
-                      activeSection === item.sectionId
-                        ? "border-[var(--foreground)] bg-[var(--surface-soft)] text-[var(--foreground)]"
-                        : "border-transparent text-[var(--foreground)]"
-                    }`}
-                  >
-                    {item.name}
-                  </button>
-                ))}
+                {navItems.map((item) =>
+                  item.isRoute ? (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className="rounded-2xl border-2 border-transparent px-4 py-3 text-xl font-bold tracking-tight text-[var(--foreground)] hover:border-[var(--foreground)]"
+                    >
+                      {item.name}
+                    </Link>
+                  ) : (
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => navigateToSection(item.sectionId)}
+                      className={`rounded-2xl border-2 px-4 py-3 text-xl font-bold tracking-tight transition-colors ${
+                        activeSection === item.sectionId
+                          ? "border-[var(--foreground)] bg-[var(--surface-soft)] text-[var(--foreground)]"
+                          : "border-transparent text-[var(--foreground)]"
+                      }`}
+                    >
+                      {item.name}
+                    </button>
+                  )
+                )}
+
                 <div className="pt-4">
                   <Link href="/hire" onClick={() => setIsOpen(false)} className="paper-button hover:!bg-[var(--accent)] hover:!border-[var(--accent)] hover:!text-[var(--surface)] inline-block w-full max-w-xs mx-auto py-3">
                     {siteCopy.headerHireCta}
