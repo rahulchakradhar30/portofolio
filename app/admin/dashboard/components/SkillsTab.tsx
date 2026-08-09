@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import { SKILL_LOGO_PRESETS, SKILL_LOGO_CATEGORIES, resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import type { Skill } from "@/app/lib/types";
+import SkillIcon from "@/app/components/SkillIcon";
 
 const normalizeSkillIcon = (iconValue?: string) => {
   const resolved = resolveSkillIconUrl(iconValue);
@@ -247,8 +248,20 @@ export default function SkillsTab() {
                 </button>
               )}
             </div>
+            <div className="flex items-center gap-3 rounded-lg border border-violet-200 bg-white p-3 mt-2">
+              <SkillIcon title={formData.title || "Preview"} icon={formData.icon} className="h-8 w-8" />
+              <div>
+                <span className="text-xs font-bold text-gray-700 block">[ Logo Preview ] {formData.title || "Skill Title"}</span>
+                {selectedLogo ? (
+                  <span className="text-xs text-gray-500">{selectedLogo.name} ({selectedLogo.category})</span>
+                ) : formData.icon ? (
+                  <span className="text-xs text-amber-700 font-semibold">Custom / Mapped Logo</span>
+                ) : (
+                  <span className="text-xs text-amber-600">⚠ Generic Fallback Logo</span>
+                )}
+              </div>
+            </div>
             <p className="text-xs text-gray-500">Showing {visibleLogoPresets.length} of {filteredLogoPresets.length} logos</p>
-            {selectedLogo && <p className="text-xs text-gray-600">Selected: <span className="font-semibold">{selectedLogo.name}</span> ({selectedLogo.category})</p>}
             <input
               type="url"
               placeholder="Or paste a custom logo URL"
@@ -297,16 +310,7 @@ export default function SkillsTab() {
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  {resolveSkillIconUrl(skill.icon) ? (
-                    <div
-                      role="img"
-                      aria-label={skill.title}
-                      className="h-6 w-6 bg-contain bg-center bg-no-repeat"
-                      style={{ backgroundImage: `url(${resolveSkillIconUrl(skill.icon)})` }}
-                    />
-                  ) : (
-                    <span className="text-lg">🛠️</span>
-                  )}
+                  <SkillIcon title={skill.title} icon={skill.icon} className="h-6 w-6" />
                   <h3 className="font-semibold text-gray-800">{skill.title}</h3>
                   {skill.featured && <span className="rounded-full bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-700">Featured</span>}
                   {skill.order !== undefined && skill.order !== null && <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-700">Order: {skill.order}</span>}

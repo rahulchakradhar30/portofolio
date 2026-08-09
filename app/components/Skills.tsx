@@ -12,6 +12,8 @@ import { getSiteCopy } from "@/app/lib/siteCopy";
 import { Sparkles } from "lucide-react";
 import { usePortfolioContent } from "./PortfolioContentProvider";
 
+import SkillIcon from "./SkillIcon";
+
 const SKILL_TAG_PRESETS: Record<string, string[]> = {
   python: ["AI", "Backend", "Automation"],
   "next.js": ["App Router", "Frontend", "Performance"],
@@ -115,16 +117,7 @@ export default function Skills() {
                     className="paper-card p-6 md:p-8"
                   >
                     <div className="mb-6 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] shadow-[2px_2px_0_0_rgba(42,36,31,0.1)] transition-transform duration-300 md:h-16 md:w-16">
-                      {resolveSkillIconUrl(skill.icon) ? (
-                        <div
-                          role="img"
-                          aria-label={skill.title}
-                          className="h-8 w-8 bg-contain bg-center bg-no-repeat md:h-10 md:w-10"
-                          style={{ backgroundImage: `url(${resolveSkillIconUrl(skill.icon)})` }}
-                        />
-                      ) : (
-                        <span className="text-xl md:text-2xl font-black">S</span>
-                      )}
+                      <SkillIcon title={skill.title} icon={skill.icon} className="h-8 w-8 md:h-10 md:w-10" />
                     </div>
                     <div className="space-y-3">
                       <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)]">{skill.title}</h3>

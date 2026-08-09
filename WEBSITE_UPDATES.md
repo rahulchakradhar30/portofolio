@@ -156,4 +156,90 @@ The following navigation paths and edge cases were verified with 0 TypeScript/bu
 9. `Cinematic Intro` → Did not replay on back navigation.
 10. `Framer Motion & FrozenRouter` → Maintained smooth exit/enter transitions without reload.
 
+---
+
+# Skills Logo & Icon System
+
+## Purpose
+The centralized Skills Logo & Icon System ensures that every technical skill, backend/cloud service, AI tool, creative tool, and writing capability displays a crisp, reliable icon across the public website and Admin Dashboard, eliminating blank icon boxes and broken CDN images.
+
+## Logo Sources
+1. **Official Brand Vectors**: Reliable SVG vector definitions for major tools (`React`, `Next.js`, `Vercel`, `Firebase`, `GitHub`, `Git`, `Python`, `Java`, `JavaScript`, `HTML5`, `CSS3`, `Tailwind CSS`, `Framer Motion`, `Figma`, `Canva`, `Adobe Premiere Pro`, `Adobe After Effects`, `Adobe Illustrator`, `Adobe Lightroom`, `Postman`, `VS Code`).
+2. **Custom Vector SVGs**: Tailored, paper-aesthetic vector icons for non-brand creative and writing skills (`Content Writing`, `Story Writing`, `Creative Writing`, `Video Editing`, `Photo Editing`, `Prompt Engineering`, `AI-assisted Development`, `Google Gemini`, `Claude AI`, `Firebase Auth`, `Firestore`, `Firebase Storage`, `Firebase Admin SDK`).
+3. **Resilient Vector Fallbacks**: Dynamic HSL SVG generator that creates clean initials badges if an unmapped custom skill is entered.
+
+## Supported Skills
+- **Programming & Web**: C, Python, Java, HTML5, CSS3, JavaScript, React.js, Next.js, Tailwind CSS, Framer Motion.
+- **Backend / Cloud / DB**: Firebase, Firebase Authentication, Firestore, Firebase Storage, Firebase Admin SDK, Vercel, Postman.
+- **VCS & Tools**: Git, GitHub, GitHub Copilot, VS Code.
+- **AI & GenAI**: Prompt Engineering, ChatGPT, Google Gemini, Claude AI, GitHub Copilot, AI-assisted Development.
+- **Creative & Design**: Canva, Figma, Adobe Premiere Pro, Adobe After Effects, Adobe Illustrator, Adobe Lightroom.
+- **Writing & Content**: Content Writing, Story Writing, Creative Writing, Video Editing, Photo Editing.
+
+## Custom Icons
+Custom vector SVG icons were created for creative, writing, and AI skills because no single corporate logo represents these broader capabilities. These icons share the portfolio's paper background design language:
+- `Content Writing`: Document sheet with pen stroke & accent gradients.
+- `Story Writing`: Open book with glowing story star motif.
+- `Creative Writing`: Feather quill pen with gold star trail.
+- `Video Editing`: Filmstrip frame with play control & timeline indicator.
+- `Photo Editing`: Camera lens aperture with green adjustment sliders.
+- `Prompt Engineering`: Terminal command prompt `>_` with AI sparkle.
+- `AI-assisted Development`: Code brackets `< / >` with AI node motif.
+
+## Registry Architecture
+```
+Skill Title / Icon Name / URL
+            ↓
+  SKILL_ALIAS_MAP (Normalizes names e.g. "react.js" → "React", "premiere" → "Adobe Premiere Pro")
+            ↓
+  SKILL_LOGO_LOOKUP (Registry match)
+            ↓
+   <SkillIcon> Component
+            ↓ (If network/image load fails)
+   onError → fallbackSkillLogo(title)
+```
+
+## Fallback System
+```
+Custom Admin Logo URL
+         ↓ (if missing or network error)
+Registered Preset Vector Logo
+         ↓ (if unmapped or failed)
+Generic HSL Initials SVG Fallback
+```
+No skill EVER renders a blank box on the public website or admin dashboard.
+
+## Admin Usage
+1. Go to **Admin Dashboard → Skills Grid**.
+2. Click **Add Skill** or **Edit Skill**.
+3. Select a preset logo from the catalog grid or type a skill title.
+4. The live **`[ Logo Preview ]`** box immediately displays the resolved icon.
+5. If an Admin enters an unrecognized custom URL that fails to resolve, an administrative warning badge (`⚠ Generic Fallback Logo`) is shown in the form preview.
+
+## Adding a New Skill
+To register a new skill preset for future developers:
+1. Open `app/lib/skillLogoCatalog.ts`.
+2. Add a new `logo('Skill Name', 'slug', 'Category')` or `customSvgLogo(...)` entry to `SPECIALIZED_LOGOS` or `CORE_LOGOS`.
+3. Add any common aliases to `SKILL_ALIAS_MAP` (e.g., `"my-skill": "My Skill"`).
+
+## Security
+- External and custom logo URLs are sanitized before rendering inside `<img>` tags.
+- Custom inline SVG icons are generated via safe `data:image/svg+xml` data URIs, avoiding `dangerouslySetInnerHTML` or raw script execution risks.
+
+## Files Changed
+- `app/lib/skillLogoCatalog.ts`
+- `app/components/SkillIcon.tsx` (New)
+- `app/components/Skills.tsx`
+- `app/skills/SkillsPageClient.tsx`
+- `app/admin/dashboard/components/SkillsTab.tsx`
+- `WEBSITE_UPDATES.md`
+
+## Verification
+- Verified preset grid in Admin (`Adobe Premiere Pro`, `Adobe After Effects`, `React`, `Next.js`, `Vercel`, `Firebase`, `Git`, `Python`, `Java`, `HTML5`, `CSS3`, `Tailwind CSS`, `Figma`, `Canva`, `Postman`, `VS Code`, `Google Gemini`, `Claude AI`, `Content Writing`, `Story Writing`, `Creative Writing`, `Video Editing`, `Photo Editing`, `Prompt Engineering`).
+- Verified Live Preview in Admin form.
+- Verified Public Homepage (`Skills.tsx`) and All Skills page (`/skills`).
+- Tested broken URL / missing logo fallback behavior.
+- Verified TypeScript (`npx tsc --noEmit`) and Production Build (`npm run build`).
+
+
 

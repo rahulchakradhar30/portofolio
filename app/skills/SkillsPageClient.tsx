@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import type { Skill } from "@/app/lib/types";
 import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import { BackButton } from "@/app/components/NavigationContext";
+import SkillIcon from "@/app/components/SkillIcon";
 
 interface SkillsPageClientProps {
   initialSkills: Skill[];
@@ -40,16 +41,7 @@ export default function SkillsPageClient({ initialSkills }: SkillsPageClientProp
                 className="rounded-2xl border border-[#7a5f47]/12 bg-white p-5 shadow-md sm:rounded-3xl sm:p-6"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#eadbbf] to-[#c4a884] sm:h-14 sm:w-14">
-                  {resolveSkillIconUrl(skill.icon) ? (
-                    <div
-                      role="img"
-                      aria-label={skill.title}
-                      className="h-8 w-8 bg-contain bg-center bg-no-repeat sm:h-9 sm:w-9"
-                      style={{ backgroundImage: `url(${resolveSkillIconUrl(skill.icon)})` }}
-                    />
-                  ) : (
-                    <span className="text-xl sm:text-2xl">🛠️</span>
-                  )}
+                  <SkillIcon title={skill.title} icon={skill.icon} className="h-8 w-8 sm:h-9 sm:w-9" />
                 </div>
                 <h2 className="text-lg font-bold text-[#2f241b] sm:text-xl">{skill.title}</h2>
                 <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">{skill.description}</p>

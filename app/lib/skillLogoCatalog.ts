@@ -12,77 +12,224 @@ const logo = (name: string, slug: string, category: string, keywords: string[] =
   url: `https://cdn.simpleicons.org/${slug}`,
 });
 
-const svgLogo = (name: string, accent: string, subtitle: string, keywords: string[] = []): SkillLogoPreset => {
+const customSvgLogo = (
+  name: string,
+  category: string,
+  primaryColor: string,
+  secondaryColor: string,
+  svgContent: string,
+  keywords: string[] = []
+): SkillLogoPreset => {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="${name}">
       <defs>
-        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${accent}" />
-          <stop offset="100%" stop-color="#0f172a" />
+        <linearGradient id="bg-${name.replace(/[^a-zA-Z0-9]/g, '')}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="${primaryColor}" />
+          <stop offset="100%" stop-color="${secondaryColor}" />
         </linearGradient>
       </defs>
-      <rect width="128" height="128" rx="28" fill="url(#g)" />
-      <circle cx="64" cy="52" r="26" fill="rgba(255,255,255,0.14)" />
-      <path d="M36 80C44 70 53 66 64 66s20 4 28 14" stroke="rgba(255,255,255,0.85)" stroke-width="8" stroke-linecap="round" fill="none" />
-      <text x="64" y="58" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#ffffff">${subtitle}</text>
+      <rect width="128" height="128" rx="28" fill="url(#bg-${name.replace(/[^a-zA-Z0-9]/g, '')})" />
+      <g transform="translate(16, 16)">
+        ${svgContent}
+      </g>
     </svg>
   `;
 
   return {
     name,
-    category: 'Personal',
-    keywords: [...keywords, 'personal', subtitle.toLowerCase(), name.toLowerCase()],
+    category,
+    keywords: [...keywords, category.toLowerCase(), name.toLowerCase()],
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`,
   };
 };
 
-const fallbackSkillLogo = (label: string) => {
+export const fallbackSkillLogo = (label: string) => {
   const cleaned = label.trim().replace(/[^A-Za-z0-9]+/g, ' ').split(/\s+/).filter(Boolean);
   const initials = cleaned.map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'S';
   const hueSeed = Array.from(label).reduce((total, character) => total + character.charCodeAt(0), 0) % 360;
-  const primary = `hsl(${hueSeed}, 36%, 52%)`;
-  const secondary = `hsl(${(hueSeed + 28) % 360}, 32%, 34%)`;
+  const primary = `hsl(${hueSeed}, 38%, 48%)`;
+  const secondary = `hsl(${(hueSeed + 30) % 360}, 34%, 30%)`;
 
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="${label}">
       <defs>
-        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="g-${initials}" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="${primary}" />
           <stop offset="100%" stop-color="${secondary}" />
         </linearGradient>
       </defs>
-      <rect width="128" height="128" rx="28" fill="url(#g)" />
-      <circle cx="64" cy="56" r="28" fill="rgba(255,255,255,0.14)" />
-      <text x="64" y="65" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" fill="#fffaf3">${initials}</text>
+      <rect width="128" height="128" rx="28" fill="url(#g-${initials})" />
+      <circle cx="64" cy="56" r="28" fill="rgba(255,255,255,0.16)" />
+      <text x="64" y="66" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="900" fill="#fffaf3">${initials}</text>
     </svg>
   `;
 
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
 };
 
+// Custom SVG Icons for Creative, Writing, AI & Specialized Tools
+const SPECIALIZED_LOGOS: SkillLogoPreset[] = [
+  customSvgLogo(
+    'Content Writing',
+    'Content',
+    '#7a5f47',
+    '#4a3728',
+    `<rect x="16" y="8" width="64" height="80" rx="8" fill="#ffffff" fill-opacity="0.95" />
+     <line x1="28" y1="28" x2="68" y2="28" stroke="#7a5f47" stroke-width="5" stroke-linecap="round" />
+     <line x1="28" y1="44" x2="68" y2="44" stroke="#7a5f47" stroke-width="5" stroke-linecap="round" />
+     <line x1="28" y1="60" x2="52" y2="60" stroke="#7a5f47" stroke-width="5" stroke-linecap="round" />
+     <path d="M60 76 L84 44 L92 52 L68 84 Z" fill="#c4a884" stroke="#ffffff" stroke-width="2" />
+     <path d="M60 76 L56 88 L68 84 Z" fill="#2f241b" />`,
+    ['writing', 'content', 'copywriting', 'blog']
+  ),
+  customSvgLogo(
+    'Story Writing',
+    'Content',
+    '#8d6b4e',
+    '#5a4230',
+    `<path d="M12 24 C 28 16, 44 24, 48 32 C 52 24, 68 16, 84 24 L 84 80 C 68 72, 52 80, 48 88 C 44 80, 28 72, 12 80 Z" fill="#ffffff" fill-opacity="0.9" stroke="#5a4230" stroke-width="3" />
+     <line x1="48" y1="32" x2="48" y2="88" stroke="#8d6b4e" stroke-width="4" />
+     <path d="M 66 12 L 70 20 L 78 22 L 72 28 L 74 36 L 66 32 L 58 36 L 60 28 L 54 22 L 62 20 Z" fill="#fcd34d" />`,
+    ['story', 'narrative', 'creative', 'book']
+  ),
+  customSvgLogo(
+    'Creative Writing',
+    'Content',
+    '#b6926d',
+    '#725539',
+    `<path d="M 72 12 C 48 36, 32 60, 24 88 L 36 88 C 44 68, 56 48, 76 24 Z" fill="#ffffff" fill-opacity="0.95" />
+     <path d="M 24 88 L 16 94 L 28 92 Z" fill="#2f241b" />
+     <path d="M 42 16 L 46 24 L 54 26 L 48 32 L 50 40 L 42 36 L 34 40 L 36 32 L 30 26 L 38 24 Z" fill="#fbbf24" />`,
+    ['quill', 'creative', 'writing', 'author']
+  ),
+  customSvgLogo(
+    'Video Editing',
+    'Content',
+    '#2563eb',
+    '#1e3a8a',
+    `<rect x="8" y="16" width="80" height="64" rx="10" fill="#ffffff" fill-opacity="0.9" />
+     <path d="M 38 32 L 64 48 L 38 64 Z" fill="#2563eb" />
+     <rect x="8" y="70" width="80" height="10" rx="3" fill="#60a5fa" />
+     <line x1="48" y1="16" x2="48" y2="80" stroke="#ef4444" stroke-width="4" stroke-linecap="round" />`,
+    ['video', 'editing', 'premiere', 'timeline']
+  ),
+  customSvgLogo(
+    'Photo Editing',
+    'Content',
+    '#059669',
+    '#064e3b',
+    `<rect x="12" y="16" width="72" height="64" rx="12" fill="#ffffff" fill-opacity="0.9" />
+     <circle cx="48" cy="48" r="20" fill="none" stroke="#059669" stroke-width="6" />
+     <circle cx="48" cy="48" r="8" fill="#10b981" />
+     <line x1="72" y1="28" x2="72" y2="68" stroke="#34d399" stroke-width="4" stroke-linecap="round" />
+     <circle cx="72" cy="40" r="5" fill="#047857" />`,
+    ['photo', 'editing', 'lightroom', 'aperture']
+  ),
+  customSvgLogo(
+    'Prompt Engineering',
+    'AI/ML',
+    '#6366f1',
+    '#312e81',
+    `<rect x="8" y="12" width="80" height="72" rx="12" fill="#1e1b4b" stroke="#818cf8" stroke-width="3" />
+     <text x="20" y="44" font-family="monospace" font-size="26" font-weight="bold" fill="#38bdf8">&gt;_</text>
+     <path d="M 64 40 L 67 48 L 75 51 L 67 54 L 64 62 L 61 54 L 53 51 L 61 48 Z" fill="#fbbf24" />`,
+    ['prompt', 'chatgpt', 'llm', 'ai']
+  ),
+  customSvgLogo(
+    'AI-assisted Development',
+    'AI/ML',
+    '#4f46e5',
+    '#1e1b4b',
+    `<rect x="8" y="12" width="80" height="72" rx="12" fill="#ffffff" fill-opacity="0.95" />
+     <path d="M 24 36 L 12 48 L 24 60" fill="none" stroke="#4f46e5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+     <path d="M 72 36 L 84 48 L 72 60" fill="none" stroke="#4f46e5" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+     <path d="M 48 24 L 52 34 L 62 38 L 52 42 L 48 52 L 44 42 L 34 38 L 44 34 Z" fill="#a855f7" />`,
+    ['ai', 'copilot', 'coding', 'development']
+  ),
+  customSvgLogo(
+    'Google Gemini',
+    'AI/ML',
+    '#2563eb',
+    '#7c3aed',
+    `<path d="M 48 8 C 48 30, 66 48, 88 48 C 66 48, 48 66, 48 88 C 48 66, 30 48, 8 48 C 30 48, 48 30, 48 8 Z" fill="#ffffff" />
+     <path d="M 64 24 C 64 36, 74 46, 86 46 C 74 46, 64 56, 64 68 C 64 56, 54 46, 42 46 C 54 46, 64 36, 64 24 Z" fill="#a855f7" />`,
+    ['gemini', 'google', 'ai', 'llm']
+  ),
+  customSvgLogo(
+    'Claude AI',
+    'AI/ML',
+    '#d97706',
+    '#78350f',
+    `<g transform="translate(48, 48)">
+       <path d="M 0 -36 L 10 -10 L 36 0 L 10 10 L 0 36 L -10 10 L -36 0 L -10 -10 Z" fill="#ffffff" />
+       <path d="M -22 -22 L -6 -6 L -6 -28 Z" fill="#fef3c7" />
+       <path d="M 22 -22 L 6 -6 L 28 -6 Z" fill="#fef3c7" />
+       <path d="M 22 22 L 6 6 L 6 28 Z" fill="#fef3c7" />
+       <path d="M -22 22 L -6 6 L -28 6 Z" fill="#fef3c7" />
+     </g>`,
+    ['claude', 'anthropic', 'ai', 'llm']
+  ),
+  customSvgLogo(
+    'Firebase Authentication',
+    'Cloud',
+    '#ffca28',
+    '#f57c00',
+    `<path d="M 24 16 L 72 16 L 72 72 L 24 72 Z" fill="#ffffff" fill-opacity="0.2" />
+     <path d="M 20 80 L 44 12 L 60 40 L 76 24 L 48 88 Z" fill="#ffffff" />
+     <rect x="36" y="44" width="24" height="24" rx="6" fill="#039be5" />
+     <circle cx="48" cy="54" r="4" fill="#ffffff" />`,
+    ['firebase', 'auth', 'authentication', 'cloud']
+  ),
+  customSvgLogo(
+    'Firestore',
+    'Database',
+    '#ffca28',
+    '#f57c00',
+    `<path d="M 20 80 L 44 12 L 60 40 L 76 24 L 48 88 Z" fill="#ffffff" />
+     <rect x="32" y="36" width="32" height="10" rx="3" fill="#ffa000" />
+     <rect x="32" y="50" width="32" height="10" rx="3" fill="#ffb300" />
+     <rect x="32" y="64" width="32" height="10" rx="3" fill="#ffe082" />`,
+    ['firestore', 'firebase', 'database', 'nosql']
+  ),
+  customSvgLogo(
+    'Firebase Storage',
+    'Cloud',
+    '#ffca28',
+    '#f57c00',
+    `<path d="M 20 80 L 44 12 L 60 40 L 76 24 L 48 88 Z" fill="#ffffff" />
+     <path d="M 28 56 C 28 48, 36 44, 44 46 C 48 40, 60 40, 64 46 C 72 46, 76 52, 74 60 C 76 68, 68 72, 60 72 L 36 72 C 28 72, 24 64, 28 56 Z" fill="#0288d1" />`,
+    ['storage', 'firebase', 'cloud', 'files']
+  ),
+  customSvgLogo(
+    'Firebase Admin SDK',
+    'Cloud',
+    '#ffca28',
+    '#f57c00',
+    `<path d="M 20 80 L 44 12 L 60 40 L 76 24 L 48 88 Z" fill="#ffffff" />
+     <rect x="28" y="44" width="40" height="28" rx="6" fill="#263238" />
+     <text x="34" y="64" font-family="monospace" font-size="14" font-weight="bold" fill="#00e676">&gt;admin</text>`,
+    ['firebase', 'admin', 'sdk', 'backend']
+  ),
+];
+
 const CORE_LOGOS: SkillLogoPreset[] = [
-  svgLogo('Code', '8d6b4e', 'CD', ['code', 'frontend', 'development']),
-  svgLogo('Layers', 'b6926d', 'LY', ['layers', 'stack', 'architecture']),
-  svgLogo('Zap', 'c4a884', 'ZP', ['zap', 'ai', 'speed']),
-  svgLogo('Film', '7a5f47', 'FM', ['film', 'video', 'production']),
-  svgLogo('Palette', '9b7a5b', 'PL', ['palette', 'design', 'ui']),
-  svgLogo('Cloud', '6e5440', 'CL', ['cloud', 'deployment', 'hosting']),
-  logo('React', 'react', 'Frontend'),
-  logo('Next.js', 'nextdotjs', 'Frontend'),
+  ...SPECIALIZED_LOGOS,
+  logo('React', 'react', 'Frontend', ['react.js', 'reactjs']),
+  logo('Next.js', 'nextdotjs', 'Frontend', ['next', 'nextjs']),
   logo('Vue.js', 'vuedotjs', 'Frontend'),
   logo('Nuxt', 'nuxt', 'Frontend'),
   logo('Svelte', 'svelte', 'Frontend'),
   logo('Angular', 'angular', 'Frontend'),
-  logo('Tailwind CSS', 'tailwindcss', 'Frontend'),
+  logo('Tailwind CSS', 'tailwindcss', 'Frontend', ['tailwind']),
   logo('Bootstrap', 'bootstrap', 'Frontend'),
   logo('Material UI', 'mui', 'Frontend'),
-  logo('Framer Motion', 'framer', 'Frontend'),
-  logo('HTML5', 'html5', 'Frontend'),
-  logo('CSS3', 'css', 'Frontend'),
+  logo('Framer Motion', 'framer', 'Frontend', ['framer']),
+  logo('HTML5', 'html5', 'Frontend', ['html']),
+  logo('CSS3', 'css', 'Frontend', ['css']),
   logo('Sass', 'sass', 'Frontend'),
-  logo('JavaScript', 'javascript', 'Languages'),
-  logo('TypeScript', 'typescript', 'Languages'),
-  logo('Node.js', 'nodedotjs', 'Backend'),
+  logo('JavaScript', 'javascript', 'Languages', ['js']),
+  logo('TypeScript', 'typescript', 'Languages', ['ts']),
+  logo('Node.js', 'nodedotjs', 'Backend', ['node']),
   logo('Express', 'express', 'Backend'),
   logo('NestJS', 'nestjs', 'Backend'),
   logo('Django', 'django', 'Backend'),
@@ -95,7 +242,7 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('Apollo GraphQL', 'apollographql', 'Backend'),
   logo('gRPC', 'grpc', 'Backend'),
   logo('MongoDB', 'mongodb', 'Database'),
-  logo('PostgreSQL', 'postgresql', 'Database'),
+  logo('PostgreSQL', 'postgresql', 'Database', ['postgres']),
   logo('MySQL', 'mysql', 'Database'),
   logo('SQLite', 'sqlite', 'Database'),
   logo('Redis', 'redis', 'Database'),
@@ -103,13 +250,13 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('Firebase', 'firebase', 'Cloud'),
   logo('AWS', 'amazonwebservices', 'Cloud'),
   logo('Azure', 'microsoftazure', 'Cloud'),
-  logo('Google Cloud', 'googlecloud', 'Cloud'),
+  logo('Google Cloud', 'googlecloud', 'Cloud', ['gcp']),
   logo('Vercel', 'vercel', 'Cloud'),
   logo('Netlify', 'netlify', 'Cloud'),
   logo('Cloudflare', 'cloudflare', 'Cloud'),
   logo('DigitalOcean', 'digitalocean', 'Cloud'),
   logo('Docker', 'docker', 'DevOps'),
-  logo('Kubernetes', 'kubernetes', 'DevOps'),
+  logo('Kubernetes', 'kubernetes', 'DevOps', ['k8s']),
   logo('Terraform', 'terraform', 'DevOps'),
   logo('Ansible', 'ansible', 'DevOps'),
   logo('GitHub Actions', 'githubactions', 'DevOps'),
@@ -120,7 +267,7 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('GitHub', 'github', 'Tools'),
   logo('GitLab', 'gitlab', 'Tools'),
   logo('Bitbucket', 'bitbucket', 'Tools'),
-  logo('VS Code', 'visualstudiocode', 'Tools'),
+  logo('VS Code', 'visualstudiocode', 'Tools', ['vscode']),
   logo('Visual Studio', 'visualstudio', 'Tools'),
   logo('IntelliJ IDEA', 'intellijidea', 'Tools'),
   logo('PyCharm', 'pycharm', 'Tools'),
@@ -129,18 +276,19 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('Insomnia', 'insomnia', 'Tools'),
   logo('Figma', 'figma', 'Design'),
   logo('Canva', 'canva', 'Design'),
-  logo('Adobe Photoshop', 'adobephotoshop', 'Design'),
-  logo('Adobe Illustrator', 'adobeillustrator', 'Design'),
-  logo('Adobe Premiere Pro', 'adobepremierepro', 'Design'),
-  logo('Adobe After Effects', 'adobeaftereffects', 'Design'),
+  logo('Adobe Photoshop', 'adobephotoshop', 'Design', ['photoshop']),
+  logo('Adobe Illustrator', 'adobeillustrator', 'Design', ['illustrator', 'ai']),
+  logo('Adobe Premiere Pro', 'adobepremierepro', 'Design', ['premiere', 'premiere pro']),
+  logo('Adobe After Effects', 'adobeaftereffects', 'Design', ['after effects', 'ae']),
+  logo('Adobe Lightroom', 'adobelightroom', 'Design', ['lightroom']),
   logo('Blender', 'blender', 'Design'),
   logo('DaVinci Resolve', 'davinciresolve', 'Design'),
   logo('Python', 'python', 'Languages'),
   logo('Java', 'openjdk', 'Languages'),
-  logo('C', 'c', 'Languages'),
-  logo('C++', 'cplusplus', 'Languages'),
-  logo('C#', 'csharp', 'Languages'),
-  logo('Go', 'go', 'Languages'),
+  logo('C', 'c', 'Languages', ['c lang', 'c language']),
+  logo('C++', 'cplusplus', 'Languages', ['cpp']),
+  logo('C#', 'csharp', 'Languages', ['csharp']),
+  logo('Go', 'go', 'Languages', ['golang']),
   logo('Rust', 'rust', 'Languages'),
   logo('Kotlin', 'kotlin', 'Languages'),
   logo('Swift', 'swift', 'Languages'),
@@ -156,7 +304,8 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('TensorFlow', 'tensorflow', 'AI/ML'),
   logo('PyTorch', 'pytorch', 'AI/ML'),
   logo('scikit-learn', 'scikitlearn', 'AI/ML'),
-  logo('OpenAI', 'openai', 'AI/ML'),
+  logo('OpenAI', 'openai', 'AI/ML', ['chatgpt', 'gpt']),
+  logo('GitHub Copilot', 'githubcopilot', 'AI/ML', ['copilot']),
   logo('Hugging Face', 'huggingface', 'AI/ML'),
   logo('LangChain', 'langchain', 'AI/ML'),
   logo('Linux', 'linux', 'Platform'),
@@ -183,7 +332,6 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('Playwright', 'playwright', 'Testing'),
   logo('Storybook', 'storybook', 'Testing'),
   logo('Selenium', 'selenium', 'Testing'),
-  logo('Content Writing', 'notion', 'Content'),
   logo('Copywriting', 'grammarly', 'Content'),
   logo('SEO', 'googlesearchconsole', 'Content'),
   logo('YouTube', 'youtube', 'Content'),
@@ -195,32 +343,6 @@ const CORE_LOGOS: SkillLogoPreset[] = [
   logo('Pinterest', 'pinterest', 'Content'),
   logo('Discord', 'discord', 'Content'),
   logo('Slack', 'slack', 'Content'),
-  svgLogo('AI Thinking', 'AI', 'AI', ['ai', 'prompting', 'generative', 'assistant']),
-  svgLogo('Content Studio', 'CW', 'CW', ['content writing', 'writing', 'blogging', 'storytelling']),
-  svgLogo('Leadership Lens', 'LD', 'LD', ['leadership', 'team lead', 'mentoring', 'management']),
-  svgLogo('Creative Strategy', 'CS', 'CS', ['strategy', 'branding', 'planning', 'creative']),
-  svgLogo('Research Notes', 'RN', 'RN', ['research', 'analysis', 'learning', 'study']),
-  svgLogo('Voice Design', 'VD', 'VD', ['communication', 'public speaking', 'presentation']),
-  svgLogo('Problem Solving', 'PS', 'PS', ['problem solving', 'critical thinking', 'logic']),
-  svgLogo('Personal Growth', 'PG', 'PG', ['growth', 'learning', 'self improvement']),
-  logo('Notion', 'notion', 'Productivity'),
-  logo('Trello', 'trello', 'Productivity'),
-  logo('Asana', 'asana', 'Productivity'),
-  logo('Jira', 'jira', 'Productivity'),
-  logo('ClickUp', 'clickup', 'Productivity'),
-  logo('Miro', 'miro', 'Productivity'),
-  logo('Google Analytics', 'googleanalytics', 'Analytics'),
-  logo('Tableau', 'tableau', 'Analytics'),
-  logo('Power BI', 'powerbi', 'Analytics'),
-  logo('Shopify', 'shopify', 'Commerce'),
-  logo('WooCommerce', 'woocommerce', 'Commerce'),
-  logo('Stripe', 'stripe', 'Commerce'),
-  logo('Razorpay', 'razorpay', 'Commerce'),
-  logo('PayPal', 'paypal', 'Commerce'),
-  logo('WordPress', 'wordpress', 'CMS'),
-  logo('Ghost', 'ghost', 'CMS'),
-  logo('Strapi', 'strapi', 'CMS'),
-  logo('Sanity', 'sanity', 'CMS'),
 ];
 
 const EXTENDED_LOGOS: SkillLogoPreset[] = [
@@ -284,7 +406,6 @@ const EXTENDED_LOGOS: SkillLogoPreset[] = [
   logo('Helm', 'helm', 'DevOps'),
   logo('CircleCI', 'circleci', 'DevOps'),
   logo('Travis CI', 'travisci', 'DevOps'),
-  logo('GitHub Copilot', 'githubcopilot', 'AI/ML'),
   logo('Perplexity', 'perplexity', 'AI/ML'),
   logo('Anthropic', 'anthropic', 'AI/ML'),
   logo('Cohere', 'cohere', 'AI/ML'),
@@ -403,7 +524,6 @@ const EXTENDED_LOGOS: SkillLogoPreset[] = [
   logo('Sketch', 'sketch', 'Design'),
   logo('InVision', 'invision', 'Design'),
   logo('Adobe XD', 'adobexd', 'Design'),
-  logo('Adobe Lightroom', 'adobelightroom', 'Design'),
   logo('Adobe Audition', 'adobeaudition', 'Design'),
   logo('Adobe Animate', 'adobeanimate', 'Design'),
   logo('Adobe InDesign', 'adobeindesign', 'Design'),
@@ -571,12 +691,123 @@ export const SKILL_LOGO_LOOKUP = Object.fromEntries(
   SKILL_LOGO_PRESETS.map((item) => [item.name.toLowerCase(), item.url])
 );
 
-export function resolveSkillIconUrl(iconValue?: string) {
-  if (!iconValue) return '';
-  const value = iconValue.trim();
-  if (!value) return '';
-  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/')) return value;
-  const mapped = SKILL_LOGO_LOOKUP[value.toLowerCase()];
-  if (mapped) return mapped;
+// Comprehensive Alias Lookup Table
+export const SKILL_ALIAS_MAP: Record<string, string> = {
+  // Programming & Languages
+  "c": "C",
+  "c lang": "C",
+  "c language": "C",
+  "c programming": "C",
+  "python": "Python",
+  "java": "Java",
+  "html": "HTML5",
+  "html5": "HTML5",
+  "css": "CSS3",
+  "css3": "CSS3",
+  "js": "JavaScript",
+  "javascript": "JavaScript",
+  "ts": "TypeScript",
+  "typescript": "TypeScript",
+  "react": "React",
+  "react.js": "React",
+  "reactjs": "React",
+  "next": "Next.js",
+  "next.js": "Next.js",
+  "nextjs": "Next.js",
+  "tailwind": "Tailwind CSS",
+  "tailwindcss": "Tailwind CSS",
+  "tailwind css": "Tailwind CSS",
+  "framer": "Framer Motion",
+  "framer motion": "Framer Motion",
+
+  // Backend & Cloud & DB
+  "firebase": "Firebase",
+  "firebase auth": "Firebase Authentication",
+  "firebase authentication": "Firebase Authentication",
+  "firestore": "Firestore",
+  "firebase firestore": "Firestore",
+  "firebase storage": "Firebase Storage",
+  "firebase admin": "Firebase Admin SDK",
+  "firebase admin sdk": "Firebase Admin SDK",
+  "vercel": "Vercel",
+  "postman": "Postman",
+
+  // Dev Tools & VCS
+  "git": "Git",
+  "github": "GitHub",
+  "copilot": "GitHub Copilot",
+  "github copilot": "GitHub Copilot",
+  "vscode": "VS Code",
+  "vs code": "VS Code",
+  "visual studio code": "VS Code",
+
+  // AI & GenAI
+  "chatgpt": "OpenAI",
+  "gpt": "OpenAI",
+  "openai": "OpenAI",
+  "gemini": "Google Gemini",
+  "google gemini": "Google Gemini",
+  "claude": "Claude AI",
+  "claude ai": "Claude AI",
+  "prompting": "Prompt Engineering",
+  "prompt engineering": "Prompt Engineering",
+  "ai-assisted development": "AI-assisted Development",
+  "ai assisted development": "AI-assisted Development",
+  "ai development": "AI-assisted Development",
+
+  // Creative & Design
+  "canva": "Canva",
+  "figma": "Figma",
+  "premiere": "Adobe Premiere Pro",
+  "premiere pro": "Adobe Premiere Pro",
+  "adobe premiere": "Adobe Premiere Pro",
+  "adobe premiere pro": "Adobe Premiere Pro",
+  "after effects": "Adobe After Effects",
+  "adobe after effects": "Adobe After Effects",
+  "ae": "Adobe After Effects",
+  "adobe ae": "Adobe After Effects",
+  "illustrator": "Adobe Illustrator",
+  "adobe illustrator": "Adobe Illustrator",
+  "ai design": "Adobe Illustrator",
+  "lightroom": "Adobe Lightroom",
+  "adobe lightroom": "Adobe Lightroom",
+  "lr": "Adobe Lightroom",
+
+  // Content & Writing
+  "content writing": "Content Writing",
+  "story writing": "Story Writing",
+  "creative writing": "Creative Writing",
+  "video editing": "Video Editing",
+  "photo editing": "Photo Editing",
+};
+
+export function resolveSkillIconUrl(iconValue?: string, titleFallback?: string) {
+  const value = (iconValue || titleFallback || '').trim();
+  if (!value) return fallbackSkillLogo('Skill');
+
+  if (value.startsWith('http://') || value.startsWith('https://') || value.startsWith('data:image/')) {
+    return value;
+  }
+
+  const normalized = value.toLowerCase();
+
+  if (SKILL_LOGO_LOOKUP[normalized]) {
+    return SKILL_LOGO_LOOKUP[normalized];
+  }
+
+  const canonicalName = SKILL_ALIAS_MAP[normalized];
+  if (canonicalName && SKILL_LOGO_LOOKUP[canonicalName.toLowerCase()]) {
+    return SKILL_LOGO_LOOKUP[canonicalName.toLowerCase()];
+  }
+
+  if (titleFallback && titleFallback !== iconValue) {
+    const titleNorm = titleFallback.trim().toLowerCase();
+    if (SKILL_LOGO_LOOKUP[titleNorm]) return SKILL_LOGO_LOOKUP[titleNorm];
+    const aliasTitle = SKILL_ALIAS_MAP[titleNorm];
+    if (aliasTitle && SKILL_LOGO_LOOKUP[aliasTitle.toLowerCase()]) {
+      return SKILL_LOGO_LOOKUP[aliasTitle.toLowerCase()];
+    }
+  }
+
   return fallbackSkillLogo(value);
 }
