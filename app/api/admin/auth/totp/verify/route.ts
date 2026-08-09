@@ -53,10 +53,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid verification code. Please check your authenticator app and try again.' }, { status: 400 });
       }
 
-      // Verification successful! Activate TOTP as primary 2FA method
+      // Verification successful! Enable TOTP method
       const encryptedSecret = encryptSecret(secret);
+      const enabledMethods = {
+        emailOtp: doc.enabledMethods?.emailOtp ?? true,
+        totp: true,
+        passkey: doc.enabledMethods?.passkey ?? false,
+      };
+
       await saveAdminSecurityDoc(uid, {
-        active2FAMethod: 'TOTP',
+        enabledMethods,
         totp: {
           enabled: true,
           encryptedSecret,

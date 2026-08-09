@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ShieldCheck, Mail, Smartphone, Key, Check, Plus, Trash2, AlertCircle, RefreshCw, X, Copy, QrCode } from "lucide-react";
+import { ShieldCheck, Mail, Smartphone, Key, Check, Plus, Trash2, AlertCircle, RefreshCw, X, Copy, QrCode, ToggleLeft, ToggleRight } from "lucide-react";
 import { startRegistration } from "@simplewebauthn/browser";
 
 type Active2FAMethod = "EMAIL_OTP" | "TOTP" | "PASSKEY";
@@ -14,8 +14,15 @@ interface PasskeyItem {
   deviceType?: string;
 }
 
+interface EnabledMethods {
+  emailOtp?: boolean;
+  totp?: boolean;
+  passkey?: boolean;
+}
+
 interface StatusData {
-  active2FAMethod: Active2FAMethod;
+  usableMethods?: Active2FAMethod[];
+  enabledMethods?: EnabledMethods;
   totpConfigured: boolean;
   passkeysCount: number;
   passkeys?: PasskeyItem[];
@@ -75,42 +82,28 @@ export default function Security2FASection() {
     };
   }, [showTotpModal, showPasskeyModal]);
 
-  // ── Switch Method ──────────────────────────────────────────────────
-  const handleSelectMethod = async (targetMethod: Active2FAMethod) => {
-    if (status?.active2FAMethod === targetMethod) return;
-
-    // If TOTP chosen but not configured, open setup modal
-    if (targetMethod === "TOTP" && !status?.totpConfigured) {
-      void handleStartTotpSetup();
-      return;
-    }
-
-    // If PASSKEY chosen but no passkeys registered, open passkey modal
-    if (targetMethod === "PASSKEY" && (!status?.passkeysCount || status.passkeysCount === 0)) {
-      setShowPasskeyModal(true);
-      return;
-    }
-
+  // ── Toggle Method Enablement ───────────────────────────────────────
+  const handleToggleMethod = async (targetMethod: Active2FAMethod, enabled: boolean) => {
     setUpdating(true);
     setError(null);
     setSuccess(null);
 
     try {
-      const res = await fetch("/api/admin/auth/2fa-method", {
+      const res = await fetch("/api/admin/auth/2fa-config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ method: targetMethod }),
+        body: JSON.stringify({ method: targetMethod, enabled }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to update 2FA method");
+        throw new Error(data.error || "Failed to update 2FA method configuration");
       }
 
-      setSuccess(`Updated active 2FA method to ${formatMethodLabel(targetMethod)}`);
+      setSuccess(`${formatMethodLabel(targetMethod)} is now ${enabled ? "Enabled" : "Disabled"}`);
       await fetch2FAStatus();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to switch method");
+      setError(err instanceof Error ? err.message : "Failed to toggle 2FA method");
     } finally {
       setUpdating(false);
     }
@@ -164,7 +157,7 @@ export default function Security2FASection() {
         throw new Error(data.error || "Verification failed");
       }
 
-      setSuccess("Google Authenticator activated successfully!");
+      setSuccess("Google Authenticator configured and enabled successfully!");
       setShowTotpModal(false);
       setTotpSetupData(null);
       await fetch2FAStatus();
@@ -181,7 +174,6 @@ export default function Security2FASection() {
     setError(null);
 
     try {
-      // 1. Get options from server
       const optionsRes = await fetch("/api/admin/auth/passkey/register-options", { method: "POST" });
       const options = await optionsRes.json();
 
@@ -189,10 +181,8 @@ export default function Security2FASection() {
         throw new Error(options.error || "Failed to initiate passkey registration");
       }
 
-      // 2. Trigger browser WebAuthn prompt
       const registrationResponse = await startRegistration({ optionsJSON: options });
 
-      // 3. Verify response on server
       const verifyRes = await fetch("/api/admin/auth/passkey/register-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -207,7 +197,7 @@ export default function Security2FASection() {
         throw new Error(verifyData.error || "Passkey verification failed");
       }
 
-      setSuccess("Passkey registered and set as your active 2FA method!");
+      setSuccess("Passkey registered and enabled successfully!");
       setShowPasskeyModal(false);
       setPasskeyName("");
       await fetch2FAStatus();
@@ -272,7 +262,9 @@ export default function Security2FASection() {
     );
   }
 
-  const activeMethod = status?.active2FAMethod || "EMAIL_OTP";
+  const isEmailOtpEnabled = status?.enabledMethods?.emailOtp !== false;
+  const isTotpEnabled = Boolean(status?.enabledMethods?.totp);
+  const isPasskeyEnabled = Boolean(status?.enabledMethods?.passkey);
 
   return (
     <div className="paper-card space-y-6 p-5 shadow-none md:p-6">
@@ -282,7 +274,7 @@ export default function Security2FASection() {
           <ShieldCheck className="h-5 w-5 text-[var(--accent)]" /> Two-Factor Authentication
         </h3>
         <p className="text-xs text-[var(--foreground)]/65">
-          Select your primary Admin 2FA verification method. Only the selected method will be requested during login.
+          Enable the 2FA verification methods available for your Admin account. During login, you can choose any configured enabled method.
         </p>
       </div>
 
@@ -311,11 +303,10 @@ export default function Security2FASection() {
       <div className="grid gap-4 md:grid-cols-3">
         {/* 1. EMAIL OTP CARD */}
         <div
-          onClick={() => handleSelectMethod("EMAIL_OTP")}
-          className={`relative cursor-pointer rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between ${
-            activeMethod === "EMAIL_OTP"
-              ? "border-[#8d6b4e] bg-[#fbf7f0] shadow-sm ring-1 ring-[#8d6b4e]/30"
-              : "border-gray-200 bg-white hover:border-[#8d6b4e]/40"
+          className={`relative rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between ${
+            isEmailOtpEnabled
+              ? "border-[#8d6b4e] bg-[#fbf7f0] shadow-sm"
+              : "border-gray-200 bg-white"
           }`}
         >
           <div>
@@ -323,45 +314,48 @@ export default function Security2FASection() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100/60 text-amber-800">
                 <Mail className="h-5 w-5" />
               </div>
-              {activeMethod === "EMAIL_OTP" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#8d6b4e] px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                  <Check className="h-3 w-3" /> Active
-                </span>
-              ) : (
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 uppercase">
-                  Available
-                </span>
-              )}
+              <button
+                type="button"
+                disabled={updating}
+                onClick={() => handleToggleMethod("EMAIL_OTP", !isEmailOtpEnabled)}
+                className="flex items-center gap-1 text-xs font-bold transition"
+              >
+                {isEmailOtpEnabled ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                    <Check className="h-3 w-3" /> Enabled
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500 uppercase">
+                    Disabled
+                  </span>
+                )}
+              </button>
             </div>
 
             <h4 className="font-bold text-[#2f241b] text-base">Email OTP</h4>
             <p className="mt-1 text-xs text-[#6a5846] leading-relaxed">
-              Receive a one-time verification code by email during login.
+              Receive a one-time verification code by email during login when selected.
             </p>
           </div>
 
           <div className="mt-4 pt-3 border-t border-gray-100">
             <button
               type="button"
-              disabled={updating || activeMethod === "EMAIL_OTP"}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleSelectMethod("EMAIL_OTP");
-              }}
+              disabled={updating}
+              onClick={() => handleToggleMethod("EMAIL_OTP", !isEmailOtpEnabled)}
               className="w-full rounded-xl border border-gray-200 bg-white py-2 text-xs font-semibold text-[#5f4a38] transition hover:bg-[#f7efe4] disabled:opacity-50"
             >
-              {activeMethod === "EMAIL_OTP" ? "Currently Active" : "Select Email OTP"}
+              {isEmailOtpEnabled ? "Disable Email OTP" : "Enable Email OTP"}
             </button>
           </div>
         </div>
 
         {/* 2. GOOGLE AUTHENTICATOR CARD */}
         <div
-          onClick={() => handleSelectMethod("TOTP")}
-          className={`relative cursor-pointer rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between ${
-            activeMethod === "TOTP"
-              ? "border-[#8d6b4e] bg-[#fbf7f0] shadow-sm ring-1 ring-[#8d6b4e]/30"
-              : "border-gray-200 bg-white hover:border-[#8d6b4e]/40"
+          className={`relative rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between ${
+            isTotpEnabled
+              ? "border-[#8d6b4e] bg-[#fbf7f0] shadow-sm"
+              : "border-gray-200 bg-white"
           }`}
         >
           <div>
@@ -369,16 +363,25 @@ export default function Security2FASection() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100/60 text-blue-800">
                 <Smartphone className="h-5 w-5" />
               </div>
-              {activeMethod === "TOTP" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#8d6b4e] px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                  <Check className="h-3 w-3" /> Active
-                </span>
-              ) : status?.totpConfigured ? (
-                <span className="rounded-full bg-emerald-100 text-emerald-800 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                  Verified
-                </span>
+              {status?.totpConfigured ? (
+                <button
+                  type="button"
+                  disabled={updating}
+                  onClick={() => handleToggleMethod("TOTP", !isTotpEnabled)}
+                  className="flex items-center gap-1 text-xs font-bold transition"
+                >
+                  {isTotpEnabled ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                      <Check className="h-3 w-3" /> Enabled
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500 uppercase">
+                      Disabled
+                    </span>
+                  )}
+                </button>
               ) : (
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 uppercase">
+                <span className="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-semibold uppercase">
                   Not Configured
                 </span>
               )}
@@ -395,10 +398,7 @@ export default function Security2FASection() {
               <button
                 type="button"
                 disabled={updating}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleStartTotpSetup();
-                }}
+                onClick={handleStartTotpSetup}
                 className="w-full rounded-xl bg-[#8d6b4e] py-2 text-xs font-semibold text-white transition hover:bg-[#6e5440] disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <QrCode className="h-3.5 w-3.5" />
@@ -408,22 +408,16 @@ export default function Security2FASection() {
               <>
                 <button
                   type="button"
-                  disabled={updating || activeMethod === "TOTP"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectMethod("TOTP");
-                  }}
+                  disabled={updating}
+                  onClick={() => handleToggleMethod("TOTP", !isTotpEnabled)}
                   className="flex-1 rounded-xl border border-gray-200 bg-white py-2 text-xs font-semibold text-[#5f4a38] transition hover:bg-[#f7efe4] disabled:opacity-50"
                 >
-                  {activeMethod === "TOTP" ? "Currently Active" : "Select Authenticator"}
+                  {isTotpEnabled ? "Disable" : "Enable"}
                 </button>
                 <button
                   type="button"
                   disabled={updating}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleStartTotpSetup();
-                  }}
+                  onClick={handleStartTotpSetup}
                   className="rounded-xl border border-gray-200 px-2.5 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50"
                   title="Re-configure Google Authenticator"
                 >
@@ -436,11 +430,10 @@ export default function Security2FASection() {
 
         {/* 3. PASSKEY CARD */}
         <div
-          onClick={() => handleSelectMethod("PASSKEY")}
-          className={`relative cursor-pointer rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between ${
-            activeMethod === "PASSKEY"
-              ? "border-[#8d6b4e] bg-[#fbf7f0] shadow-sm ring-1 ring-[#8d6b4e]/30"
-              : "border-gray-200 bg-white hover:border-[#8d6b4e]/40"
+          className={`relative rounded-2xl border p-4 transition-all duration-200 flex flex-col justify-between ${
+            isPasskeyEnabled
+              ? "border-[#8d6b4e] bg-[#fbf7f0] shadow-sm"
+              : "border-gray-200 bg-white"
           }`}
         >
           <div>
@@ -448,16 +441,25 @@ export default function Security2FASection() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-100/60 text-purple-800">
                 <Key className="h-5 w-5" />
               </div>
-              {activeMethod === "PASSKEY" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[#8d6b4e] px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
-                  <Check className="h-3 w-3" /> Active
-                </span>
-              ) : status?.passkeysCount && status.passkeysCount > 0 ? (
-                <span className="rounded-full bg-purple-100 text-purple-800 px-2 py-0.5 text-[10px] font-semibold uppercase">
-                  {status.passkeysCount} {status.passkeysCount === 1 ? "Passkey" : "Passkeys"}
-                </span>
+              {status?.passkeysCount && status.passkeysCount > 0 ? (
+                <button
+                  type="button"
+                  disabled={updating}
+                  onClick={() => handleToggleMethod("PASSKEY", !isPasskeyEnabled)}
+                  className="flex items-center gap-1 text-xs font-bold transition"
+                >
+                  {isPasskeyEnabled ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                      <Check className="h-3 w-3" /> Enabled
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[10px] font-semibold text-gray-500 uppercase">
+                      Disabled
+                    </span>
+                  )}
+                </button>
               ) : (
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500 uppercase">
+                <span className="rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-semibold uppercase">
                   Not Configured
                 </span>
               )}
@@ -474,10 +476,7 @@ export default function Security2FASection() {
               <button
                 type="button"
                 disabled={updating}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowPasskeyModal(true);
-                }}
+                onClick={() => setShowPasskeyModal(true)}
                 className="w-full rounded-xl bg-[#8d6b4e] py-2 text-xs font-semibold text-white transition hover:bg-[#6e5440] disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -487,22 +486,16 @@ export default function Security2FASection() {
               <>
                 <button
                   type="button"
-                  disabled={updating || activeMethod === "PASSKEY"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectMethod("PASSKEY");
-                  }}
+                  disabled={updating}
+                  onClick={() => handleToggleMethod("PASSKEY", !isPasskeyEnabled)}
                   className="flex-1 rounded-xl border border-gray-200 bg-white py-2 text-xs font-semibold text-[#5f4a38] transition hover:bg-[#f7efe4] disabled:opacity-50"
                 >
-                  {activeMethod === "PASSKEY" ? "Currently Active" : "Select Passkey"}
+                  {isPasskeyEnabled ? "Disable" : "Enable"}
                 </button>
                 <button
                   type="button"
                   disabled={updating}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowPasskeyModal(true);
-                  }}
+                  onClick={() => setShowPasskeyModal(true)}
                   className="rounded-xl border border-gray-200 px-2.5 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 flex items-center justify-center"
                   title="Add Another Passkey"
                 >

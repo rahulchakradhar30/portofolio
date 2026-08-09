@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminAuth } from '@/app/lib/firebaseAdmin';
 import { assertAdminSession } from '@/app/lib/adminAuth';
-import { getAdminSecurityDoc } from '@/app/lib/admin2FA';
+import { getAdminSecurityDoc, resolveUsable2FAMethods } from '@/app/lib/admin2FA';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 
 export async function POST(request: NextRequest) {
@@ -37,9 +37,11 @@ export async function POST(request: NextRequest) {
     }
 
     const doc = await getAdminSecurityDoc(decodedIdToken.uid);
+    const usableMethods = resolveUsable2FAMethods(doc);
 
     return NextResponse.json({
-      active2FAMethod: doc.active2FAMethod,
+      usableMethods,
+      enabledMethods: doc.enabledMethods,
       totpConfigured: Boolean(doc.totp?.enabled && doc.totp?.encryptedSecret),
       passkeysCount: doc.passkeys?.length || 0,
     });
@@ -55,9 +57,11 @@ export async function GET(request: NextRequest) {
     if (!auth.ok) return auth.response;
 
     const doc = await getAdminSecurityDoc(auth.decoded.uid);
+    const usableMethods = resolveUsable2FAMethods(doc);
 
     return NextResponse.json({
-      active2FAMethod: doc.active2FAMethod,
+      usableMethods,
+      enabledMethods: doc.enabledMethods,
       totpConfigured: Boolean(doc.totp?.enabled && doc.totp?.encryptedSecret),
       passkeysCount: doc.passkeys?.length || 0,
       passkeys: (doc.passkeys || []).map((pk) => ({

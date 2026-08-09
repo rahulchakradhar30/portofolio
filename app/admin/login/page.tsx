@@ -12,7 +12,7 @@ import { assertFirebaseClientConfig, firebaseAuth } from '@/app/lib/firebaseClie
 import { startAuthentication } from '@simplewebauthn/browser';
 
 // ── Types ───────────────────────────────────────────────────────────
-type LoginStep = 'credentials' | 'otp' | 'totp' | 'passkey' | 'forgot-password';
+type LoginStep = 'credentials' | 'choose-2fa' | 'otp' | 'totp' | 'passkey' | 'forgot-password';
 type LoadingStage =
   | 'idle'
   | 'starting-email'
@@ -249,6 +249,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [otp, setOtp] = useState('');
+  const [usableMethods, setUsableMethods] = useState<('EMAIL_OTP' | 'TOTP' | 'PASSKEY')[]>([]);
 
   // OTP state
   const [otpExpiresAt, setOtpExpiresAt] = useState(0);
@@ -377,7 +378,7 @@ export default function AdminLoginPage() {
   })();
 
 
-  // ── Email/Password Login → Resolve 2FA Method ──────────────────────
+  // ── Email/Password Login → Resolve 2FA Methods ─────────────────────
   const handleEmailPasswordLogin = async () => {
     setLoading(true);
     setLoadingStage('starting-email');
@@ -403,7 +404,7 @@ export default function AdminLoginPage() {
       const idToken = await credential.user.getIdToken(true);
       idTokenRef.current = idToken;
 
-      // Query server for Admin's active 2FA method
+      // Query server for Admin's usable 2FA methods
       setLoadingStage('fetching-2fa');
       const statusRes = await fetch('/api/admin/auth/2fa-status', {
         method: 'POST',
@@ -415,43 +416,60 @@ export default function AdminLoginPage() {
         throw new Error(statusData.error || 'Failed to determine 2FA configuration');
       }
 
-      const activeMethod: 'EMAIL_OTP' | 'TOTP' | 'PASSKEY' = statusData.active2FAMethod || 'EMAIL_OTP';
+      const available: ('EMAIL_OTP' | 'TOTP' | 'PASSKEY')[] = statusData.usableMethods || ['EMAIL_OTP'];
+      setUsableMethods(available);
 
-      if (activeMethod === 'EMAIL_OTP') {
-        // Send Email OTP
-        setLoadingStage('sending-otp');
-        const otpRes = await fetch('/api/admin/auth/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ idToken }),
-          credentials: 'include',
-        });
-
-        const otpData = await otpRes.json();
-        if (!otpRes.ok) {
-          throw new Error(otpData.error || 'Failed to send OTP');
-        }
-
-        setOtpExpiresAt(Date.now() + (otpData.expiresInMs || 300000));
-        setMaskedEmail(otpData.maskedEmail || normalizedEmail);
-        setOtpExpired(false);
-        setOtp('');
-        setStep('otp');
-      } else if (activeMethod === 'TOTP') {
-        // ABSOLUTE RULE: DO NOT send email OTP!
-        setTotpCode('');
-        setStep('totp');
-      } else if (activeMethod === 'PASSKEY') {
-        // ABSOLUTE RULE: DO NOT send email OTP!
-        setStep('passkey');
-      }
-
+      // Move to 2FA selection screen (DO NOT pre-generate OTP!)
+      setStep('choose-2fa');
       setLoading(false);
       setLoadingStage('idle');
     } catch (e) {
       setError(getReadableAuthError(e));
       setLoading(false);
       setLoadingStage('idle');
+    }
+  };
+
+  // ── Select 2FA Verification Method ─────────────────────────────────
+  const handleSelectLoginMethod = async (selectedMethod: 'EMAIL_OTP' | 'TOTP' | 'PASSKEY') => {
+    setError(null);
+    setSuccess(null);
+
+    if (selectedMethod === 'EMAIL_OTP') {
+      setLoading(true);
+      setLoadingStage('sending-otp');
+
+      try {
+        if (!idTokenRef.current) throw new Error('Session expired. Please sign in again.');
+
+        const otpRes = await fetch('/api/admin/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken: idTokenRef.current }),
+          credentials: 'include',
+        });
+
+        const otpData = await otpRes.json();
+        if (!otpRes.ok) throw new Error(otpData.error || 'Failed to send OTP');
+
+        setOtpExpiresAt(Date.now() + (otpData.expiresInMs || 300000));
+        setMaskedEmail(otpData.maskedEmail || email);
+        setOtpExpired(false);
+        setOtp('');
+        setStep('otp');
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to send OTP');
+      } finally {
+        setLoading(false);
+        setLoadingStage('idle');
+      }
+    } else if (selectedMethod === 'TOTP') {
+      // ABSOLUTE RULE: DO NOT send email OTP!
+      setTotpCode('');
+      setStep('totp');
+    } else if (selectedMethod === 'PASSKEY') {
+      // ABSOLUTE RULE: DO NOT send email OTP!
+      setStep('passkey');
     }
   };
 
@@ -867,8 +885,120 @@ export default function AdminLoginPage() {
                   <p className="mt-5 text-center text-xs leading-relaxed text-[var(--foreground)]/55">
                   Access is restricted to the authorized admin email only.
                   <br />
-                  OTP verification will be sent after credential check.
+                  Select your verification method after credential check.
                 </p>
+              </motion.div>
+            )}
+
+            {/* ═══════════ STEP: CHOOSE 2FA METHOD ═══════════ */}
+            {step === 'choose-2fa' && (
+              <motion.div
+                key="choose-2fa"
+                variants={stepVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Back button */}
+                <button
+                  onClick={handleBackToCredentials}
+                  disabled={loading}
+                  className="mb-4 flex items-center gap-1.5 text-xs font-semibold text-[var(--foreground)]/65 transition-colors hover:text-[var(--foreground)] disabled:opacity-50"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  Back to login
+                </button>
+
+                {/* Badge */}
+                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <span className="mr-1.5">🛡️</span> Verification
+                </div>
+
+                <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
+                  Choose Verification Method
+                </h1>
+                <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">
+                  Select how you want to complete your secure login.
+                </p>
+
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 rounded-2xl border border-red-200/60 px-4 py-3 text-sm"
+                    style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.06) 0%, rgba(239,68,68,0.02) 100%)' }}
+                  >
+                    <p className="text-red-600/90 text-[13px]">{error}</p>
+                  </motion.div>
+                )}
+
+                <div className="mt-6 space-y-3">
+                  {usableMethods.includes('EMAIL_OTP') && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleSelectLoginMethod('EMAIL_OTP')}
+                      className="w-full flex items-center gap-4 rounded-2xl border border-[#7a5f47]/15 bg-white p-4 text-left transition-all hover:border-[#8d6b4e] hover:bg-[#fbf7f0] hover:shadow-md disabled:opacity-60 group"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100/60 text-amber-800 font-bold text-xl group-hover:scale-105 transition-transform">
+                        ✉️
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[#2f241b] text-base group-hover:text-[#8d6b4e] transition-colors">
+                          Email OTP
+                        </h4>
+                        <p className="text-xs text-[#6a5846] mt-0.5">
+                          Receive a one-time verification code by email.
+                        </p>
+                      </div>
+                    </button>
+                  )}
+
+                  {usableMethods.includes('TOTP') && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleSelectLoginMethod('TOTP')}
+                      className="w-full flex items-center gap-4 rounded-2xl border border-[#7a5f47]/15 bg-white p-4 text-left transition-all hover:border-[#8d6b4e] hover:bg-[#fbf7f0] hover:shadow-md disabled:opacity-60 group"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100/60 text-blue-800 font-bold text-xl group-hover:scale-105 transition-transform">
+                        📱
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[#2f241b] text-base group-hover:text-[#8d6b4e] transition-colors">
+                          Google Authenticator
+                        </h4>
+                        <p className="text-xs text-[#6a5846] mt-0.5">
+                          Enter the code generated by your authenticator app.
+                        </p>
+                      </div>
+                    </button>
+                  )}
+
+                  {usableMethods.includes('PASSKEY') && (
+                    <button
+                      type="button"
+                      disabled={loading}
+                      onClick={() => handleSelectLoginMethod('PASSKEY')}
+                      className="w-full flex items-center gap-4 rounded-2xl border border-[#7a5f47]/15 bg-white p-4 text-left transition-all hover:border-[#8d6b4e] hover:bg-[#fbf7f0] hover:shadow-md disabled:opacity-60 group"
+                    >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100/60 text-purple-800 font-bold text-xl group-hover:scale-105 transition-transform">
+                        🔑
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-[#2f241b] text-base group-hover:text-[#8d6b4e] transition-colors">
+                          Passkey
+                        </h4>
+                        <p className="text-xs text-[#6a5846] mt-0.5">
+                          Use your device passkey, biometric, PIN, or security key.
+                        </p>
+                      </div>
+                    </button>
+                  )}
+                </div>
               </motion.div>
             )}
 
@@ -1011,6 +1141,21 @@ export default function AdminLoginPage() {
                 <p className="mt-5 text-center text-xs leading-relaxed text-[#9c8a78]">
                   Check your inbox and spam folder. The code expires in 5 minutes.
                 </p>
+
+                {usableMethods.length > 1 && (
+                  <div className="mt-4 text-center border-t pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setError(null);
+                        setStep('choose-2fa');
+                      }}
+                      className="text-xs font-semibold text-[#8d6b4e] hover:text-[#6e5440] transition-colors"
+                    >
+                      ← Use another verification method
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -1100,6 +1245,21 @@ export default function AdminLoginPage() {
                     </>
                   )}
                 </button>
+
+                {usableMethods.length > 1 && (
+                  <div className="mt-4 text-center border-t pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setError(null);
+                        setStep('choose-2fa');
+                      }}
+                      className="text-xs font-semibold text-[#8d6b4e] hover:text-[#6e5440] transition-colors"
+                    >
+                      ← Use another verification method
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -1176,6 +1336,21 @@ export default function AdminLoginPage() {
                     </>
                   )}
                 </button>
+
+                {usableMethods.length > 1 && (
+                  <div className="mt-4 text-center border-t pt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setError(null);
+                        setStep('choose-2fa');
+                      }}
+                      className="text-xs font-semibold text-[#8d6b4e] hover:text-[#6e5440] transition-colors"
+                    >
+                      ← Use another verification method
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
 

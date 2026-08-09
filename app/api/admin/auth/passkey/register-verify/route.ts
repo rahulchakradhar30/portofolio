@@ -65,9 +65,15 @@ export async function POST(request: NextRequest) {
 
     const updatedPasskeys = [...(doc.passkeys || []).filter((pk) => pk.id !== newPasskey.id), newPasskey];
 
-    // Verification successful! Set active2FAMethod = 'PASSKEY'
+    const enabledMethods = {
+      emailOtp: doc.enabledMethods?.emailOtp ?? true,
+      totp: doc.enabledMethods?.totp ?? false,
+      passkey: true,
+    };
+
+    // Verification successful! Enable Passkey method
     await saveAdminSecurityDoc(uid, {
-      active2FAMethod: 'PASSKEY',
+      enabledMethods,
       passkeys: updatedPasskeys,
       pendingWebAuthnChallenge: '',
     });

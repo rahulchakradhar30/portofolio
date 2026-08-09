@@ -1,4 +1,4 @@
-# Admin Multi-Method 2FA
+# Admin Multi-Method 2FA Architecture Guide
 
 This document details the multi-factor authentication (2FA) architecture for the Admin portal, supporting Email OTP, Google Authenticator (TOTP), and Passkeys (WebAuthn).
 
@@ -6,7 +6,7 @@ This document details the multi-factor authentication (2FA) architecture for the
 
 ## Purpose
 
-The Admin 2FA system provides flexible, high-security authentication options for the website Administrator. Rather than forcing a single 2FA mechanism, the Admin can choose their preferred primary second factor while maintaining strict server-side policy enforcement.
+The Admin 2FA system provides flexible, high-security authentication options for the website Administrator. Rather than restricting the Admin to a single method or forcing one specific mechanism, multiple 2FA methods can be enabled in Admin Settings, allowing the Admin to choose their preferred verification method for each individual login.
 
 ---
 
@@ -24,20 +24,45 @@ The Admin 2FA system provides flexible, high-security authentication options for
 ## Admin Configuration
 
 - **Location**: Admin Dashboard → Settings → Two-Factor Authentication
-- **Selection Rule**: The Admin selects **ONE active primary 2FA method**.
-- **State Indicators**:
-  - `ACTIVE`: Currently selected 2FA method used for login verification.
-  - `VERIFIED`: Configured and ready to be set active.
-  - `NOT CONFIGURED`: Requires initial setup/registration before activation.
+- **Selection Model**: The Admin controls which 2FA methods are **ENABLED** for their account.
+- **Enabled vs Configured**:
+  - `Email OTP`: Enabled by default (can be toggled if another usable method exists).
+  - `Google Authenticator`: Requires initial setup & 6-digit verification code before it can be enabled.
+  - `Passkey`: Requires registering at least one WebAuthn credential before it can be enabled.
+- **Lockout Prevention**: At least one usable 2FA method must remain enabled at all times.
 
 ---
 
-## Email OTP
+## Login Flow & Method Selection
 
-- **Trigger Condition**:
-  > Email OTP is generated and sent only when Email OTP is the active authentication method.
-- **Server Enforcement**:
-  The `/api/admin/auth/send-otp` endpoint checks `active2FAMethod` on the server before generating or emailing any OTP. If TOTP or Passkey is active, no email is sent and no OTP entry is written to Firestore.
+1. **Step 1: Credential Verification**
+   - Admin enters Email and Password.
+   - Primary credentials are validated by Firebase Auth.
+   - Server returns the list of usable enabled methods (`usableMethods`).
+   - **NO OTP email is sent during this step.**
+
+2. **Step 2: Verification Method Selection**
+   - The login UI presents a **Choose Verification Method** screen listing all available usable methods:
+     - `Email OTP`: "Receive a verification code by email."
+     - `Google Authenticator`: "Enter the code from your authenticator app."
+     - `Passkey`: "Use your device passkey, biometric, PIN, or security key."
+   - The Admin selects ONE method for the current login session.
+
+3. **Step 3: Verification Execution**
+   - **Email OTP**: OTP is generated and emailed **ONLY** when Email OTP is selected.
+   - **Google Authenticator**: Prompts for 6-digit TOTP code. **NO email OTP is generated or sent.**
+   - **Passkey**: Prompts for WebAuthn credential verification. **NO email OTP is generated or sent.**
+
+4. **Step 4: Method Switching**
+   - On challenge screens, a `"← Use another verification method"` action returns the Admin to the selection screen if multiple methods are enabled.
+
+---
+
+## Email OTP Trigger Rule
+
+> **CRITICAL RULE**: Email OTP is generated and sent ONLY when the Admin explicitly selects Email OTP for the current login session.
+
+The `/api/admin/auth/send-otp` endpoint checks `resolveUsable2FAMethods` on the server before generating or emailing any OTP. If TOTP or Passkey is used, no email is sent and no OTP entry is written to Firestore.
 
 ---
 
@@ -46,9 +71,8 @@ The Admin 2FA system provides flexible, high-security authentication options for
 - **Standard**: RFC 6238 TOTP with SHA-1 algorithm, 6 digits, and 30-second time period.
 - **Secret Generation**: Cryptographically secure 20-byte base32 secret generated server-side using `otplib`.
 - **Provisioning URI Format**:
-  Uses standard format:
   `otpauth://totp/{ISSUER}:{ACCOUNT}?secret={BASE32_SECRET}&issuer={ISSUER}`
-- **QR Provisioning**: Generated as a PNG Data URI via `qrcode` from the provisioning URI.
+- **QR Provisioning**: Generated as a PNG Data URI via `qrcode`.
 - **Manual Setup Key**: Displayed alongside QR code formatted for easy typing.
 - **Verification**: Occurs strictly server-side (`otplib.authenticator.verify`).
 - **Secret Storage**: Encrypted at rest in Firestore `admin_security` collection using AES-256-GCM encryption with a key derived from server environment credentials.
@@ -61,7 +85,7 @@ The Admin 2FA system provides flexible, high-security authentication options for
 - **Registration**:
   1. Server generates random WebAuthn registration challenge (`/api/admin/auth/passkey/register-options`).
   2. Client calls `navigator.credentials.create()`.
-  3. Server verifies registration response (`verifyRegistrationResponse`), stores public key, credential ID, sign counter, and transports.
+  3. Server verifies registration response (`verifyRegistrationResponse`), stores public key, credential ID, sign counter, and transports, and sets `enabledMethods.passkey = true`.
 - **Authentication**:
   1. Server generates authentication challenge (`/api/admin/auth/passkey/login-options`).
   2. Client calls `navigator.credentials.get()`.
@@ -70,46 +94,20 @@ The Admin 2FA system provides flexible, high-security authentication options for
 
 ---
 
-## Method Switching & Verification-Before-Activation
-
-To prevent accidental lockout during configuration:
-1. Admin selects a new method (e.g., Email OTP → Google Authenticator).
-2. System initiates setup (generates secret / WebAuthn challenge).
-3. Admin must **successfully verify** a code or biometric assertion.
-4. Only upon successful verification does `active2FAMethod` update to the new method.
-5. If verification fails or is cancelled, the existing 2FA method remains active without interruption.
-
----
-
-## Recovery / Lockout Protection
-
-- The system blocks deleting the last registered Passkey while Passkey is set as the active 2FA method.
-- Existing Admin accounts without explicit 2FA configuration default safely to `EMAIL_OTP`.
-
----
-
 ## Security Considerations
 
-- **Server-Side Enforcement**: All authentication decisions (which challenge to issue, verifying credentials, checking active method) are enforced by server API routes.
+- **Server-Side Authorization**: All 2FA decisions (usable methods, challenge issuance, credential verification) are enforced by server API routes. Frontend requests for methods are strictly validated.
 - **Rate Limiting**: `asyncEnforceAdminRateLimit` protects OTP, TOTP, and Passkey verification endpoints against brute-force attacks.
-- **Secret Hygiene**: TOTP secrets and WebAuthn challenges are never logged, never exposed in client bundles, and encrypted at rest.
+- **Secret Hygiene**: TOTP secrets and WebAuthn challenges are never logged, never exposed in client bundles, and encrypted at rest using AES-256-GCM.
 - **Origin Verification**: WebAuthn checks `expectedRPID` and `expectedOrigin` to prevent phishing and relay attacks.
 
 ---
 
-## Files Changed
+## Key Files
 
-- [admin2FA.ts](file:///r:/Repo/portofolio/app/lib/admin2FA.ts) — Centralized 2FA Resolver & Firestore Persistence
-- [send-otp/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/send-otp/route.ts) — Server check enforcing Email OTP rule
-- [2fa-status/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/2fa-status/route.ts) — 2FA status query endpoint
-- [totp/setup/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/totp/setup/route.ts) — TOTP secret & QR provisioning
-- [totp/verify/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/totp/verify/route.ts) — TOTP setup & login verification
-- [passkey/register-options/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/passkey/register-options/route.ts) — WebAuthn registration options
-- [passkey/register-verify/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/passkey/register-verify/route.ts) — WebAuthn registration verification
-- [passkey/login-options/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/passkey/login-options/route.ts) — WebAuthn login options
-- [passkey/login-verify/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/passkey/login-verify/route.ts) — WebAuthn login assertion verification & session creation
-- [passkey/manage/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/passkey/manage/route.ts) — Passkey management & deletion
-- [2fa-method/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/2fa-method/route.ts) — Method activation endpoint
-- [Security2FASection.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/Security2FASection.tsx) — Admin 2FA Settings UI
-- [SettingsTab.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/SettingsTab.tsx) — Admin Settings dashboard integration
-- [page.tsx (Admin Login)](file:///r:/Repo/portofolio/app/admin/login/page.tsx) — Login page 2FA method flow
+- [admin2FA.ts](file:///r:/Repo/portofolio/app/lib/admin2FA.ts) — Centralized 2FA resolver & AES-256-GCM encryption.
+- [2fa-status/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/2fa-status/route.ts) — Endpoint returning `usableMethods` & `enabledMethods`.
+- [2fa-config/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/2fa-config/route.ts) — Endpoint to enable/disable 2FA methods in Admin Settings.
+- [send-otp/route.ts](file:///r:/Repo/portofolio/app/api/admin/auth/send-otp/route.ts) — Email OTP endpoint enforced to execute only when Email OTP is selected.
+- [Security2FASection.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/Security2FASection.tsx) — Admin Settings UI with independent method enablement toggles.
+- [page.tsx (Admin Login)](file:///r:/Repo/portofolio/app/admin/login/page.tsx) — Multi-step login flow with method selection screen.

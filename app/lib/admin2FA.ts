@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import { getAdminDb } from './firebaseAdmin';
 
-export type Active2FAMethod = 'EMAIL_OTP' | 'TOTP' | 'PASSKEY';
+export type TwoFactorMethodType = 'EMAIL_OTP' | 'TOTP' | 'PASSKEY';
+export type Active2FAMethod = TwoFactorMethodType; // Alias for backward compatibility
 
 export interface PasskeyCredential {
   id: string; // Base64URL credential ID
@@ -22,7 +23,12 @@ export interface TotpConfig {
 }
 
 export interface AdminSecurityDoc {
-  active2FAMethod: Active2FAMethod;
+  active2FAMethod?: TwoFactorMethodType; // Kept for legacy compatibility
+  enabledMethods?: {
+    emailOtp?: boolean; // Default true
+    totp?: boolean;     // Default false until configured
+    passkey?: boolean;  // Default false until registered
+  };
   totp?: TotpConfig;
   passkeys?: PasskeyCredential[];
   pendingTotpSecret?: string; // Encrypted unverified secret during TOTP setup
@@ -78,7 +84,7 @@ export function decryptSecret(encryptedPayload: string): string {
 }
 
 /**
- * Fetches the Admin security configuration from Firestore, falling back to EMAIL_OTP default
+ * Fetches the Admin security configuration from Firestore
  */
 export async function getAdminSecurityDoc(uid: string): Promise<AdminSecurityDoc> {
   try {
@@ -88,6 +94,7 @@ export async function getAdminSecurityDoc(uid: string): Promise<AdminSecurityDoc
 
     if (!snap.exists) {
       return {
+        enabledMethods: { emailOtp: true, totp: false, passkey: false },
         active2FAMethod: 'EMAIL_OTP',
       };
     }
@@ -95,6 +102,11 @@ export async function getAdminSecurityDoc(uid: string): Promise<AdminSecurityDoc
     const data = snap.data() as AdminSecurityDoc;
     return {
       active2FAMethod: data.active2FAMethod || 'EMAIL_OTP',
+      enabledMethods: {
+        emailOtp: data.enabledMethods?.emailOtp ?? true,
+        totp: data.enabledMethods?.totp ?? Boolean(data.totp?.enabled),
+        passkey: data.enabledMethods?.passkey ?? Boolean(data.passkeys && data.passkeys.length > 0),
+      },
       totp: data.totp,
       passkeys: data.passkeys || [],
       pendingTotpSecret: data.pendingTotpSecret,
@@ -103,8 +115,41 @@ export async function getAdminSecurityDoc(uid: string): Promise<AdminSecurityDoc
     };
   } catch (error) {
     console.error('Failed to get Admin security doc:', error);
-    return { active2FAMethod: 'EMAIL_OTP' };
+    return {
+      enabledMethods: { emailOtp: true, totp: false, passkey: false },
+      active2FAMethod: 'EMAIL_OTP',
+    };
   }
+}
+
+/**
+ * Resolves the list of currently usable 2FA methods for the Admin.
+ * A method is usable ONLY if it is enabled AND properly configured.
+ */
+export function resolveUsable2FAMethods(doc: AdminSecurityDoc): TwoFactorMethodType[] {
+  const usable: TwoFactorMethodType[] = [];
+
+  // Email OTP is usable if enabled (default true)
+  if (doc.enabledMethods?.emailOtp !== false) {
+    usable.push('EMAIL_OTP');
+  }
+
+  // TOTP is usable if enabled AND configured with a secret
+  if (doc.enabledMethods?.totp === true && doc.totp?.enabled && doc.totp?.encryptedSecret) {
+    usable.push('TOTP');
+  }
+
+  // Passkey is usable if enabled AND at least one passkey credential exists
+  if (doc.enabledMethods?.passkey === true && doc.passkeys && doc.passkeys.length > 0) {
+    usable.push('PASSKEY');
+  }
+
+  // Minimum safety fallback to prevent lockouts
+  if (usable.length === 0) {
+    usable.push('EMAIL_OTP');
+  }
+
+  return usable;
 }
 
 /**
@@ -124,9 +169,10 @@ export async function saveAdminSecurityDoc(uid: string, updates: Partial<AdminSe
 }
 
 /**
- * Returns the currently active 2FA method for the given Admin UID
+ * Returns legacy active 2FA method for backward compatibility
  */
-export async function getActive2FAMethod(uid: string): Promise<Active2FAMethod> {
+export async function getActive2FAMethod(uid: string): Promise<TwoFactorMethodType> {
   const doc = await getAdminSecurityDoc(uid);
-  return doc.active2FAMethod || 'EMAIL_OTP';
+  const usable = resolveUsable2FAMethods(doc);
+  return usable[0] || 'EMAIL_OTP';
 }

@@ -3,7 +3,7 @@ import { getAdminAuth, getAdminDb } from '@/app/lib/firebaseAdmin';
 import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 import { sendMail } from '@/app/lib/mail';
-import { getActive2FAMethod } from '@/app/lib/admin2FA';
+import { getAdminSecurityDoc, resolveUsable2FAMethods } from '@/app/lib/admin2FA';
 
 // ── OTP types & configs ─────────────────────────────────────────────
 export type OtpEntry = {
@@ -79,11 +79,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ABSOLUTE RULE: Verify active 2FA method on the SERVER
-    const activeMethod = await getActive2FAMethod(decodedIdToken.uid);
-    if (activeMethod !== 'EMAIL_OTP') {
+    // ABSOLUTE RULE: Verify Email OTP is enabled & usable on the SERVER
+    const doc = await getAdminSecurityDoc(decodedIdToken.uid);
+    const usableMethods = resolveUsable2FAMethods(doc);
+    if (!usableMethods.includes('EMAIL_OTP')) {
       return NextResponse.json(
-        { error: 'Email OTP is not enabled for your account. Use your configured 2FA method.' },
+        { error: 'Email OTP is not enabled for your account.' },
         { status: 400 }
       );
     }
