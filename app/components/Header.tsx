@@ -107,7 +107,7 @@ export default function Header() {
               Quick Search
               <span className="ml-1 rounded border-2 border-[var(--foreground)] px-1.5 py-0.5 text-[10px] font-bold">Ctrl K</span>
             </button>
-            <Link href="/hire" className="paper-button-primary px-6 py-2.5 text-sm">
+            <Link href="/hire" className="paper-button hover:!bg-[var(--accent)] hover:!border-[var(--accent)] hover:!text-[var(--surface)] px-6 py-2.5 text-sm">
               {siteCopy.headerHireCta}
             </Link>
           </div>
@@ -148,7 +148,7 @@ export default function Header() {
                   </button>
                 ))}
                 <div className="pt-4">
-                  <Link href="/hire" onClick={() => setIsOpen(false)} className="paper-button-primary inline-block w-full max-w-xs mx-auto py-3">
+                  <Link href="/hire" onClick={() => setIsOpen(false)} className="paper-button hover:!bg-[var(--accent)] hover:!border-[var(--accent)] hover:!text-[var(--surface)] inline-block w-full max-w-xs mx-auto py-3">
                     {siteCopy.headerHireCta}
                   </Link>
                 </div>

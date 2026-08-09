@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useMotionPreferences } from "./MotionProvider";
 import { useIsMobile } from "./useViewport";
+import { FrozenRouter } from "./FrozenRouter";
 
 export default function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,9 +18,9 @@ export default function PageTransition({ children }: { children: React.ReactNode
     ? { duration: 0.05 }
     : { type: "spring" as const, stiffness: isMobile ? 220 : 180, damping: isMobile ? 26 : 22, mass: 0.85 };
 
-  const isFirstMount = useRef(true);
+  const [isFirstMount, setIsFirstMount] = useState(true);
   useEffect(() => {
-    isFirstMount.current = false;
+    setIsFirstMount(false);
   }, []);
 
   return (
@@ -41,7 +42,7 @@ export default function PageTransition({ children }: { children: React.ReactNode
               className="pointer-events-none fixed left-0 top-0 z-[95] h-1 w-full origin-left bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300"
             />
           ) : null}
-          {children}
+          <FrozenRouter>{children}</FrozenRouter>
         </motion.div>
       </AnimatePresence>
     </>

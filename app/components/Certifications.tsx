@@ -57,6 +57,16 @@ export default function Certifications() {
     fetchCertifications();
   }, []);
 
+  useEffect(() => {
+    if (selectedCert) {
+      const originalStyle = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [selectedCert]);
+
   if ((loading || contentLoading) && isVisible) {
     return (
       <section className="relative px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
@@ -191,7 +201,7 @@ export default function Certifications() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(event) => event.stopPropagation()}
-              className="paper-card max-h-[90vh] w-full max-w-2xl overflow-y-auto shadow-2xl"
+              className="paper-card max-h-[90vh] w-full max-w-2xl !overflow-y-auto shadow-2xl"
             >
             <div className="sticky top-0 flex items-center justify-between border-b-2 border-[var(--foreground)] bg-[var(--surface)] p-4 sm:p-6 z-10">
               <div>
