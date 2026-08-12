@@ -16,7 +16,7 @@ export function DevtoolsGuard() {
       checkInterval: 1000, // Check every second
       methods: ['console', 'size', 'debugger'],
       logDetection: false,
-      blockMessage: '🔒 Developer tools are disabled for security reasons. Please close DevTools to continue.',
+      blockMessage: 'Developer tools are disabled for security reasons. Please close DevTools to continue.',
     });
   }, []);
 

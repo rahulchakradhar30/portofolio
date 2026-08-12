@@ -112,7 +112,7 @@ export default function Projects() {
           <LoadingSkeleton variant="cards" count={6} />
         ) : (
           <ExpandableSection collapsedMaxHeightPx={860}>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
+            <div className={gridClasses}>
               {visibleProjects.length === 0 ? (
                 <div className="col-span-full text-center font-bold text-lg">{siteCopy.projectsEmpty}</div>
               ) : (

@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { assertFirebaseClientConfig, firebaseAuth } from '@/app/lib/firebaseClient';
 import { startAuthentication } from '@simplewebauthn/browser';
+import { ShieldCheck, Mail, Smartphone, Key, Lock } from 'lucide-react';
 
 // ── Types ───────────────────────────────────────────────────────────
 type LoginStep = 'credentials' | 'choose-2fa' | 'otp' | 'totp' | 'passkey' | 'forgot-password';
@@ -777,8 +778,8 @@ export default function AdminLoginPage() {
                 transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* Badge */}
-                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
-                  <span className="mr-1.5">🔐</span> Secure Portal
+                <div className="inline-flex items-center rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <Lock className="w-3.5 h-3.5 mr-1.5 inline text-[var(--accent)]" /> Secure Portal
                 </div>
 
                 <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
@@ -913,8 +914,8 @@ export default function AdminLoginPage() {
                 </button>
 
                 {/* Badge */}
-                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
-                  <span className="mr-1.5">🛡️</span> Verification
+                <div className="inline-flex items-center rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <ShieldCheck className="w-3.5 h-3.5 mr-1.5 inline text-[var(--accent)]" /> Verification
                 </div>
 
                 <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
@@ -944,7 +945,7 @@ export default function AdminLoginPage() {
                       className="w-full flex items-center gap-4 rounded-2xl border border-[#7a5f47]/15 bg-white p-4 text-left transition-all hover:border-[#8d6b4e] hover:bg-[#fbf7f0] hover:shadow-md disabled:opacity-60 group"
                     >
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100/60 text-amber-800 font-bold text-xl group-hover:scale-105 transition-transform">
-                        ✉️
+                        <Mail className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-[#2f241b] text-base group-hover:text-[#8d6b4e] transition-colors">
@@ -965,7 +966,7 @@ export default function AdminLoginPage() {
                       className="w-full flex items-center gap-4 rounded-2xl border border-[#7a5f47]/15 bg-white p-4 text-left transition-all hover:border-[#8d6b4e] hover:bg-[#fbf7f0] hover:shadow-md disabled:opacity-60 group"
                     >
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-100/60 text-blue-800 font-bold text-xl group-hover:scale-105 transition-transform">
-                        📱
+                        <Smartphone className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-[#2f241b] text-base group-hover:text-[#8d6b4e] transition-colors">
@@ -986,7 +987,7 @@ export default function AdminLoginPage() {
                       className="w-full flex items-center gap-4 rounded-2xl border border-[#7a5f47]/15 bg-white p-4 text-left transition-all hover:border-[#8d6b4e] hover:bg-[#fbf7f0] hover:shadow-md disabled:opacity-60 group"
                     >
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100/60 text-purple-800 font-bold text-xl group-hover:scale-105 transition-transform">
-                        🔑
+                        <Key className="w-5 h-5" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-[#2f241b] text-base group-hover:text-[#8d6b4e] transition-colors">
@@ -1025,8 +1026,8 @@ export default function AdminLoginPage() {
                 </button>
 
                 {/* Badge */}
-                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
-                  <span className="mr-1.5">✉️</span> Verification
+                <div className="inline-flex items-center rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <Mail className="w-3.5 h-3.5 mr-1.5 inline text-[var(--accent)]" /> Verification
                 </div>
 
                 <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
@@ -1182,8 +1183,8 @@ export default function AdminLoginPage() {
                 </button>
 
                 {/* Badge */}
-                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
-                  <span className="mr-1.5">📱</span> Authenticator
+                <div className="inline-flex items-center rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <Smartphone className="w-3.5 h-3.5 mr-1.5 inline text-[var(--accent)]" /> Authenticator
                 </div>
 
                 <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
@@ -1286,8 +1287,8 @@ export default function AdminLoginPage() {
                 </button>
 
                 {/* Badge */}
-                <div className="inline-flex rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
-                  <span className="mr-1.5">🔑</span> Passkey
+                <div className="inline-flex items-center rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--foreground)]/70">
+                  <Key className="w-3.5 h-3.5 mr-1.5 inline text-[var(--accent)]" /> Passkey
                 </div>
 
                 <h1 className="mt-4 text-2xl font-black tracking-tight text-[var(--foreground)] sm:text-3xl">
@@ -1377,8 +1378,8 @@ export default function AdminLoginPage() {
                 </button>
 
                 {/* Badge */}
-                <div className="inline-flex rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a5f47]">
-                  <span className="mr-1.5">🔑</span> Password Reset
+                <div className="inline-flex items-center rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#7a5f47]">
+                  <Key className="w-3.5 h-3.5 mr-1.5 inline text-[#8d6b4e]" /> Password Reset
                 </div>
 
                 <h1 className="mt-4 text-2xl font-black text-[#2f241b] sm:text-3xl" style={{ letterSpacing: '-0.03em' }}>

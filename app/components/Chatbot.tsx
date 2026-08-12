@@ -17,7 +17,7 @@ const CHAT_STORAGE_KEY = 'portfolio-chat-messages-v1';
 const DEFAULT_MESSAGE: Message = {
   id: '1',
   role: 'assistant',
-  content: "Hi! 👋 I'm your AI assistant. Ask me anything about the portfolio, projects, web development, or any topic you'd like to know about!",
+  content: "Hi! I'm your AI assistant. Ask me anything about the portfolio, projects, web development, or any topic you'd like to know about!",
   timestamp: new Date(),
 };
 

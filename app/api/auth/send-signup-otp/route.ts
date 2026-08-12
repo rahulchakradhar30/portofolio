@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     // SMTP Dispatch
     await sendMail({
       to: email,
-      subject: `🔐 Signup Verification OTP: ${otp}`,
+      subject: `Signup Verification OTP: ${otp}`,
       text: `Your Signup Verification OTP is: ${otp}. It will expire in 5 minutes.`,
       html: `
         <div style="font-family: sans-serif; max-width: 400px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">

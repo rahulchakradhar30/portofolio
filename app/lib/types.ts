@@ -156,6 +156,7 @@ export interface PortfolioContent {
   // Dynamic Configuration Extensions
   animationConfig?: UnifiedAnimationConfig;
   themeConfig?: UnifiedThemeConfig;
+  siteEditorConfig?: SiteEditorConfig;
   
   // Cinematic Intro Experience
   introEnabled?: boolean;
@@ -168,6 +169,39 @@ export interface PortfolioContent {
   introEnableLogoAnimation?: boolean;
   // Branding & Favicon Configuration
   faviconConfig?: FaviconConfig;
+}
+
+export interface TypographyStyle {
+  color?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+}
+
+export interface StructuredFormattedText {
+  text: string;
+  style?: TypographyStyle;
+}
+
+export interface SectionLayoutConfig {
+  spacing?: 'compact' | 'normal' | 'large';
+  width?: 'narrow' | 'standard' | 'wide';
+  alignment?: 'left' | 'center' | 'right';
+  visible?: boolean;
+}
+
+export interface ProjectGridConfig {
+  desktopColumns: number;
+  tabletColumns: number;
+  mobileColumns: number;
+}
+
+export interface SiteEditorConfig {
+  sectionOrder?: string[];
+  sectionLayouts?: Record<string, SectionLayoutConfig>;
+  projectGridConfig?: ProjectGridConfig;
+  typographyOverrides?: Record<string, TypographyStyle>;
+  updatedAt?: string;
 }
 
 export interface FaviconConfig {

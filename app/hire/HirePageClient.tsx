@@ -79,9 +79,9 @@ export default function HirePageClient() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_15%_10%,rgba(235,216,188,0.6)_0%,transparent_30%),radial-gradient(circle_at_85%_15%,rgba(196,168,132,0.25)_0%,transparent_28%),linear-gradient(140deg,#fbf7f0_0%,#f4eadb_52%,#ede0cf_100%)] px-4 pb-16 pt-28 text-[#2f241b] sm:px-6 lg:px-10">
+    <main className="min-h-screen bg-[var(--background)] px-4 pb-16 pt-28 text-[var(--foreground)] sm:px-6 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <BackButton fallback="/" className="inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-white px-4 py-2 text-sm font-semibold text-[#5f4a38] backdrop-blur transition hover:bg-[#f7efe4]">
+        <BackButton fallback="/" className="paper-button inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold">
           <ArrowLeft className="h-4 w-4" />
           Back
         </BackButton>
@@ -91,14 +91,14 @@ export default function HirePageClient() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="rounded-3xl border border-[#7a5f47]/12 bg-white/90 p-6 shadow-2xl backdrop-blur-xl sm:p-8"
+            className="paper-card p-6 sm:p-8"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#7a5f47]/12 bg-[#fbf7f0] px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#7a5f47]">
+            <div className="paper-chip inline-flex items-center gap-2 uppercase tracking-[0.2em]">
               <Users className="h-3.5 w-3.5" />
               Hire Request
             </div>
-            <h1 className="mt-4 text-4xl font-black leading-tight text-[#2f241b] md:text-5xl">Hire Rahul for your next project</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6a5846] md:text-base">
+            <h1 className="mt-4 text-4xl font-black leading-tight text-[var(--foreground)] md:text-5xl">Hire Rahul for your next project</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/80 md:text-base">
               This page is designed for companies, founders, and individuals who want to hire for web development,
               AI, design, content-driven work, or strategic digital execution. Share the project scope and I&apos;ll
               review it directly from the admin inbox.
@@ -113,10 +113,10 @@ export default function HirePageClient() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.title} className="rounded-2xl border border-[#7a5f47]/10 bg-white p-4 shadow-lg">
-                    <Icon className="h-5 w-5 text-[#8d6b4e]" />
-                    <h3 className="mt-3 text-sm font-bold text-[#2f241b]">{item.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#6a5846]">{item.text}</p>
+                  <div key={item.title} className="paper-card p-4">
+                    <Icon className="h-5 w-5 text-[var(--accent)]" />
+                    <h3 className="mt-3 text-sm font-bold text-[var(--foreground)]">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--foreground)]/80">{item.text}</p>
                   </div>
                 );
               })}
@@ -128,18 +128,18 @@ export default function HirePageClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.05 }}
             onSubmit={handleSubmit}
-            className="rounded-3xl border border-[#7a5f47]/12 bg-white p-5 shadow-2xl sm:p-8"
+            className="paper-card p-5 sm:p-8"
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-black text-[#2f241b]">Hire Form</h2>
-                <p className="mt-1 text-sm text-[#6a5846]">Fill in the fields below to submit a proper hiring request.</p>
+                <h2 className="text-2xl font-black text-[var(--foreground)]">Hire Form</h2>
+                <p className="mt-1 text-sm text-[var(--foreground)]/70">Fill in the fields below to submit a proper hiring request.</p>
               </div>
-              <Mail className="h-10 w-10 rounded-2xl bg-[#f7efe4] p-2 text-[#8d6b4e]" />
+              <Mail className="h-10 w-10 rounded-2xl bg-[var(--surface-soft)] p-2 text-[var(--accent)]" />
             </div>
 
             {status && (
-              <div className={`mt-5 rounded-2xl border px-4 py-3 text-sm ${status.type === 'success' ? 'border-[#c4a884]/30 bg-[#f7efe4] text-[#5f4a38]' : 'border-red-200 bg-red-50 text-red-800'}`}>
+              <div className={`mt-5 rounded-2xl border px-4 py-3 text-sm ${status.type === 'success' ? 'border-[var(--accent)]/30 bg-[var(--surface-soft)] text-[var(--foreground)]' : 'border-red-200 bg-red-50 text-red-800'}`}>
                 {status.message}
               </div>
             )}
@@ -153,57 +153,57 @@ export default function HirePageClient() {
               <Field label="Role / Title Needed" icon={Briefcase} value={formData.role} onChange={(v) => handleChange('role', v)} placeholder="E.g. Developer, Designer" />
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Project Type</label>
+                <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Project Type</label>
                 <select
                   value={formData.projectType}
                   onChange={(e) => handleChange('projectType', e.target.value)}
-                  className="w-full rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-4 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full rounded-2xl border border-[var(--foreground)]/20 bg-[var(--surface-soft)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                 >
                   {PROJECT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
                 </select>
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Timeline</label>
+                <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Timeline</label>
                 <select
                   value={formData.timeline}
                   onChange={(e) => handleChange('timeline', e.target.value)}
-                  className="w-full rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-4 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full rounded-2xl border border-[var(--foreground)]/20 bg-[var(--surface-soft)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                 >
                   {TIMELINES.map((timeline) => <option key={timeline} value={timeline}>{timeline}</option>)}
                 </select>
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Budget Range</label>
+                <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Budget Range</label>
                 <input
                   value={formData.budget}
                   onChange={(e) => handleChange('budget', e.target.value)}
                   placeholder="Example: ₹50,000 - ₹1,00,000"
-                  className="w-full rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-4 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full rounded-2xl border border-[var(--foreground)]/20 bg-[var(--surface-soft)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Project Description</label>
+                <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Project Description</label>
                 <textarea
                   rows={6}
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   placeholder="Tell me what you need built, the goals, audience, constraints, and any key features."
-                  className="w-full resize-none rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-4 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
+                  className="w-full resize-none rounded-2xl border border-[var(--foreground)]/20 bg-[var(--surface-soft)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Preferred Contact Method</label>
+                <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">Preferred Contact Method</label>
                 <div className="flex flex-wrap gap-3">
                   {['email', 'phone', 'whatsapp'].map((method) => (
                     <button
                       key={method}
                       type="button"
                       onClick={() => handleChange('preferredContact', method)}
-                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${formData.preferredContact === method ? 'border-[#8d6b4e] bg-[#f7efe4] text-[#5f4a38]' : 'border-[#7a5f47]/12 bg-white text-[#6a5846] hover:bg-[#fbf7f0]'}`}
+                      className={`paper-button px-4 py-2 text-sm font-semibold ${formData.preferredContact === method ? 'paper-button-primary' : ''}`}
                     >
                       {method.charAt(0).toUpperCase() + method.slice(1)}
                     </button>
@@ -215,7 +215,7 @@ export default function HirePageClient() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-6 w-full rounded-2xl bg-[#8d6b4e] px-5 py-4 text-sm font-bold text-[#fffaf3] shadow-lg transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+              className="paper-button-primary mt-6 w-full py-4 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? 'Sending request...' : 'Submit Hiring Request'}
             </button>
@@ -237,16 +237,16 @@ function Field({ label, icon: Icon, value, onChange, placeholder, type = 'text',
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-[#2f241b]">{label}</label>
+      <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">{label}</label>
       <div className="relative">
-        <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8d6b4e]" />
+        <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--accent)]" />
         <input
           type={type}
           required={required}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-10 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
+          className="w-full rounded-2xl border border-[var(--foreground)]/20 bg-[var(--surface-soft)] px-10 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)]"
         />
       </div>
     </div>
