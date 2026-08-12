@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     "TypeScript Developer",
   ],
   icons: {
-    icon: [{ url: "/favicon.ico", sizes: "any" }],
-    apple: [{ url: "/favicon.ico" }],
+    icon: [{ url: "/api/favicon", sizes: "any" }],
+    apple: [{ url: "/api/favicon" }],
   },
   openGraph: {
     type: "website",

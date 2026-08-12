@@ -150,6 +150,19 @@ export interface PortfolioContent {
   introFirstLoadOnly?: boolean;
   introAccentColor?: string;
   introEnableLogoAnimation?: boolean;
+  // Branding & Favicon Configuration
+  faviconConfig?: FaviconConfig;
+}
+
+export interface FaviconConfig {
+  enabled: boolean;
+  url: string;
+  publicId?: string;
+  originalName?: string;
+  mimeType?: string;
+  size?: number;
+  updatedAt?: string;
+  version?: number;
 }
 
 export type SupportedAnimationType = 'fade' | 'slide' | 'scale' | 'reveal' | 'stagger' | 'float' | 'rotate';

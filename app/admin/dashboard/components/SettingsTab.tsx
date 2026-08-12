@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Copy, Trash2, Search, Link2, FileText, Image as ImageIcon, Settings, Upload, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Copy, Trash2, Search, Link2, FileText, Image as ImageIcon, Settings, Upload, Check, Globe, Power, RotateCcw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type { PortfolioContent } from "@/app/lib/types";
 import Security2FASection from "./Security2FASection";
@@ -35,6 +35,14 @@ export default function SettingsTab() {
   const [mediaSearch, setMediaSearch] = useState("");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Favicon State
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [togglingFavicon, setTogglingFavicon] = useState(false);
+  const [faviconError, setFaviconError] = useState<string | null>(null);
+  const [faviconSuccess, setFaviconSuccess] = useState<string | null>(null);
+  const [previewKey, setPreviewKey] = useState(Date.now());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     loadSettings();
     loadMediaLibrary();
@@ -59,6 +67,79 @@ export default function SettingsTab() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFavicon(true);
+    setFaviconError(null);
+    setFaviconSuccess(null);
+
+    try {
+      const res = await adminAPI.uploadFavicon(file);
+      if (res.success && res.faviconConfig) {
+        setContent((prev: PortfolioContent | null) => (prev ? { ...prev, faviconConfig: res.faviconConfig } : prev));
+        setFaviconSuccess("Favicon updated successfully!");
+        setPreviewKey(Date.now());
+      } else {
+        setFaviconError(res.error || "Failed to upload favicon");
+      }
+    } catch (err) {
+      setFaviconError("An error occurred during favicon upload");
+    } finally {
+      setUploadingFavicon(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleToggleFavicon = async (enabled: boolean) => {
+    setTogglingFavicon(true);
+    setFaviconError(null);
+    setFaviconSuccess(null);
+
+    try {
+      const res = await adminAPI.updateFaviconConfig({ enabled });
+      if (res.success && res.faviconConfig) {
+        setContent((prev: PortfolioContent | null) => (prev ? { ...prev, faviconConfig: res.faviconConfig } : prev));
+        setFaviconSuccess(enabled ? "Custom Favicon enabled!" : "Default Favicon activated!");
+        setPreviewKey(Date.now());
+      } else {
+        setFaviconError(res.error || "Failed to update favicon state");
+      }
+    } catch (err) {
+      setFaviconError("Error updating favicon state");
+    } finally {
+      setTogglingFavicon(false);
+    }
+  };
+
+  const handleRemoveFavicon = async () => {
+    if (!confirm("Are you sure you want to remove the custom favicon and restore default portfolio branding?")) return;
+
+    setTogglingFavicon(true);
+    setFaviconError(null);
+    setFaviconSuccess(null);
+
+    try {
+      const res = await adminAPI.removeFavicon();
+      if (res.success && res.faviconConfig) {
+        setContent((prev: PortfolioContent | null) => (prev ? { ...prev, faviconConfig: res.faviconConfig } : prev));
+        setFaviconSuccess("Favicon removed. Default portfolio favicon restored!");
+        setPreviewKey(Date.now());
+      } else {
+        setFaviconError(res.error || "Failed to remove favicon");
+      }
+    } catch (err) {
+      setFaviconError("Error removing favicon");
+    } finally {
+      setTogglingFavicon(false);
+    }
+  };
+
+  const handleRestoreDefault = async () => {
+    await handleRemoveFavicon();
   };
 
   const loadMediaLibrary = async () => {
@@ -142,7 +223,7 @@ export default function SettingsTab() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
-  const filteredMedia = mediaAssets.filter((asset) => {
+  const filteredMedia = mediaAssets.filter((asset: MediaAsset) => {
     const q = mediaSearch.toLowerCase().trim();
     if (!q) return true;
     return asset.fileName.toLowerCase().includes(q) || asset.fileType.toLowerCase().includes(q);
@@ -156,6 +237,161 @@ export default function SettingsTab() {
     <div className="space-y-8">
       {/* Two-Factor Authentication Security Section */}
       <Security2FASection />
+
+      {/* System & Media -> Branding -> Website Favicon */}
+      <div className="paper-card space-y-5 p-5 shadow-none md:p-6">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between border-b-2 border-[var(--foreground)]/10 pb-4">
+          <div>
+            <h3 className="flex items-center gap-2 text-lg font-bold text-[var(--foreground)]">
+              <Globe className="h-5 w-5 text-[var(--accent)]" /> Website Favicon & Branding
+            </h3>
+            <p className="text-xs text-[var(--foreground)]/60 mt-0.5">
+              Customize the browser tab icon for your site. Normalizes PNG, JPG, WEBP, ICO, and SVG files automatically.
+            </p>
+          </div>
+          {content?.faviconConfig && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-500">Status:</span>
+              <button
+                type="button"
+                disabled={togglingFavicon}
+                onClick={() => handleToggleFavicon(!content.faviconConfig?.enabled)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition ${
+                  content.faviconConfig.enabled
+                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
+                    : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                }`}
+              >
+                <Power className="h-3.5 w-3.5" />
+                {content.faviconConfig.enabled ? "Custom Favicon Active" : "Default Favicon Active"}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {faviconError && (
+          <div className="flex items-center gap-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 text-xs font-medium text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{faviconError}</span>
+          </div>
+        )}
+
+        {faviconSuccess && (
+          <div className="flex items-center gap-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>{faviconSuccess}</span>
+          </div>
+        )}
+
+        <div className="grid gap-6 md:grid-cols-2 items-start">
+          {/* Live Preview */}
+          <div className="space-y-3">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Browser Tab Preview
+            </label>
+            <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-gray-100 dark:bg-zinc-950 p-4 space-y-3">
+              <div className="flex items-center gap-2 rounded-t-xl bg-gray-200 dark:bg-zinc-800 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-zinc-700 max-w-full">
+                <div className="flex items-center gap-2.5 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg shadow-sm w-full overflow-hidden">
+                  <img
+                    key={previewKey}
+                    src={
+                      content?.faviconConfig?.enabled && content?.faviconConfig?.url
+                        ? content.faviconConfig.url
+                        : `/api/favicon?t=${Date.now()}`
+                    }
+                    alt="Favicon Preview"
+                    className="w-4 h-4 object-contain rounded-sm"
+                  />
+                  <span className="truncate font-medium text-xs text-slate-800 dark:text-slate-200">
+                    {content?.seoTitle || "Rahul Chakradhar | AI/ML Engineer"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-gray-500 pt-1">
+                <span>Format: {content?.faviconConfig?.mimeType || "image/png"}</span>
+                <span>
+                  {content?.faviconConfig?.size
+                    ? formatBytes(content.faviconConfig.size)
+                    : "Standard fallback"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Controls & Details */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                Favicon Actions
+              </label>
+              <p className="text-xs text-gray-500 mb-3">
+                Supported input formats: <code className="bg-gray-100 dark:bg-zinc-800 px-1 py-0.5 rounded text-slate-700 dark:text-slate-300">PNG, JPG, WEBP, ICO, SVG</code> (Max size: 2MB).
+              </p>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".png,.jpg,.jpeg,.webp,.ico,.svg,image/png,image/jpeg,image/webp,image/x-icon,image/svg+xml"
+                onChange={handleFaviconUpload}
+                className="hidden"
+              />
+
+              <div className="flex flex-wrap gap-2.5">
+                <button
+                  type="button"
+                  disabled={uploadingFavicon}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="paper-button-primary inline-flex items-center gap-2 px-4 py-2.5 text-xs font-semibold disabled:opacity-50"
+                >
+                  <Upload className="h-4 w-4" />
+                  {uploadingFavicon
+                    ? "Processing..."
+                    : content?.faviconConfig?.url
+                    ? "Replace Favicon"
+                    : "Upload Favicon"}
+                </button>
+
+                {content?.faviconConfig?.url && (
+                  <button
+                    type="button"
+                    disabled={uploadingFavicon || togglingFavicon}
+                    onClick={handleRemoveFavicon}
+                    className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition disabled:opacity-50 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Remove Favicon
+                  </button>
+                )}
+
+                {content?.faviconConfig?.url && (
+                  <button
+                    type="button"
+                    disabled={uploadingFavicon || togglingFavicon}
+                    onClick={handleRestoreDefault}
+                    className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-gray-200"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    Restore Default
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {content?.faviconConfig?.originalName && (
+              <div className="rounded-xl border border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-3 text-xs space-y-1">
+                <div className="font-semibold text-gray-700 dark:text-gray-300">File Metadata</div>
+                <div className="text-gray-500 truncate">Name: {content.faviconConfig.originalName}</div>
+                {content.faviconConfig.updatedAt && (
+                  <div className="text-gray-400">
+                    Updated: {new Date(content.faviconConfig.updatedAt).toLocaleString()}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Social Links & System Settings */}
       <div className="paper-card space-y-4 p-5 shadow-none md:p-6">
@@ -252,7 +488,7 @@ export default function SettingsTab() {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {filteredMedia.map((asset) => (
+            {filteredMedia.map((asset: MediaAsset) => (
               <div key={asset.id} className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm hover:border-[#8d6b4e]/30 flex flex-col justify-between">
                 {asset.fileType.startsWith("image/") ? (
                   <div className="relative h-32 overflow-hidden bg-gray-100 border-b">

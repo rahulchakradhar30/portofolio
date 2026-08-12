@@ -417,6 +417,57 @@ export const adminAPI = {
       return { success: false, error: String(error) };
     }
   },
+
+  // Favicon & Branding
+  async uploadFavicon(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await fetch('/api/admin/favicon', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'Failed to upload favicon' };
+      }
+      return { success: true, faviconConfig: data.faviconConfig };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async updateFaviconConfig(config: Record<string, unknown>) {
+    try {
+      const res = await fetch('/api/admin/favicon', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'Failed to update favicon settings' };
+      }
+      return { success: true, faviconConfig: data.faviconConfig };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async removeFavicon() {
+    try {
+      const res = await fetch('/api/admin/favicon', {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data.error || 'Failed to remove favicon' };
+      }
+      return { success: true, faviconConfig: data.faviconConfig };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
 };
 
 
