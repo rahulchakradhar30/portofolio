@@ -186,7 +186,7 @@ export async function PUT(request: NextRequest) {
     const { enabled } = body;
 
     const content = (await serverFirebaseHelpers.getPortfolioContent()) as {
-      faviconConfig?: Record<string, any>;
+      faviconConfig?: Record<string, unknown>;
     } | null;
 
     const currentConfig = content?.faviconConfig || { enabled: false, url: '' };

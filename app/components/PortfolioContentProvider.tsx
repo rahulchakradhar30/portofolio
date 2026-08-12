@@ -3,8 +3,7 @@
 import { createContext, useContext, useEffect, useState, useTransition } from "react";
 import { collection, limit, onSnapshot, query } from "firebase/firestore";
 import { firebaseDb } from "@/app/lib/firebaseClient";
-import type { PortfolioContent, Project, Skill, Certification } from "@/app/lib/types";
-import { DEFAULT_SITE_COPY } from "@/app/lib/siteCopy";
+import type { PortfolioContent } from "@/app/lib/types";
 
 interface PortfolioContentContextType {
   content: PortfolioContent | null;

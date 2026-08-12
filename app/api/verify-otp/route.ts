@@ -9,7 +9,7 @@ const SESSION_MAX_AGE_SEC = 5 * 24 * 60 * 60; // 5 days
 
 export async function POST(request: NextRequest) {
   try {
-    let payload: any;
+    let payload: Record<string, unknown>;
     try {
       payload = await request.json();
     } catch {
@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error verifying OTP:', error);
-    return NextResponse.json({ error: error.message || 'Failed to verify OTP' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to verify OTP' }, { status: 500 });
   }
 }

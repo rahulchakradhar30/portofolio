@@ -6,7 +6,7 @@ import { validateEmail, sanitizeString } from '@/app/lib/validation';
 
 export async function POST(request: NextRequest) {
   try {
-    let payload: any;
+    let payload: Record<string, unknown>;
     try {
       payload = await request.json();
     } catch {
@@ -83,8 +83,8 @@ export async function POST(request: NextRequest) {
     await docRef.delete();
 
     return NextResponse.json({ success: true, email, message: 'Email verified successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error verifying signup OTP:', error);
-    return NextResponse.json({ error: error.message || 'Failed to verify signup OTP' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to verify signup OTP' }, { status: 500 });
   }
 }

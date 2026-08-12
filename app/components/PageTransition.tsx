@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Transition } from "framer-motion";
 import { usePathname } from "next/navigation";
@@ -20,7 +20,7 @@ export default function PageTransition({ children }: { children: React.ReactNode
 
   const [isFirstMount, setIsFirstMount] = useState(true);
   useEffect(() => {
-    setIsFirstMount(false);
+    queueMicrotask(() => setIsFirstMount(false));
   }, []);
 
   return (

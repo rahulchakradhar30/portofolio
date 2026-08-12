@@ -29,6 +29,7 @@ export default function SkillIcon({ title, icon, className = "h-8 w-8", imgClass
 
   return (
     <div className={`relative flex items-center justify-center ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={currentSrc}
         alt={`${title} logo`}

@@ -26,7 +26,7 @@ function generateOtp(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    let payload: any;
+    let payload: Record<string, unknown>;
     try {
       payload = await request.json();
     } catch {
@@ -117,8 +117,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, message: 'Signup OTP sent successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error sending signup OTP:', error);
-    return NextResponse.json({ error: error.message || 'Failed to send signup OTP' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to send signup OTP' }, { status: 500 });
   }
 }

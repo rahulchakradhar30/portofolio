@@ -220,7 +220,7 @@ export default function MessagesTab({ inboxType }: { inboxType: 'contact' | 'hir
         ...selectedHire,
         replied: true,
         messageStatus: emailStatus === 'success' ? 'Replied' : 'Reply Failed',
-        status: (selectedHire.status === 'new' ? 'contacted' : selectedHire.status) as any,
+        status: (selectedHire.status === 'new' ? 'contacted' : selectedHire.status) as HireRequest['status'],
         replies: updatedReplies,
       };
       setSelectedHire(updatedItem);

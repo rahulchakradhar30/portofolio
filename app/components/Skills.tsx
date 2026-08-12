@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { Skill } from "@/app/lib/types";
-import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import { prioritizeFeatured } from "@/app/lib/contentOrdering";
 import LoadingSkeleton from "./LoadingSkeleton";
 import ExpandableSection from "./ExpandableSection";
@@ -33,11 +32,11 @@ function getSkillTags(skill: Skill) {
 }
 
 export default function Skills() {
-  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
+  const { content, loading: contentLoading, error: _contentError } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [_error, setError] = useState<Error | null>(null);
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
   const isVisible = content ? content.sectionVisibility?.skills !== false : true;

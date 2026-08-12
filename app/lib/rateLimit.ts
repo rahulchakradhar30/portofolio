@@ -126,7 +126,8 @@ export async function asyncEnforceAdminRateLimit(options: {
     });
     
     if (!result.ok) {
-      const retryAfterSeconds = Math.ceil(((result as any).resetAt - now) / 1000);
+      const resetAt = 'resetAt' in result ? (result as { resetAt: number }).resetAt : now;
+      const retryAfterSeconds = Math.ceil((resetAt - now) / 1000);
       return {
         ok: false as const,
         response: NextResponse.json(

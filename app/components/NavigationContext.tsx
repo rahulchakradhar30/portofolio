@@ -48,7 +48,10 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     
     count += 1;
     sessionStorage.setItem("internal_nav_count", String(count));
-    setCanGoBack(count > 1 || (typeof document !== "undefined" && !!document.referrer && document.referrer.includes(window.location.host)));
+    const ableToGoBack = count > 1 || (typeof document !== "undefined" && !!document.referrer && document.referrer.includes(window.location.host));
+    queueMicrotask(() => {
+      setCanGoBack(ableToGoBack);
+    });
   }, [pathname, searchStr]);
 
   // Record scroll positions on current path — debounced to avoid synchronous

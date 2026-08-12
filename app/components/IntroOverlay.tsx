@@ -5,14 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { usePortfolioContent } from "./PortfolioContentProvider";
 import { useMotionPreferences } from "./MotionProvider";
-import { SITE_NAME, PRIMARY_NAME } from "@/app/lib/seoSchemas";
+import { PRIMARY_NAME } from "@/app/lib/seoSchemas";
 import styles from "./IntroOverlay.module.css";
 
 export default function IntroOverlay({ children }: { children?: React.ReactNode }) {
   const { content, loading } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
-  
-  const [mounted, setMounted] = useState(false);
   
   // 'ssr': Server-side or initial hydration, where we hide children to prevent layout flashes.
   // 'playing': Intro is active and playing.
@@ -23,10 +21,6 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
   
   // Guard references to ensure body scroll is restored
   const bodyLockedRef = useRef(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // Global cleanup for body lock in case component unmounts early
   useEffect(() => {
@@ -47,18 +41,20 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     const hasPlayed = sessionStorage.getItem("introPlayed");
 
     if (firstLoadOnly && hasPlayed) {
-      setStatus("done");
+      queueMicrotask(() => setStatus("done"));
       return;
     }
 
     if (!isEnabled) {
-      setStatus("done");
+      queueMicrotask(() => setStatus("done"));
       return;
     }
 
     // Initialize Intro
-    setStatus("playing");
-    setPhase("text");
+    queueMicrotask(() => {
+      setStatus("playing");
+      setPhase("text");
+    });
     
     // Lock body scroll
     document.body.style.overflow = "hidden";

@@ -55,7 +55,7 @@ export default function Header() {
     setIsOpen(false);
 
     if (!target) {
-      window.location.hash = sectionId;
+      window.history.pushState(null, "", `#${sectionId}`);
       return;
     }
 

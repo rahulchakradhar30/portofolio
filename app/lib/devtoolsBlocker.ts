@@ -88,7 +88,6 @@ function detectViaWindowSize(): boolean {
 function detectViaDebuggerStatement(): boolean {
   try {
     const start = performance.now();
-    // eslint-disable-next-line no-debugger
     debugger;
     const end = performance.now();
     
@@ -103,7 +102,7 @@ function detectViaDebuggerStatement(): boolean {
  * Method 5: Error Stack Analysis
  * Analyzes error stack for debugging indicators
  */
-function detectViaErrorStack(): boolean {
+function _detectViaErrorStack(): boolean {
   try {
     const error = new Error();
     const stack = error.stack || '';

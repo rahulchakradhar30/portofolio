@@ -36,12 +36,14 @@ export const LocalInput = React.memo(function LocalInput({
   className = "",
 }: LocalInputProps) {
   const [localValue, setLocalValue] = useState(parentValue || "");
+  const [prevParentValue, setPrevParentValue] = useState(parentValue);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync internal state if parentValue changes from external source
-  useEffect(() => {
+  // Sync internal state when parentValue changes from external source (e.g. form load or reset)
+  if (parentValue !== prevParentValue) {
+    setPrevParentValue(parentValue);
     setLocalValue(parentValue || "");
-  }, [parentValue]);
+  }
 
   // Clean up debounce timer on unmount
   useEffect(() => {

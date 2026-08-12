@@ -7,6 +7,7 @@ import { adminAPI } from "@/app/lib/adminAPI";
 import { SKILL_LOGO_PRESETS, SKILL_LOGO_CATEGORIES, resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import type { Skill } from "@/app/lib/types";
 import SkillIcon from "@/app/components/SkillIcon";
+import { LocalInput } from "@/app/components/LocalInput";
 
 const normalizeSkillIcon = (iconValue?: string) => {
   const resolved = resolveSkillIconUrl(iconValue);
@@ -165,26 +166,23 @@ export default function SkillsTab() {
 
       {showForm && (
         <div className="paper-card space-y-4 p-6 shadow-none">
-          <input
-            type="text"
+          <LocalInput
             placeholder="Skill Title"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
+            onChange={(val) => setFormData((prev) => ({ ...prev, title: val }))}
           />
-          <textarea
+          <LocalInput
+            isTextarea
+            rows={3}
             placeholder="Skill Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={3}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition resize-none"
+            onChange={(val) => setFormData((prev) => ({ ...prev, description: val }))}
           />
-          <input
+          <LocalInput
             type="number"
             placeholder="Display Order (Optional, e.g. 1, 2, 3)"
             value={formData.order}
-            onChange={(e) => setFormData({ ...formData, order: e.target.value })}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-200 transition"
+            onChange={(val) => setFormData((prev) => ({ ...prev, order: val }))}
           />
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-2">Proficiency: {formData.proficiency}%</label>
@@ -193,18 +191,17 @@ export default function SkillsTab() {
               min="0"
               max="100"
               value={formData.proficiency}
-              onChange={(e) => setFormData({ ...formData, proficiency: parseInt(e.target.value) })}
+              onChange={(e) => setFormData((prev) => ({ ...prev, proficiency: parseInt(e.target.value) }))}
               className="w-full accent-violet-600"
             />
           </div>
           <div className="space-y-2 rounded-lg border border-violet-100 bg-violet-50/40 p-3">
             <label className="text-sm font-medium text-gray-700 block">Skill Logo (choose one)</label>
-            <input
-              type="text"
+            <LocalInput
               placeholder="Search logos by name or category"
               value={logoQuery}
-              onChange={(e) => setLogoQuery(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+              onChange={(val) => setLogoQuery(val)}
+              debounceMs={150}
             />
             <div className="flex gap-2 overflow-x-auto pb-1">
               {SKILL_LOGO_CATEGORIES.map((category) => (

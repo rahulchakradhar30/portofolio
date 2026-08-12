@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyRegistrationResponse } from '@simplewebauthn/server';
+import { verifyRegistrationResponse, RegistrationResponseJSON } from '@simplewebauthn/server';
 import { assertAdminSession } from '@/app/lib/adminAuth';
 import { getAdminSecurityDoc, saveAdminSecurityDoc, type PasskeyCredential } from '@/app/lib/admin2FA';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = (payload && typeof payload === 'object') ? (payload as Record<string, unknown>) : {};
-    const registrationResponse = body.registrationResponse as any;
+    const registrationResponse = body.registrationResponse as RegistrationResponseJSON;
     const name = typeof body.name === 'string' && body.name.trim() ? body.name.trim() : 'Admin Passkey';
 
     if (!registrationResponse) {

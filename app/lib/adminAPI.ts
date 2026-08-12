@@ -274,8 +274,8 @@ export const adminAPI = {
         message: data.message,
         reply: data.reply,
       };
-    } catch (error: any) {
-      return { success: false, error: error.message || String(error) };
+    } catch (error: unknown) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) };
     }
   },
 

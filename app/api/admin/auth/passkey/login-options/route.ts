@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAuthenticationOptions } from '@simplewebauthn/server';
+import { generateAuthenticationOptions, AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { getAdminAuth } from '@/app/lib/firebaseAdmin';
 import { getAdminSecurityDoc, saveAdminSecurityDoc, resolveUsable2FAMethods } from '@/app/lib/admin2FA';
 import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
@@ -20,12 +20,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    const idToken =
-      typeof payload === 'object' && payload !== null && 'idToken' in payload
-        ? (payload as { idToken?: unknown }).idToken
-        : undefined;
+    const body = (payload && typeof payload === 'object') ? (payload as Record<string, unknown>) : {};
+    const idToken = typeof body.idToken === 'string' ? body.idToken.trim() : '';
 
-    if (typeof idToken !== 'string' || idToken.trim().length < 20) {
+    if (!idToken || idToken.length < 20) {
       return NextResponse.json({ error: 'Missing ID token' }, { status: 400 });
     }
 
@@ -52,7 +50,7 @@ export async function POST(request: NextRequest) {
       rpID,
       allowCredentials: doc.passkeys.map((pk) => ({
         id: pk.id,
-        transports: pk.transports as any,
+        transports: pk.transports as AuthenticatorTransportFuture[],
       })),
       userVerification: 'preferred',
     });

@@ -41,16 +41,18 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedMotion = window.localStorage.getItem(STORAGE_KEY) as MotionMode | null;
-    if (savedMotion === "full" || savedMotion === "system" || savedMotion === "reduced") {
-      setMotionMode(savedMotion);
-    }
     const savedMagnifier = window.localStorage.getItem(MAGNIFIER_STORAGE_KEY);
-    if (savedMagnifier !== null) {
-      setMagnifierEnabled(savedMagnifier === "true");
-    }
-    
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setSystemReduced(media.matches);
+
+    queueMicrotask(() => {
+      if (savedMotion === "full" || savedMotion === "system" || savedMotion === "reduced") {
+        setMotionMode(savedMotion);
+      }
+      if (savedMagnifier !== null) {
+        setMagnifierEnabled(savedMagnifier === "true");
+      }
+      setSystemReduced(media.matches);
+    });
 
     const update = () => setSystemReduced(media.matches);
     media.addEventListener("change", update);

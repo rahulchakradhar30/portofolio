@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateRegistrationOptions } from '@simplewebauthn/server';
+import { generateRegistrationOptions, AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { assertAdminSession } from '@/app/lib/adminAuth';
 import { getAdminSecurityDoc, saveAdminSecurityDoc } from '@/app/lib/admin2FA';
+import { asyncEnforceAdminRateLimit } from '@/app/lib/rateLimit';
 import { rejectDisallowedOrigin } from '@/app/lib/security';
 
 export async function POST(request: NextRequest) {
@@ -9,11 +10,14 @@ export async function POST(request: NextRequest) {
     const originError = rejectDisallowedOrigin(request);
     if (originError) return originError;
 
+    const limit = await asyncEnforceAdminRateLimit({ request, scope: 'admin-passkey-register-options', max: 10, windowMs: 60_000 });
+    if (!limit.ok) return limit.response;
+
     const auth = await assertAdminSession(request);
     if (!auth.ok) return auth.response;
 
     const uid = auth.decoded.uid;
-    const email = auth.decoded.email || 'admin@local';
+    const email = auth.decoded.email || 'admin';
     const doc = await getAdminSecurityDoc(uid);
 
     const hostname = request.nextUrl.hostname;
@@ -31,7 +35,7 @@ export async function POST(request: NextRequest) {
       attestationType: 'none',
       excludeCredentials: existingPasskeys.map((pk) => ({
         id: pk.id,
-        transports: pk.transports as any,
+        transports: pk.transports as AuthenticatorTransportFuture[],
       })),
       authenticatorSelection: {
         residentKey: 'preferred',

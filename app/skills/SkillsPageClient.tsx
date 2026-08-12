@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import type { Skill } from "@/app/lib/types";
-import { resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import { BackButton } from "@/app/components/NavigationContext";
 import SkillIcon from "@/app/components/SkillIcon";
 

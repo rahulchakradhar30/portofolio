@@ -41,11 +41,11 @@ function getProjectHighlights(project: Project) {
 import { usePortfolioContent } from "./PortfolioContentProvider";
 
 export default function Projects() {
-  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
+  const { content, loading: contentLoading, error: _contentError } = usePortfolioContent();
   const { reducedMotion, getAnimation } = useMotionPreferences();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [_error, setError] = useState<Error | null>(null);
 
   const sectionAnim = useMemo(() => getAnimation("projects"), [getAnimation]);
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { GraduationCap } from "lucide-react";
-import type { PortfolioContent, StudyRoadmapItem, StudyRoadmapMetricType, StudyRoadmapStageMetric } from "@/app/lib/types";
+import type { StudyRoadmapItem, StudyRoadmapMetricType, StudyRoadmapStageMetric } from "@/app/lib/types";
 import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 

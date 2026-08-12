@@ -20,8 +20,7 @@ import {
   DEFAULT_UNIFIED_ANIMATION_CONFIG,
   normalizeAnimationConfig,
   getResolvedAnimation,
-} from "@/app/lib/animationResolver";
-import { adminPrimaryButtonClassName } from "@/app/components/AdminUIComponents";
+}  from "@/app/lib/animationResolver";
 
 const ANIMATION_TYPE_OPTIONS: { value: SupportedAnimationType; label: string }[] = [
   { value: "slide", label: "Slide Up & Fade In" },

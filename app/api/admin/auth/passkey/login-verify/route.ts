@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuthenticationResponse } from '@simplewebauthn/server';
+import { verifyAuthenticationResponse, AuthenticationResponseJSON, AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { getAdminAuth } from '@/app/lib/firebaseAdmin';
 import { ADMIN_SESSION_COOKIE } from '@/app/lib/adminAuth';
 import { getAdminSecurityDoc, saveAdminSecurityDoc, resolveUsable2FAMethods } from '@/app/lib/admin2FA';
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     const body = (payload && typeof payload === 'object') ? (payload as Record<string, unknown>) : {};
     const idToken = typeof body.idToken === 'string' ? body.idToken.trim() : '';
-    const authResponse = body.authResponse as any;
+    const authResponse = body.authResponse as AuthenticationResponseJSON;
 
     if (!idToken || idToken.length < 20) {
       return NextResponse.json({ error: 'Missing ID token' }, { status: 400 });
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         id: passkey.id,
         publicKey: Buffer.from(passkey.publicKey, 'base64url'),
         counter: passkey.counter,
-        transports: passkey.transports as any,
+        transports: passkey.transports as AuthenticatorTransportFuture[],
       },
     });
 

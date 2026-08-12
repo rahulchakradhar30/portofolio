@@ -7,6 +7,7 @@ import { Plus, Edit2, Trash2 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import { normalizeYouTubeUrl, normalizeYouTubeUrlList } from "@/app/lib/youtube";
 import type { Project } from "@/app/lib/types";
+import { LocalInput } from "@/app/components/LocalInput";
 
 const parseUrlList = (input: string) => {
   const values = input
@@ -280,54 +281,43 @@ export default function ProjectsTab() {
 
       {showForm && (
         <div className="paper-card space-y-4 p-6 shadow-none">
-          <input
-            type="text"
+          <LocalInput
             placeholder="Project Title"
             value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full rounded-lg border-2 border-[#7a5f47]/15 bg-white px-4 py-3 text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+            onChange={(val) => setFormData((prev) => ({ ...prev, title: val }))}
           />
-          <textarea
+          <LocalInput
+            isTextarea
+            rows={3}
             placeholder="Project Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={3}
-            className="w-full resize-none rounded-lg border-2 border-[#7a5f47]/15 bg-white px-4 py-3 text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+            onChange={(val) => setFormData((prev) => ({ ...prev, description: val }))}
           />
-          <input
-            type="text"
+          <LocalInput
             placeholder="Tech Stack (comma-separated)"
             value={formData.tech}
-            onChange={(e) => setFormData({ ...formData, tech: e.target.value })}
-            className="w-full rounded-lg border-2 border-[#7a5f47]/15 bg-white px-4 py-3 text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+            onChange={(val) => setFormData((prev) => ({ ...prev, tech: val }))}
           />
-          <input
-            type="text"
+          <LocalInput
             placeholder="GitHub URL"
             value={formData.github}
-            onChange={(e) => setFormData({ ...formData, github: e.target.value })}
-            className="w-full rounded-lg border-2 border-[#7a5f47]/15 bg-white px-4 py-3 text-[#2f241b] placeholder-[#b29579] transition focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20"
+            onChange={(val) => setFormData((prev) => ({ ...prev, github: val }))}
           />
-          <input
-            type="text"
+          <LocalInput
             placeholder="Demo URL"
             value={formData.demo}
-            onChange={(e) => setFormData({ ...formData, demo: e.target.value })}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20 transition"
+            onChange={(val) => setFormData((prev) => ({ ...prev, demo: val }))}
           />
-          <input
-            type="text"
+          <LocalInput
             placeholder="Category"
             value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20 transition"
+            onChange={(val) => setFormData((prev) => ({ ...prev, category: val }))}
           />
-          <input
+          <LocalInput
             type="number"
             placeholder="Display Order (Optional, e.g. 1, 2, 3)"
             value={formData.order}
-            onChange={(e) => setFormData({ ...formData, order: e.target.value })}
-            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-white text-black placeholder-gray-400 focus:border-[#8d6b4e] focus:outline-none focus:ring-2 focus:ring-[#c4a884]/20 transition"
+            onChange={(val) => setFormData((prev) => ({ ...prev, order: val }))}
           />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Project Image</label>

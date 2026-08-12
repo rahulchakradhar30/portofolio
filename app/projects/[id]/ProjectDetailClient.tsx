@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ExternalLink, Code, GitBranch, Play } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
 import type { Project } from "@/app/lib/types";
 import ImageLightbox from "@/app/components/ImageLightbox";
-import { getYouTubeEmbedUrl, getYouTubeId } from "@/app/lib/youtube";
+import { getYouTubeEmbedUrl } from "@/app/lib/youtube";
 import { BackButton } from "@/app/components/NavigationContext";
 
 interface ProjectDetailClientProps {

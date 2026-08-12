@@ -4,7 +4,7 @@ import { assertAdminSession } from '@/app/lib/adminAuth';
 import { verifyAdminSession } from '@/app/lib/adminAuthHmac';
 import { logAdminAudit } from '@/app/lib/adminAudit';
 import { sendMail } from '@/app/lib/mail';
-import { getClientIp, enforceDbRateLimit } from '@/app/lib/dbRateLimit';
+import { enforceDbRateLimit } from '@/app/lib/dbRateLimit';
 import * as admin from 'firebase-admin';
 import crypto from 'crypto';
 
@@ -49,17 +49,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Rate limit exceeded. Please wait a minute before sending another reply.' }, { status: 429 });
     }
 
-    let payload: any;
+    let payload: Record<string, unknown>;
     try {
       payload = await request.json();
     } catch {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    const { ticketId, requestId, requestType, replyContent, attachments } = payload;
-    const targetId = ticketId || requestId;
+    const ticketId = typeof payload.ticketId === 'string' ? payload.ticketId : undefined;
+    const requestId = typeof payload.requestId === 'string' ? payload.requestId : undefined;
+    const requestType = typeof payload.requestType === 'string' ? payload.requestType : undefined;
+    const replyContent = typeof payload.replyContent === 'string' ? payload.replyContent : undefined;
+    const attachments = Array.isArray(payload.attachments) ? payload.attachments : [];
+    const targetId = (ticketId || requestId || '') as string;
 
-    if (!targetId || !replyContent || typeof replyContent !== 'string' || !replyContent.trim()) {
+    if (!targetId || !replyContent || !replyContent.trim()) {
       return NextResponse.json({ error: 'Target request ID and non-empty replyContent are required' }, { status: 400 });
     }
 
@@ -173,7 +177,7 @@ export async function POST(request: NextRequest) {
               <div style="margin: 16px 0;">
                 <p style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">Attachments:</p>
                 <ul style="margin: 0; padding-left: 20px; font-size: 13px;">
-                  ${attachments.map((file: any) => `<li><a href="${escapeHtml(file.url)}" target="_blank" style="color: #2563eb;">${escapeHtml(file.name)}</a></li>`).join('')}
+                  ${attachments.map((file: { url: string; name: string }) => `<li><a href="${escapeHtml(file.url)}" target="_blank" style="color: #2563eb;">${escapeHtml(file.name)}</a></li>`).join('')}
                 </ul>
               </div>
             ` : ''}
@@ -203,7 +207,7 @@ export async function POST(request: NextRequest) {
     };
 
     const nowIso = new Date().toISOString();
-    const docUpdates: Record<string, any> = {
+    const docUpdates: Record<string, unknown> = {
       replied: true,
       messageStatus: emailStatus === 'success' ? 'Replied' : 'Reply Failed',
       read: true,
@@ -239,8 +243,8 @@ export async function POST(request: NextRequest) {
       reply: replySnapshot,
     }, { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in send-reply route:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error processing reply' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Internal server error processing reply' }, { status: 500 });
   }
 }
