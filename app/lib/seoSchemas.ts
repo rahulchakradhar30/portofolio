@@ -108,7 +108,7 @@ export function getOrganizationEntity() {
     "name": SITE_NAME,
     "alternateName": `${PRIMARY_NAME} Personal Brand`,
     "url": SITE_URL,
-    "logo": `${SITE_URL}/icon.svg`,
+    "logo": `${SITE_URL}/favicon.ico`,
     "founder": { "@id": `${SITE_URL}/#person` },
     "sameAs": [
       "https://github.com/rahulchakradhar",

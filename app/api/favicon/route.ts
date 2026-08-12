@@ -6,7 +6,25 @@ import path from 'path';
 export const dynamic = 'force-dynamic';
 
 function getDefaultFaviconResponse(version?: string) {
+  const cacheHeader = version
+    ? 'public, max-age=31536000, immutable'
+    : 'public, max-age=3600, s-maxage=86400, must-revalidate';
+
   try {
+    // Try serving default-favicon.ico from public folder
+    const icoPath = path.join(process.cwd(), 'public', 'default-favicon.ico');
+    if (fs.existsSync(icoPath)) {
+      const icoBuffer = fs.readFileSync(icoPath);
+      return new NextResponse(icoBuffer, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/x-icon',
+          'Cache-Control': cacheHeader,
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+
     // Try serving default icon.svg from public folder
     const svgPath = path.join(process.cwd(), 'public', 'icon.svg');
     if (fs.existsSync(svgPath)) {
@@ -15,9 +33,7 @@ function getDefaultFaviconResponse(version?: string) {
         status: 200,
         headers: {
           'Content-Type': 'image/svg+xml',
-          'Cache-Control': version
-            ? 'public, max-age=86400, immutable'
-            : 'public, max-age=3600, s-maxage=86400',
+          'Cache-Control': cacheHeader,
           'Access-Control-Allow-Origin': '*',
         },
       });
@@ -33,9 +49,7 @@ function getDefaultFaviconResponse(version?: string) {
     status: 200,
     headers: {
       'Content-Type': 'image/svg+xml',
-      'Cache-Control': version
-        ? 'public, max-age=86400, immutable'
-        : 'public, max-age=3600, s-maxage=86400',
+      'Cache-Control': cacheHeader,
       'Access-Control-Allow-Origin': '*',
     },
   });
@@ -60,9 +74,9 @@ export async function GET(request: NextRequest) {
     if (faviconConfig && faviconConfig.enabled && faviconConfig.url) {
       const { url, mimeType } = faviconConfig;
 
-      const cacheHeader = version || faviconConfig.version
-        ? 'public, max-age=86400, immutable'
-        : 'public, max-age=3600, s-maxage=86400';
+      const cacheHeader = version
+        ? 'public, max-age=31536000, immutable'
+        : 'public, max-age=3600, s-maxage=86400, must-revalidate';
 
       // 1. Handle remote URL (Cloudinary or HTTP asset)
       if (url.startsWith('http://') || url.startsWith('https://')) {
