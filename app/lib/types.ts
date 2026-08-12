@@ -168,6 +168,8 @@ export interface PortfolioContent {
   introEnableLogoAnimation?: boolean;
   // Branding & Favicon Configuration
   faviconConfig?: FaviconConfig;
+  // Scroll & Component Layout Configurations
+  scrollConfigs?: ScrollConfigRegistry;
 }
 
 export interface FaviconConfig {
@@ -179,6 +181,21 @@ export interface FaviconConfig {
   size?: number;
   updatedAt?: string;
   version?: number;
+}
+
+export type ScrollDirection = 'vertical' | 'horizontal';
+
+export interface ComponentScrollConfig {
+  desktop: ScrollDirection;
+  tablet: ScrollDirection;
+  mobile: ScrollDirection;
+}
+
+export interface ScrollConfigRegistry {
+  proofModeCards?: ComponentScrollConfig;
+  skills?: ComponentScrollConfig;
+  certifications?: ComponentScrollConfig;
+  [key: string]: ComponentScrollConfig | undefined;
 }
 
 export type SupportedAnimationType = 'fade' | 'slide' | 'scale' | 'reveal' | 'stagger' | 'float' | 'rotate';
@@ -399,6 +416,7 @@ export interface ProofExperience {
   images?: string[];
   published: boolean;
   order?: number;
+  defaultSectionState?: 'expanded' | 'collapsed';
   mlMetadata?: {
     tags?: string[];
     similarityVector?: number[];
