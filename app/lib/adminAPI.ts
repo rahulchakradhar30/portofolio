@@ -367,6 +367,7 @@ export const adminAPI = {
       const res = await fetch(`/api/admin/proof-mode${includeDrafts ? '?includeDrafts=true' : ''}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
       });
       if (!res.ok) throw new Error('Failed to fetch proof experiences');
       const data = await res.json();

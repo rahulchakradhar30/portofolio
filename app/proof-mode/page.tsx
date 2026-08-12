@@ -42,8 +42,8 @@ export default function ProofModePage() {
     const loadData = async () => {
       try {
         const [proofRes, projectsRes] = await Promise.all([
-          fetch("/api/admin/proof-mode"),
-          fetch("/api/admin/projects"),
+          fetch("/api/admin/proof-mode", { cache: "no-store" }),
+          fetch("/api/admin/projects", { cache: "no-store" }),
         ]);
 
         if (proofRes.ok) {

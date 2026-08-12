@@ -4,11 +4,15 @@ import { assertAdminSession } from '@/app/lib/adminAuth';
 import { logAdminAudit } from '@/app/lib/adminAudit';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function addCorsHeaders(response: NextResponse) {
   const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
   return response;
 }
 
