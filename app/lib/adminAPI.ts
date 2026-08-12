@@ -253,6 +253,32 @@ export const adminAPI = {
     }
   },
 
+  // Email Reply System
+  async sendReply(payload: {
+    requestType: 'contact' | 'hire';
+    ticketId: string;
+    replyContent: string;
+    attachments?: { name: string; url: string }[];
+  }) {
+    try {
+      const res = await fetch('/api/send-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to send email reply');
+      return {
+        success: true,
+        emailStatus: data.emailStatus as 'success' | 'failed',
+        message: data.message,
+        reply: data.reply,
+      };
+    } catch (error: any) {
+      return { success: false, error: error.message || String(error) };
+    }
+  },
+
   // Certifications
   async getCertifications() {
     try {

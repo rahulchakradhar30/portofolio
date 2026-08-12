@@ -66,6 +66,16 @@ export interface OTPSchema {
   expires_at: Date | FirestoreTimestamp;
 }
 
+export interface EmailReplyItem {
+  id: string;
+  emailId: string;
+  content: string;
+  repliedBy: string;
+  repliedAt: string;
+  emailStatus: 'success' | 'failed';
+  attachments?: { name: string; url: string }[];
+}
+
 export interface ContactMessage {
   id: string;
   firstName: string;
@@ -75,6 +85,9 @@ export interface ContactMessage {
   message: string;
   createdAt: string;
   read: boolean;
+  replied?: boolean;
+  messageStatus?: string;
+  replies?: EmailReplyItem[];
 }
 
 export interface HireRequest {
@@ -93,6 +106,9 @@ export interface HireRequest {
   createdAt: string;
   read: boolean;
   status?: 'new' | 'contacted' | 'quoted' | 'won' | 'archived';
+  replied?: boolean;
+  messageStatus?: string;
+  replies?: EmailReplyItem[];
 }
 
 export interface PortfolioContent {
