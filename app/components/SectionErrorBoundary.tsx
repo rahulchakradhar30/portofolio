@@ -37,6 +37,7 @@ export default class SectionErrorBoundary extends React.Component<Props, State> 
           <p className="mt-2 text-sm text-red-600">A loading error occurred. You can retry this section.</p>
           <button
             onClick={this.reset}
+            aria-label={`Retry loading ${this.props.sectionName}`}
             className="mt-4 rounded-full bg-red-600 px-5 py-2 text-sm font-semibold text-white"
           >
             Retry

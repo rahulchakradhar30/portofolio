@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, type ChangeEvent, type FormEvent } from "react";
+import { useState, useMemo, type ChangeEvent, type FormEvent } from "react";
 import { motion } from "framer-motion";
 import { Camera, Code2, Link2, Mail, MapPin, Send, Clock3, ShieldCheck, Briefcase } from "lucide-react";
 import LoadingSkeleton from "./LoadingSkeleton";
@@ -19,7 +19,7 @@ const DEFAULT_CONTACT = {
 import { usePortfolioContent } from "./PortfolioContentProvider";
 
 export default function Contact() {
-  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
+  const { content, loading: contentLoading, error: _contentError } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
   const [formData, setFormData] = useState({
     firstName: "",
@@ -154,7 +154,7 @@ export default function Contact() {
                 { icon: Clock3, label: "Response", value: "1-2 business days" },
                 { icon: Briefcase, label: "Best for", value: "Product briefs" },
                 { icon: ShieldCheck, label: "Approach", value: "Clear scope first" },
-              ].map((item, idx) => {
+              ].map((item, _idx) => {
                 const Icon = item.icon;
                 return (
                   <motion.div

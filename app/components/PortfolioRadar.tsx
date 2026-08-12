@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Layers3, Sparkles, Star } from "lucide-react";
@@ -158,16 +158,31 @@ export default function PortfolioRadar() {
     ];
   }, [radarNodes]);
 
+  const rafRef = useRef<number | null>(null);
+
   const onRadarMove = (event: MouseEvent<HTMLDivElement>) => {
     if (reducedMotion) return;
+    // Cache event data synchronously — event object is not safe to read async
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    const y = ((event.clientY - rect.top) / rect.height) * 2 - 1;
-    setPointer({ x, y, active: true });
+    const clientX = event.clientX;
+    const clientY = event.clientY;
+
+    // Cancel any pending frame to avoid stale updates
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      const y = ((clientY - rect.top) / rect.height) * 2 - 1;
+      setPointer({ x, y, active: true });
+      rafRef.current = null;
+    });
   };
 
   const onRadarLeave = () => {
     if (reducedMotion) return;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
     setPointer({ x: 0, y: 0, active: false });
   };
 

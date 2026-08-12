@@ -5,13 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   Play,
-  Activity,
   RefreshCw,
-  Layers,
   Sliders,
-  CheckCircle2,
-  AlertCircle,
-  HelpCircle,
 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type {
@@ -20,15 +15,13 @@ import type {
   SupportedAnimationType,
   SupportedEasing,
   Project,
-  Skill,
-  Certification,
 } from "@/app/lib/types";
 import {
   DEFAULT_UNIFIED_ANIMATION_CONFIG,
   normalizeAnimationConfig,
   getResolvedAnimation,
 } from "@/app/lib/animationResolver";
-import { AdminCard, adminPrimaryButtonClassName, adminSubtleButtonClassName } from "@/app/components/AdminUIComponents";
+import { adminPrimaryButtonClassName } from "@/app/components/AdminUIComponents";
 
 const ANIMATION_TYPE_OPTIONS: { value: SupportedAnimationType; label: string }[] = [
   { value: "slide", label: "Slide Up & Fade In" },
@@ -120,7 +113,7 @@ export default function AnimationsTab() {
       } else {
         alert("Failed to save animation settings: " + (res.error || "Unknown error"));
       }
-    } catch (error) {
+    } catch (_error) {
       alert("Error saving animation configuration");
     } finally {
       setSaving(false);

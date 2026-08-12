@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Mail, Trash2, X, Briefcase } from "lucide-react";
+import { Mail, Trash2, X } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type { ContactMessage, HireRequest } from "@/app/lib/types";
 

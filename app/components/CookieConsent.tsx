@@ -48,6 +48,7 @@ export default function CookieConsent() {
           transition={{ duration: 0.25 }}
           className="fixed inset-x-3 bottom-3 z-[70] sm:inset-x-5 sm:bottom-5"
           role="dialog"
+          aria-modal="true"
           aria-live="polite"
           aria-label="Cookie consent"
         >

@@ -161,8 +161,8 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     
-    // Remove fields that shouldn't be overwritten directly from the body
-    const { id, created_at, updated_at, createdAt, updatedAt, ...updatePayload } = body;
+    // Strip fields that must not be directly overwritten via the public body
+    const { id: _id, created_at: _created_at, updated_at: _updated_at, createdAt: _createdAt, updatedAt: _updatedAt, ...updatePayload } = body;
 
     const updatedContent = await serverFirebaseHelpers.updatePortfolioContent(updatePayload);
 

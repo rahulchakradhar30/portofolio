@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting for reply sending
-    const clientIp = getClientIp(request);
+    const _clientIp = getClientIp(request);
     const replyLimit = await enforceDbRateLimit({
       scope: 'admin-send-reply',
       subject: adminEmail,

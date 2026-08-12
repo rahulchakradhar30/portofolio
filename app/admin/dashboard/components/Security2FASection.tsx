@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ShieldCheck, Mail, Smartphone, Key, Check, Plus, Trash2, AlertCircle, RefreshCw, X, Copy, QrCode, ToggleLeft, ToggleRight } from "lucide-react";
+import { ShieldCheck, Mail, Smartphone, Key, Check, Plus, Trash2, AlertCircle, RefreshCw, X, Copy, QrCode } from "lucide-react";
 import { startRegistration } from "@simplewebauthn/browser";
 
 type Active2FAMethod = "EMAIL_OTP" | "TOTP" | "PASSKEY";

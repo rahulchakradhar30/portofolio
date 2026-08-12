@@ -83,7 +83,7 @@ export default function Header() {
           </motion.div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8 items-center">
+          <nav aria-label="Main navigation" className="hidden md:flex space-x-8 items-center">
             {navItems.map((item) => (
               <motion.a
                 key={item.name}
@@ -133,9 +133,12 @@ export default function Header() {
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsOpen(!isOpen)}
+            aria-expanded={isOpen}
+            aria-controls="mobile-nav-menu"
+            aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
             className="p-2 text-[var(--foreground)] md:hidden border-2 border-[var(--foreground)] rounded-xl bg-[var(--surface)]"
           >
-            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isOpen ? <X className="w-5 h-5" aria-hidden="true" /> : <Menu className="w-5 h-5" aria-hidden="true" />}
           </motion.button>
         </div>
 
@@ -143,13 +146,14 @@ export default function Header() {
         <AnimatePresence initial={false}>
           {isOpen ? (
             <motion.div
+              id="mobile-nav-menu"
               initial={reducedMotion ? false : { opacity: 0, height: 0 }}
               animate={reducedMotion ? undefined : { opacity: 1, height: "auto" }}
               exit={reducedMotion ? undefined : { opacity: 0, height: 0 }}
               transition={reducedMotion ? undefined : { duration: 0.25, ease: [0.42, 0, 0.58, 1] }}
               className="mt-4 border-t-2 border-[var(--foreground)] pt-6 pb-4 md:hidden"
             >
-              <nav className="flex flex-col space-y-4 text-center">
+              <nav aria-label="Mobile navigation" className="flex flex-col space-y-4 text-center">
                 {navItems.map((item) => (
                   <button
                     key={item.name}

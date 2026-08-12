@@ -5,17 +5,13 @@ import { motion } from "framer-motion";
 import {
   Palette,
   Plus,
-  Check,
   Trash2,
   Edit2,
-  RefreshCw,
-  Sparkles,
-  ShieldAlert,
   Save,
   CheckCircle2,
 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
-import type { PortfolioContent, ThemeConfigItem, ThemeTokens, UnifiedThemeConfig } from "@/app/lib/types";
+import type { PortfolioContent, ThemeConfigItem, UnifiedThemeConfig } from "@/app/lib/types";
 import {
   PERMANENT_DEFAULT_THEME,
   MAX_CUSTOM_THEMES,

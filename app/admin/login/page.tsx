@@ -699,7 +699,7 @@ export default function AdminLoginPage() {
       await sendPasswordResetEmail(firebaseAuth, targetEmail);
       setResetSent(true);
       setSuccess(null);
-    } catch (e) {
+    } catch (_e) {
       // Don't reveal if the email exists or not
       setResetSent(true);
     } finally {

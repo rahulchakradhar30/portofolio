@@ -15,7 +15,6 @@ import {
   X,
   Save,
   ExternalLink,
-  Code2,
 } from "lucide-react";
 
 import { adminAPI } from "@/app/lib/adminAPI";
@@ -207,6 +206,7 @@ export default function ProofModeTab() {
         return {
           label: parts[0] || "Link",
           url: parts[1] || parts[0],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- type comes from free-text user input parsing
           type: (parts[2] as any) || "demo",
         };
       });
@@ -223,7 +223,7 @@ export default function ProofModeTab() {
       try {
         parsedConfig = JSON.parse(configJsonText);
         setConfigJsonError(null);
-      } catch (err) {
+      } catch (_err) {
         setConfigJsonError("Invalid JSON structure in Demonstration Config");
         return;
       }

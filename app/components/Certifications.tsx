@@ -29,12 +29,12 @@ function getCertificationTags(cert: Certification) {
 import { usePortfolioContent } from "./PortfolioContentProvider";
 
 export default function Certifications() {
-  const { content, loading: contentLoading, error: contentError } = usePortfolioContent();
+  const { content, loading: contentLoading, error: _contentError } = usePortfolioContent();
   const { reducedMotion, getAnimation } = useMotionPreferences();
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCert, setSelectedCert] = useState<Certification | null>(null);
-  const [error, setError] = useState<Error | null>(null);
+  const [_error, setError] = useState<Error | null>(null);
 
   const sectionAnim = useMemo(() => getAnimation("certifications"), [getAnimation]);
 

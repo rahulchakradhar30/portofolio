@@ -21,7 +21,7 @@ const DEFAULT_ABOUT = {
 };
 
 export default function About() {
-  const { content, loading, error } = usePortfolioContent();
+  const { content, loading, error: _error } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
 
   const aboutData = useMemo(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Globe, FileText, Search, Image as ImageIcon, Sparkles, RefreshCw } from "lucide-react";
+import { Globe, Search, Image as ImageIcon, RefreshCw } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type { PortfolioContent } from "@/app/lib/types";
 

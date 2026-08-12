@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import LoadingSkeleton from "./LoadingSkeleton";
@@ -23,9 +23,9 @@ const DEFAULT_HERO_DATA = {
 };
 
 export default function Hero() {
-  const { content, loading, error } = usePortfolioContent();
+  const { content, loading, error: _error } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
-  const isMobile = useIsMobile();
+  const _isMobile = useIsMobile();
 
   const heroData = useMemo(() => {
     if (!content) return DEFAULT_HERO_DATA;

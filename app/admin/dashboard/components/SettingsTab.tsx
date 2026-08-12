@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Copy, Trash2, Search, Link2, FileText, Image as ImageIcon, Settings, Upload, Check, Globe, Power, RotateCcw, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Copy, Trash2, Search, FileText, Image as ImageIcon, Settings, Upload, Check, Globe, Power, RotateCcw, AlertCircle, CheckCircle2 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type { PortfolioContent } from "@/app/lib/types";
 import Security2FASection from "./Security2FASection";
@@ -86,7 +86,7 @@ export default function SettingsTab() {
       } else {
         setFaviconError(res.error || "Failed to upload favicon");
       }
-    } catch (err) {
+    } catch (_err) {
       setFaviconError("An error occurred during favicon upload");
     } finally {
       setUploadingFavicon(false);
@@ -108,7 +108,7 @@ export default function SettingsTab() {
       } else {
         setFaviconError(res.error || "Failed to update favicon state");
       }
-    } catch (err) {
+    } catch (_err) {
       setFaviconError("Error updating favicon state");
     } finally {
       setTogglingFavicon(false);
@@ -131,7 +131,7 @@ export default function SettingsTab() {
       } else {
         setFaviconError(res.error || "Failed to remove favicon");
       }
-    } catch (err) {
+    } catch (_err) {
       setFaviconError("Error removing favicon");
     } finally {
       setTogglingFavicon(false);
@@ -292,6 +292,8 @@ export default function SettingsTab() {
             <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-gray-100 dark:bg-zinc-950 p-4 space-y-3">
               <div className="flex items-center gap-2 rounded-t-xl bg-gray-200 dark:bg-zinc-800 px-3 py-2 text-xs text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-zinc-700 max-w-full">
                 <div className="flex items-center gap-2.5 bg-white dark:bg-zinc-900 px-3 py-1.5 rounded-lg shadow-sm w-full overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- favicon preview requires an img tag;
+                      next/image cannot serve arbitrary user-uploaded URLs without allowlisting every hostname */}
                   <img
                     key={previewKey}
                     src={

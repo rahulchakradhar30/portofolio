@@ -4,16 +4,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
-  CheckCircle2,
   Cpu,
-  Layers,
   Sparkles,
   Zap,
   HelpCircle,
-  Play,
   RotateCcw,
   Sliders,
-  Database,
   Server,
   Workflow,
 } from "lucide-react";

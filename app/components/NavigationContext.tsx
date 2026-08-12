@@ -51,17 +51,26 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     setCanGoBack(count > 1 || (typeof document !== "undefined" && !!document.referrer && document.referrer.includes(window.location.host)));
   }, [pathname, searchStr]);
 
-  // Record scroll positions on current path
+  // Record scroll positions on current path — debounced to avoid synchronous
+  // sessionStorage writes on every animation frame during active scrolling.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    let scrollSaveTimer: ReturnType<typeof setTimeout> | null = null;
+
     const handleScrollSave = () => {
-      const fullPath = window.location.pathname + window.location.search + window.location.hash;
-      sessionStorage.setItem(`scroll_${fullPath}`, String(window.scrollY));
+      if (scrollSaveTimer) clearTimeout(scrollSaveTimer);
+      scrollSaveTimer = setTimeout(() => {
+        const fullPath = window.location.pathname + window.location.search + window.location.hash;
+        sessionStorage.setItem(`scroll_${fullPath}`, String(window.scrollY));
+      }, 100);
     };
 
     window.addEventListener("scroll", handleScrollSave, { passive: true });
-    return () => window.removeEventListener("scroll", handleScrollSave);
+    return () => {
+      window.removeEventListener("scroll", handleScrollSave);
+      if (scrollSaveTimer) clearTimeout(scrollSaveTimer);
+    };
   }, [pathname, searchStr]);
 
   // Section Tracking on Home page ("/") using IntersectionObserver
