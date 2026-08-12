@@ -15,10 +15,26 @@ import {
   X,
   Save,
   ExternalLink,
+  ArrowUp,
+  ArrowDown,
+  Monitor,
+  Tablet as TabletIcon,
+  Smartphone,
+  Sliders,
+  Settings,
 } from "lucide-react";
 
 import { adminAPI } from "@/app/lib/adminAPI";
-import type { ProofExperience, Project, DemonstrationType, EvidenceLink, DemonstrationConfig } from "@/app/lib/types";
+import type {
+  ProofExperience,
+  Project,
+  DemonstrationType,
+  EvidenceLink,
+  DemonstrationConfig,
+  PortfolioContent,
+  ScrollConfigRegistry,
+  ScrollDirection,
+} from "@/app/lib/types";
 import {
   AdminCard,
   AdminTextInput,
@@ -95,6 +111,7 @@ const DEFAULT_CONFIG_EXAMPLES: Record<DemonstrationType, DemonstrationConfig> = 
 export default function ProofModeTab() {
   const [proofExperiences, setProofExperiences] = useState<ProofExperience[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const [content, setContent] = useState<PortfolioContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -102,14 +119,23 @@ export default function ProofModeTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
+  // Scroll Config State
+  const [scrollConfigs, setScrollConfigs] = useState<ScrollConfigRegistry>({
+    proofModeCards: { desktop: "vertical", tablet: "vertical", mobile: "vertical" },
+    skills: { desktop: "vertical", tablet: "vertical", mobile: "vertical" },
+    certifications: { desktop: "vertical", tablet: "vertical", mobile: "vertical" },
+  });
+  const [savingScrollConfig, setSavingScrollConfig] = useState(false);
+
   // Form State
   const [editingExperience, setEditingExperience] = useState<Partial<ProofExperience> | null>(null);
   const [configJsonText, setConfigJsonText] = useState("");
   const [configJsonError, setConfigJsonError] = useState<string | null>(null);
   const [evidenceLinksText, setEvidenceLinksText] = useState("");
 
-  // Preview State
+  // Preview Modal State
   const [previewExperience, setPreviewExperience] = useState<ProofExperience | null>(null);
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
   useEffect(() => {
     fetchData();
@@ -127,14 +153,14 @@ export default function ProofModeTab() {
     };
   }, [editingExperience, previewExperience]);
 
-
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [proofRes, projectsRes] = await Promise.all([
+      const [proofRes, projectsRes, contentRes] = await Promise.all([
         adminAPI.getProofExperiences(true),
         adminAPI.getProjects(),
+        adminAPI.getPortfolioContent(),
       ]);
 
       if (proofRes.success) {
@@ -146,10 +172,39 @@ export default function ProofModeTab() {
       if (projectsRes.success) {
         setProjects(projectsRes.projects || []);
       }
+
+      if (contentRes.success && contentRes.content) {
+        setContent(contentRes.content);
+        if (contentRes.content.scrollConfigs) {
+          setScrollConfigs({
+            proofModeCards: contentRes.content.scrollConfigs.proofModeCards || { desktop: "vertical", tablet: "vertical", mobile: "vertical" },
+            skills: contentRes.content.scrollConfigs.skills || { desktop: "vertical", tablet: "vertical", mobile: "vertical" },
+            certifications: contentRes.content.scrollConfigs.certifications || { desktop: "vertical", tablet: "vertical", mobile: "vertical" },
+          });
+        }
+      }
     } catch (err) {
       setError(String(err));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveScrollConfigs = async () => {
+    setSavingScrollConfig(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      const res = await adminAPI.updatePortfolioContent({ scrollConfigs });
+      if (res.success) {
+        setSuccessMsg("Responsive scroll settings saved successfully!");
+      } else {
+        setError(res.error || "Failed to update scroll settings");
+      }
+    } catch (err) {
+      setError(String(err));
+    } finally {
+      setSavingScrollConfig(false);
     }
   };
 
@@ -169,6 +224,7 @@ export default function ProofModeTab() {
       evidenceLinks: [],
       published: true,
       order: (proofExperiences.length || 0) + 1,
+      defaultSectionState: "expanded",
     });
     setConfigJsonText(JSON.stringify(initialConfig, null, 2));
     setConfigJsonError(null);
@@ -291,6 +347,27 @@ export default function ProofModeTab() {
     }
   };
 
+  const handleMoveOrder = async (exp: ProofExperience, direction: "up" | "down") => {
+    const currentIndex = proofExperiences.findIndex((item) => item.id === exp.id);
+    if (currentIndex === -1) return;
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= proofExperiences.length) return;
+
+    const targetExp = proofExperiences[targetIndex];
+    const currentOrder = exp.order || currentIndex + 1;
+    const targetOrder = targetExp.order || targetIndex + 1;
+
+    try {
+      await Promise.all([
+        adminAPI.updateProofExperience(exp.id, { order: targetOrder }),
+        adminAPI.updateProofExperience(targetExp.id, { order: currentOrder }),
+      ]);
+      fetchData();
+    } catch (err) {
+      setError(String(err));
+    }
+  };
+
   const filtered = proofExperiences.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -309,7 +386,7 @@ export default function ProofModeTab() {
             <Sparkles className="h-6 w-6 text-[var(--accent)]" /> Proof Mode Management
           </h2>
           <p className="text-sm text-[var(--foreground)]/70 mt-1">
-            Create and publish interactive evidence experiences for visitors. No fake data.
+            Configure interactive evidence experiences, responsive scroll direction, and project detail layouts.
           </p>
         </div>
         <button
@@ -333,6 +410,107 @@ export default function ProofModeTab() {
           <span>{successMsg}</span>
         </div>
       )}
+
+      {/* RESPONSIVE SCROLL BEHAVIOR CONTROL PANEL */}
+      <AdminCard
+        title="Admin-Controlled Responsive Scroll Behavior"
+        description="Select whether registered content sections scroll Vertically (default grid) or Horizontally (swipeable row) per device breakpoint."
+      >
+        <div className="space-y-6 pt-2">
+          {(["proofModeCards", "skills", "certifications"] as const).map((compKey) => {
+            const compLabel =
+              compKey === "proofModeCards"
+                ? "Proof Mode Cards Library"
+                : compKey === "skills"
+                ? "Skills Capability Grid"
+                : "Certifications Grid";
+
+            const current = scrollConfigs[compKey] || { desktop: "vertical", tablet: "vertical", mobile: "vertical" };
+
+            return (
+              <div key={compKey} className="p-4 rounded-xl border border-[var(--foreground)]/15 bg-[var(--surface-soft)] space-y-3">
+                <div className="font-extrabold text-sm text-[var(--foreground)] flex items-center gap-2">
+                  <Sliders className="h-4 w-4 text-[var(--accent)]" />
+                  {compLabel}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Desktop */}
+                  <div>
+                    <label className="text-xs font-bold text-[var(--foreground)]/70 flex items-center gap-1.5 mb-1.5">
+                      <Monitor className="h-3.5 w-3.5" /> Desktop (1024px+)
+                    </label>
+                    <select
+                      value={current.desktop}
+                      onChange={(e) =>
+                        setScrollConfigs({
+                          ...scrollConfigs,
+                          [compKey]: { ...current, desktop: e.target.value as ScrollDirection },
+                        })
+                      }
+                      className={adminFieldClassName}
+                    >
+                      <option value="vertical">Vertical (Grid Layout)</option>
+                      <option value="horizontal">Horizontal (Carousel Row)</option>
+                    </select>
+                  </div>
+
+                  {/* Tablet */}
+                  <div>
+                    <label className="text-xs font-bold text-[var(--foreground)]/70 flex items-center gap-1.5 mb-1.5">
+                      <TabletIcon className="h-3.5 w-3.5" /> Tablet (640px - 1023px)
+                    </label>
+                    <select
+                      value={current.tablet}
+                      onChange={(e) =>
+                        setScrollConfigs({
+                          ...scrollConfigs,
+                          [compKey]: { ...current, tablet: e.target.value as ScrollDirection },
+                        })
+                      }
+                      className={adminFieldClassName}
+                    >
+                      <option value="vertical">Vertical (Grid Layout)</option>
+                      <option value="horizontal">Horizontal (Carousel Row)</option>
+                    </select>
+                  </div>
+
+                  {/* Mobile */}
+                  <div>
+                    <label className="text-xs font-bold text-[var(--foreground)]/70 flex items-center gap-1.5 mb-1.5">
+                      <Smartphone className="h-3.5 w-3.5" /> Mobile (&lt;640px)
+                    </label>
+                    <select
+                      value={current.mobile}
+                      onChange={(e) =>
+                        setScrollConfigs({
+                          ...scrollConfigs,
+                          [compKey]: { ...current, mobile: e.target.value as ScrollDirection },
+                        })
+                      }
+                      className={adminFieldClassName}
+                    >
+                      <option value="vertical">Vertical (Grid Layout)</option>
+                      <option value="horizontal">Horizontal (Carousel Row)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={handleSaveScrollConfigs}
+              disabled={savingScrollConfig}
+              className={`${adminPrimaryButtonClassName} gap-2 text-xs`}
+            >
+              <Save className="h-4 w-4" />
+              {savingScrollConfig ? "Saving Settings..." : "Save Scroll Configuration"}
+            </button>
+          </div>
+        </div>
+      </AdminCard>
 
       {/* Filter and Search controls */}
       <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -378,7 +556,7 @@ export default function ProofModeTab() {
         </AdminCard>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {filtered.map((item) => {
+          {filtered.map((item, index) => {
             const linkedProject = projects.find((p) => p.id === item.projectId);
             return (
               <AdminCard
@@ -387,6 +565,25 @@ export default function ProofModeTab() {
                 description={`${item.category} · Demo: ${item.demonstrationType.replace("_", " ")}`}
                 actions={
                   <div className="flex items-center gap-2">
+                    {/* Move Up */}
+                    <button
+                      onClick={() => handleMoveOrder(item, "up")}
+                      disabled={index === 0}
+                      title="Move Up"
+                      className="p-2 rounded-lg border border-[var(--foreground)]/20 hover:bg-[var(--surface-soft)] disabled:opacity-30"
+                    >
+                      <ArrowUp className="h-4 w-4" />
+                    </button>
+                    {/* Move Down */}
+                    <button
+                      onClick={() => handleMoveOrder(item, "down")}
+                      disabled={index === filtered.length - 1}
+                      title="Move Down"
+                      className="p-2 rounded-lg border border-[var(--foreground)]/20 hover:bg-[var(--surface-soft)] disabled:opacity-30"
+                    >
+                      <ArrowDown className="h-4 w-4" />
+                    </button>
+                    {/* Preview Button */}
                     <button
                       onClick={() => setPreviewExperience(item)}
                       title="Preview experience"
@@ -394,6 +591,7 @@ export default function ProofModeTab() {
                     >
                       <Eye className="h-4 w-4 text-[var(--foreground)]" />
                     </button>
+                    {/* Toggle Draft / Published */}
                     <button
                       onClick={() => handleTogglePublish(item)}
                       className={`paper-chip text-[10px] font-mono uppercase ${
@@ -404,12 +602,14 @@ export default function ProofModeTab() {
                     >
                       {item.published ? "Published" : "Draft"}
                     </button>
+                    {/* Edit */}
                     <button
                       onClick={() => handleOpenEdit(item)}
                       className="p-2 rounded-lg border border-[var(--foreground)]/20 hover:bg-[var(--surface-soft)]"
                     >
                       <Edit2 className="h-4 w-4 text-[var(--foreground)]" />
                     </button>
+                    {/* Delete */}
                     <button
                       onClick={() => handleDelete(item.id)}
                       className="p-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
@@ -453,7 +653,6 @@ export default function ProofModeTab() {
               className="relative inline-block w-full max-w-3xl my-8 text-left align-middle paper-card p-6 sm:p-8 bg-[var(--surface)] shadow-[8px_8px_0_0_rgba(42,36,31,0.2)] space-y-6 pointer-events-auto"
             >
               <div className="flex items-center justify-between pb-4 border-b border-[var(--foreground)]/15">
-
                 <h3 className="text-xl font-black text-[var(--foreground)]">
                   {editingExperience.id ? "Edit Proof Experience" : "Create Proof Experience"}
                 </h3>
@@ -599,27 +798,55 @@ export default function ProofModeTab() {
                   helpText="Supported types: github, demo, paper, metrics"
                 />
 
-                <div className="flex items-center gap-6 pt-2">
-                  <label className="inline-flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(editingExperience.published)}
-                      onChange={(e) => setEditingExperience({ ...editingExperience, published: e.target.checked })}
-                      className="h-4 w-4 rounded accent-[var(--accent)]"
-                    />
-                    <span className="text-sm font-semibold text-[var(--foreground)]">
-                      Publish publicly immediately
-                    </span>
-                  </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div>
+                    <label className="mb-2 block text-sm font-semibold text-[var(--foreground)]">
+                      Detail Section Default State
+                    </label>
+                    <select
+                      value={editingExperience.defaultSectionState || "expanded"}
+                      onChange={(e) =>
+                        setEditingExperience({
+                          ...editingExperience,
+                          defaultSectionState: e.target.value as "expanded" | "collapsed",
+                        })
+                      }
+                      className={adminFieldClassName}
+                    >
+                      <option value="expanded">Expanded by default</option>
+                      <option value="collapsed">Collapsed by default</option>
+                    </select>
+                  </div>
 
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs font-bold text-[var(--foreground)]">Order:</label>
-                    <input
-                      type="number"
-                      value={editingExperience.order || 1}
-                      onChange={(e) => setEditingExperience({ ...editingExperience, order: parseInt(e.target.value) || 1 })}
-                      className="w-20 rounded-xl border border-[var(--foreground)]/30 px-3 py-1 text-sm text-[var(--foreground)] font-bold"
-                    />
+                  <div className="flex items-center gap-6 pt-6">
+                    <label className="inline-flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(editingExperience.published)}
+                        onChange={(e) =>
+                          setEditingExperience({ ...editingExperience, published: e.target.checked })
+                        }
+                        className="h-4 w-4 rounded accent-[var(--accent)]"
+                      />
+                      <span className="text-sm font-semibold text-[var(--foreground)]">
+                        Publish publicly
+                      </span>
+                    </label>
+
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-bold text-[var(--foreground)]">Order:</label>
+                      <input
+                        type="number"
+                        value={editingExperience.order || 1}
+                        onChange={(e) =>
+                          setEditingExperience({
+                            ...editingExperience,
+                            order: parseInt(e.target.value) || 1,
+                          })
+                        }
+                        className="w-20 rounded-xl border border-[var(--foreground)]/30 px-3 py-1 text-sm text-[var(--foreground)] font-bold"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -645,27 +872,68 @@ export default function ProofModeTab() {
         )}
       </AnimatePresence>
 
-      {/* Live Preview Modal */}
+      {/* Admin Responsive Device Preview Modal */}
       <AnimatePresence>
         {previewExperience && (
-          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm p-4 sm:p-6 text-center">
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-md p-4 sm:p-6 text-center">
             <div className="fixed inset-0 pointer-events-auto" onClick={() => setPreviewExperience(null)} />
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative inline-block w-full max-w-4xl my-8 text-left align-middle paper-card p-6 sm:p-10 bg-[var(--surface)] shadow-[8px_8px_0_0_rgba(42,36,31,0.2)] space-y-6 pointer-events-auto"
+              className={`relative inline-block text-left align-middle paper-card bg-[var(--surface)] shadow-[12px_12px_0_0_rgba(42,36,31,0.3)] pointer-events-auto transition-all duration-300 my-6 ${
+                previewDevice === "mobile"
+                  ? "w-[375px]"
+                  : previewDevice === "tablet"
+                  ? "w-[768px]"
+                  : "w-full max-w-5xl"
+              }`}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-[var(--foreground)]/15">
-
+              {/* Preview Control Header */}
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[var(--foreground)]/15 bg-[var(--surface-strong)] rounded-t-2xl">
                 <div>
-                  <span className="paper-chip text-[10px] uppercase font-mono bg-[var(--surface-strong)]">
-                    Live Public Preview
+                  <span className="paper-chip text-[10px] uppercase font-mono bg-[var(--surface)] text-[var(--accent)]">
+                    Device Preview · Real Data
                   </span>
-                  <h3 className="text-2xl font-black text-[var(--foreground)] mt-1">
+                  <h4 className="text-lg font-black text-[var(--foreground)] mt-1">
                     {previewExperience.title}
-                  </h3>
+                  </h4>
                 </div>
+
+                {/* Device Switcher */}
+                <div className="flex items-center gap-1.5 bg-[var(--surface)] p-1 rounded-xl border border-[var(--foreground)]/20">
+                  <button
+                    onClick={() => setPreviewDevice("desktop")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-all ${
+                      previewDevice === "desktop"
+                        ? "bg-[var(--foreground)] text-[var(--surface)]"
+                        : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <Monitor className="h-3.5 w-3.5" /> Desktop
+                  </button>
+                  <button
+                    onClick={() => setPreviewDevice("tablet")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-all ${
+                      previewDevice === "tablet"
+                        ? "bg-[var(--foreground)] text-[var(--surface)]"
+                        : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <TabletIcon className="h-3.5 w-3.5" /> Tablet
+                  </button>
+                  <button
+                    onClick={() => setPreviewDevice("mobile")}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 transition-all ${
+                      previewDevice === "mobile"
+                        ? "bg-[var(--foreground)] text-[var(--surface)]"
+                        : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <Smartphone className="h-3.5 w-3.5" /> Mobile
+                  </button>
+                </div>
+
                 <button
                   onClick={() => setPreviewExperience(null)}
                   className="p-2 rounded-full border border-[var(--foreground)]/20 hover:bg-[var(--surface-soft)]"
@@ -674,70 +942,73 @@ export default function ProofModeTab() {
                 </button>
               </div>
 
-              {/* WHAT I BUILD */}
-              <div className="space-y-2">
-                <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--accent)]">
-                  WHAT I BUILD
-                </div>
-                <p className="text-base font-semibold text-[var(--foreground)]/90">
-                  {previewExperience.shortDescription}
-                </p>
-              </div>
-
-              {/* HOW I THINK & HOW IT WORKS */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-5 rounded-xl border border-[var(--foreground)]/15 bg-[var(--surface-soft)] space-y-2">
-                  <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--foreground)]/60">
-                    HOW I THINK · Problem & Approach
+              {/* Device Frame Viewport Body */}
+              <div className="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto">
+                {/* WHAT I BUILD */}
+                <div className="space-y-2">
+                  <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--accent)]">
+                    WHAT I BUILD
                   </div>
-                  <p className="text-xs text-[var(--foreground)]/80">
-                    <strong>Challenge:</strong> {previewExperience.problem}
-                  </p>
-                  <p className="text-xs text-[var(--foreground)]/80">
-                    <strong>Strategy:</strong> {previewExperience.approach}
+                  <p className="text-base font-bold text-[var(--foreground)]">
+                    {previewExperience.shortDescription}
                   </p>
                 </div>
 
-                <div className="p-5 rounded-xl border border-[var(--foreground)]/15 bg-[var(--surface-soft)] space-y-2">
-                  <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--foreground)]/60">
-                    HOW IT WORKS · Technical Breakdown
+                {/* HOW I THINK & HOW IT WORKS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl border border-[var(--foreground)]/15 bg-[var(--surface-soft)] space-y-2">
+                    <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--foreground)]/60">
+                      HOW I THINK · Strategy
+                    </div>
+                    <p className="text-xs text-[var(--foreground)]/80">
+                      <strong>Challenge:</strong> {previewExperience.problem}
+                    </p>
+                    <p className="text-xs text-[var(--foreground)]/80">
+                      <strong>Approach:</strong> {previewExperience.approach}
+                    </p>
                   </div>
-                  <p className="text-xs text-[var(--foreground)]/80">
-                    {previewExperience.technicalDetails}
+
+                  <div className="p-4 rounded-xl border border-[var(--foreground)]/15 bg-[var(--surface-soft)] space-y-2">
+                    <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--foreground)]/60">
+                      HOW IT WORKS · Technical Breakdown
+                    </div>
+                    <p className="text-xs text-[var(--foreground)]/80 whitespace-pre-line">
+                      {previewExperience.technicalDetails}
+                    </p>
+                  </div>
+                </div>
+
+                {/* INTERACT WITH IT */}
+                <InteractiveProofVisualizer
+                  type={previewExperience.demonstrationType}
+                  config={previewExperience.demonstrationConfig}
+                  title={previewExperience.title}
+                />
+
+                {/* SEE THE RESULT */}
+                <div className="p-5 rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-strong)] space-y-3">
+                  <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--accent)]">
+                    SEE THE RESULT
+                  </div>
+                  <p className="text-sm font-black text-[var(--foreground)] leading-snug">
+                    {previewExperience.result}
                   </p>
+                  {previewExperience.evidenceLinks && previewExperience.evidenceLinks.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2 border-t border-[var(--foreground)]/15">
+                      {previewExperience.evidenceLinks.map((link, idx) => (
+                        <a
+                          key={idx}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="paper-chip text-xs inline-flex items-center gap-1.5 hover:bg-[var(--foreground)] hover:text-[var(--surface)]"
+                        >
+                          <ExternalLink className="h-3 w-3" /> {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {/* INTERACT WITH IT */}
-              <InteractiveProofVisualizer
-                type={previewExperience.demonstrationType}
-                config={previewExperience.demonstrationConfig}
-                title={previewExperience.title}
-              />
-
-              {/* SEE THE RESULT */}
-              <div className="p-5 rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] space-y-3">
-                <div className="text-xs uppercase font-bold tracking-[0.2em] text-[var(--accent)]">
-                  SEE THE RESULT
-                </div>
-                <p className="text-sm font-bold text-[var(--foreground)]">
-                  {previewExperience.result}
-                </p>
-                {previewExperience.evidenceLinks && previewExperience.evidenceLinks.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-[var(--foreground)]/10">
-                    {previewExperience.evidenceLinks.map((link, idx) => (
-                      <a
-                        key={idx}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="paper-chip inline-flex items-center gap-1.5 hover:bg-[var(--foreground)] hover:text-[var(--surface)]"
-                      >
-                        <ExternalLink className="h-3 w-3" /> {link.label}
-                      </a>
-                    ))}
-                  </div>
-                )}
               </div>
             </motion.div>
           </div>

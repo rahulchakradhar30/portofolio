@@ -1,4 +1,4 @@
-import type { Project, Certification, PortfolioContent } from "@/app/lib/types";
+import type { Project, Certification, PortfolioContent, ProofExperience } from "@/app/lib/types";
 
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('portofolio-one-dun-27') && !process.env.NEXT_PUBLIC_SITE_URL.includes('rahulchakradhar.com')
   ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
@@ -202,6 +202,34 @@ export function getGlobalJsonLdGraph(content?: PortfolioContent | null) {
       getWebSiteEntity(),
       getProfilePageEntity(),
       getOrganizationEntity(),
+    ],
+  };
+}
+
+export function getProofExperienceJsonLd(proof: ProofExperience) {
+  const proofUrl = `${SITE_URL}/proof-mode/${proof.id}`;
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "TechArticle",
+        "@id": `${proofUrl}/#techarticle`,
+        "name": proof.title,
+        "headline": proof.title,
+        "description": proof.shortDescription,
+        "url": proofUrl,
+        "articleSection": proof.category,
+        "author": { "@id": `${SITE_URL}/#person` },
+        "publisher": { "@id": `${SITE_URL}/#organization` },
+        "dateCreated": proof.created_at || undefined,
+        "dateModified": proof.updated_at || proof.created_at || undefined,
+      },
+      getPersonEntity(),
+      getBreadcrumbListEntity([
+        { name: "Home", item: "/" },
+        { name: "Proof Mode", item: "/proof-mode" },
+        { name: proof.title, item: `/proof-mode/${proof.id}` },
+      ]),
     ],
   };
 }

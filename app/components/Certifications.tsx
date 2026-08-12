@@ -27,6 +27,7 @@ function getCertificationTags(cert: Certification) {
 }
 
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import ScrollContainer from "./ScrollContainer";
 
 export default function Certifications() {
   const { content, loading: contentLoading, error: _contentError } = usePortfolioContent();
@@ -108,11 +109,16 @@ export default function Certifications() {
           <LoadingSkeleton variant="cards" count={6} />
         ) : (
           <ExpandableSection collapsedMaxHeightPx={900}>
-            <div className="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10">
-              {visibleCertifications.length === 0 ? (
-                <div className="col-span-full text-center font-bold text-lg">{siteCopy.certificationsEmpty}</div>
-              ) : (
-                visibleCertifications.map((cert, index) => {
+            {visibleCertifications.length === 0 ? (
+              <div className="text-center font-bold text-lg">{siteCopy.certificationsEmpty}</div>
+            ) : (
+              <ScrollContainer
+                config={content?.scrollConfigs?.certifications}
+                verticalClassName="grid auto-rows-fr gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8 2xl:gap-10"
+                horizontalItemClassName="shrink-0 w-[280px] sm:w-[360px] snap-start"
+                ariaLabel="Certifications list"
+              >
+                {visibleCertifications.map((cert, index) => {
                   const cardAnim = getAnimation("certifications", cert.id);
                   return (
                     <motion.button
@@ -129,68 +135,68 @@ export default function Certifications() {
                       className="paper-card group flex h-full flex-col overflow-hidden text-left"
                       onClick={() => setSelectedCert(cert)}
                     >
-                    <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-soft)] border-b-2 border-[var(--foreground)]">
-                      {cert.image ? (
-                        <Image
-                          src={cert.image}
-                          alt={cert.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center bg-[var(--surface-strong)]">
-                          <Award className="h-16 w-16 text-[var(--foreground)] transition-transform duration-300 group-hover:scale-110 opacity-20" />
+                      <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-soft)] border-b-2 border-[var(--foreground)]">
+                        {cert.image ? (
+                          <Image
+                            src={cert.image}
+                            alt={cert.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center bg-[var(--surface-strong)]">
+                            <Award className="h-16 w-16 text-[var(--foreground)] transition-transform duration-300 group-hover:scale-110 opacity-20" />
+                          </div>
+                        )}
+
+                        {cert.featured && (
+                          <div className="absolute top-4 right-4 z-10">
+                            <span className="paper-chip bg-[var(--surface)] text-xs font-bold shadow-sm">
+                              Featured
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-1 flex-col space-y-4 p-6 sm:p-8">
+                        <div>
+                          <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)] transition-colors group-hover:text-[var(--accent)]">
+                            {cert.title}
+                          </h3>
+                          <p className="mt-3 text-sm font-bold text-[var(--foreground)] uppercase tracking-widest">Issuer: {cert.issuer}</p>
+                          <p className="mt-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
+                            Issued {new Date(cert.issuedDate).toLocaleDateString()}
+                          </p>
                         </div>
-                      )}
 
-                      {cert.featured && (
-                        <div className="absolute top-4 right-4 z-10">
-                          <span className="paper-chip bg-[var(--surface)] text-xs font-bold shadow-sm">
-                            Featured
-                          </span>
+                        <p className="text-base font-medium leading-relaxed">{cert.description}</p>
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                          {getCertificationTags(cert).map((tag) => (
+                            <span key={tag} className="paper-chip px-3 py-1.5 text-xs font-bold bg-[var(--surface-soft)]">
+                              {tag}
+                            </span>
+                          ))}
                         </div>
-                      )}
-                    </div>
 
-                    <div className="flex flex-1 flex-col space-y-4 p-6 sm:p-8">
-                      <div>
-                        <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)] transition-colors group-hover:text-[var(--accent)]">
-                          {cert.title}
-                        </h3>
-                        <p className="mt-3 text-sm font-bold text-[var(--foreground)] uppercase tracking-widest">Issuer: {cert.issuer}</p>
-                        <p className="mt-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
-                          Issued {new Date(cert.issuedDate).toLocaleDateString()}
-                        </p>
-                      </div>
-
-                      <p className="text-base font-medium leading-relaxed">{cert.description}</p>
-
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {getCertificationTags(cert).map((tag) => (
-                          <span key={tag} className="paper-chip px-3 py-1.5 text-xs font-bold bg-[var(--surface-soft)]">
-                            {tag}
+                        <div className="mt-auto flex flex-wrap gap-3 pt-4">
+                          <span className="paper-button-primary text-sm px-5 py-2.5">
+                            View details
                           </span>
-                        ))}
+                          {cert.credentialUrl ? (
+                            <span className="paper-button text-sm px-5 py-2.5 bg-white">
+                              Credential
+                              <ExternalLink className="ml-2 h-4 w-4" />
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
-
-                      <div className="mt-auto flex flex-wrap gap-3 pt-4">
-                        <span className="paper-button-primary text-sm px-5 py-2.5">
-                          View details
-                        </span>
-                        {cert.credentialUrl ? (
-                          <span className="paper-button text-sm px-5 py-2.5 bg-white">
-                            Credential
-                            <ExternalLink className="ml-2 h-4 w-4" />
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  </motion.button>
-                );
-              })
-              )}
-            </div>
+                    </motion.button>
+                  );
+                })}
+              </ScrollContainer>
+            )}
           </ExpandableSection>
         )}
       </div>
