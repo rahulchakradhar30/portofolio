@@ -73,6 +73,18 @@ export default function Projects() {
     fetchProjects();
   }, []);
 
+  const gridConfig = content?.siteEditorConfig?.projectGridConfig;
+  const desktopCols = gridConfig?.desktopColumns || 3;
+  const tabletCols = gridConfig?.tabletColumns || 2;
+  const mobileCols = gridConfig?.mobileColumns || 1;
+
+  const gridClasses = useMemo(() => {
+    const mobileClass = mobileCols === 2 ? "grid-cols-2" : "grid-cols-1";
+    const tabletClass = tabletCols === 1 ? "sm:grid-cols-1" : tabletCols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
+    const desktopClass = desktopCols === 1 ? "lg:grid-cols-1" : desktopCols === 2 ? "lg:grid-cols-2" : desktopCols === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3";
+    return `grid gap-6 ${mobileClass} ${tabletClass} ${desktopClass} xl:gap-8 2xl:gap-10`;
+  }, [desktopCols, tabletCols, mobileCols]);
+
   if ((loading || contentLoading) && isVisible) {
     return (
       <section className="relative px-4 py-24 sm:px-6 lg:px-10">

@@ -18,6 +18,8 @@ import {
   Edit2,
   Globe,
   Layout,
+  Film,
+  Sparkles,
 } from "lucide-react";
 import AIAssistant from "@/app/components/AIAssistant";
 import type { AdminUser } from "@/app/lib/types";
