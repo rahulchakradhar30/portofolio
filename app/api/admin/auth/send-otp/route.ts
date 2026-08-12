@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     try {
       await sendMail({
         to: email,
-        subject: `Admin Login OTP: ${otp}`,
+        subject: `🔐 Admin Login OTP: ${otp}`,
         text: `Your Login Code is ${otp}. Use this code to complete your admin login. It expires in 5 minutes.`,
         html: `
           <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 40px 24px; background: #fbf7f0; border-radius: 16px;">

@@ -530,7 +530,7 @@ export default function Security2FASection() {
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-700 font-bold">
-                    <Key className="w-4 h-4" />
+                    🔑
                   </div>
                   <div>
                     <p className="font-bold text-gray-800">{pk.name}</p>

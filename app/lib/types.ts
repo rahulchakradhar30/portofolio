@@ -156,7 +156,6 @@ export interface PortfolioContent {
   // Dynamic Configuration Extensions
   animationConfig?: UnifiedAnimationConfig;
   themeConfig?: UnifiedThemeConfig;
-  siteEditorConfig?: SiteEditorConfig;
   
   // Cinematic Intro Experience
   introEnabled?: boolean;
@@ -169,58 +168,6 @@ export interface PortfolioContent {
   introEnableLogoAnimation?: boolean;
   // Branding & Favicon Configuration
   faviconConfig?: FaviconConfig;
-  
-  // Admin-Controlled Scroll Behavior
-  scrollConfigs?: ScrollConfigRegistry;
-}
-
-export type ScrollDirection = 'vertical' | 'horizontal';
-
-export interface ComponentScrollConfig {
-  desktop: ScrollDirection;
-  tablet: ScrollDirection;
-  mobile: ScrollDirection;
-}
-
-export interface ScrollConfigRegistry {
-  proofModeCards?: ComponentScrollConfig;
-  skills?: ComponentScrollConfig;
-  certifications?: ComponentScrollConfig;
-  evidenceGallery?: ComponentScrollConfig;
-  techBadges?: ComponentScrollConfig;
-}
-
-export interface TypographyStyle {
-  color?: string;
-  bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
-}
-
-export interface StructuredFormattedText {
-  text: string;
-  style?: TypographyStyle;
-}
-
-export interface SectionLayoutConfig {
-  spacing?: 'compact' | 'normal' | 'large';
-  width?: 'narrow' | 'standard' | 'wide';
-  alignment?: 'left' | 'center' | 'right';
-  visible?: boolean;
-}
-
-export interface ProjectGridConfig {
-  desktopColumns: number;
-  tabletColumns: number;
-  mobileColumns: number;
-}
-
-export interface SiteEditorConfig {
-  sectionOrder?: string[];
-  sectionLayouts?: Record<string, SectionLayoutConfig>;
-  projectGridConfig?: ProjectGridConfig;
-  typographyOverrides?: Record<string, TypographyStyle>;
-  updatedAt?: string;
 }
 
 export interface FaviconConfig {
@@ -452,7 +399,6 @@ export interface ProofExperience {
   images?: string[];
   published: boolean;
   order?: number;
-  defaultSectionState?: 'expanded' | 'collapsed';
   mlMetadata?: {
     tags?: string[];
     similarityVector?: number[];

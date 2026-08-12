@@ -260,7 +260,7 @@ function generateSmartResponse(messages: ChatMessage[]): string {
   if (lowerMessage.match(/^(hi|hello|hey|greetings|good morning|good afternoon|good evening)/)) {
     const greetings = [
       "Hello! I'm an AI assistant here to help you explore this portfolio. What interests you most?",
-      "Hi there! Feel free to ask me anything about web development, AI, projects, or this portfolio.",
+      "Hi there! 👋 Feel free to ask me anything about web development, AI, projects, or this portfolio.",
       "Hey! Welcome. I'm happy to answer any questions you have. What would you like to know?",
     ];
     return greetings[Math.floor(Math.random() * greetings.length)];

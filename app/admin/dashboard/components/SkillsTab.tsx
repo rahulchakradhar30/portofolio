@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import { SKILL_LOGO_PRESETS, SKILL_LOGO_CATEGORIES, resolveSkillIconUrl } from "@/app/lib/skillLogoCatalog";
 import type { Skill } from "@/app/lib/types";
@@ -254,7 +254,7 @@ export default function SkillsTab() {
                 ) : formData.icon ? (
                   <span className="text-xs text-amber-700 font-semibold">Custom / Mapped Logo</span>
                 ) : (
-                  <span className="text-xs text-amber-600 inline-flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" /> Generic Fallback Logo</span>
+                  <span className="text-xs text-amber-600">⚠ Generic Fallback Logo</span>
                 )}
               </div>
             </div>

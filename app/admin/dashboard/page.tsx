@@ -17,9 +17,8 @@ import {
   Plus,
   Edit2,
   Globe,
-  Layout,
-  Film,
   Sparkles,
+  Film,
 } from "lucide-react";
 import AIAssistant from "@/app/components/AIAssistant";
 import type { AdminUser } from "@/app/lib/types";
@@ -41,7 +40,7 @@ import SEOTab from "./components/SEOTab";
 import AnimationsTab from "./components/AnimationsTab";
 import IntroTab from "./components/IntroTab";
 import ProofModeTab from "./components/ProofModeTab";
-import LiveSiteEditorTab from "./components/LiveSiteEditorTab";
+
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -89,7 +88,6 @@ export default function AdminDashboard() {
 
   const adminTabs = [
     { id: "overview", label: "Overview", icon: BarChart3 },
-    { id: "editor", label: "Live Site Editor", icon: Layout },
     { id: "content", label: "Content Copy", icon: Edit2 },
     { id: "projects", label: "Projects", icon: Plus },
     { id: "skills", label: "Skills Grid", icon: Plus },
@@ -105,6 +103,7 @@ export default function AdminDashboard() {
     { id: "activity", label: "Audit Logs", icon: Activity },
     { id: "settings", label: "System & Media", icon: SettingsIcon },
   ];
+
 
   return (
     <div className="min-h-screen text-[var(--foreground)]">
@@ -189,7 +188,6 @@ export default function AdminDashboard() {
         {/* Content Area */}
         <div className="overflow-x-hidden p-3 md:p-6">
           {activeTab === "overview" && <OverviewTab />}
-          {activeTab === "editor" && <LiveSiteEditorTab />}
           {activeTab === "content" && <ContentTab />}
           {activeTab === "projects" && <ProjectsTab />}
           {activeTab === "skills" && <SkillsTab />}
