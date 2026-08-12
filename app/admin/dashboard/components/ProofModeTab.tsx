@@ -21,7 +21,6 @@ import {
   Tablet as TabletIcon,
   Smartphone,
   Sliders,
-  Settings,
 } from "lucide-react";
 
 import { adminAPI } from "@/app/lib/adminAPI";
@@ -111,7 +110,7 @@ const DEFAULT_CONFIG_EXAMPLES: Record<DemonstrationType, DemonstrationConfig> = 
 export default function ProofModeTab() {
   const [proofExperiences, setProofExperiences] = useState<ProofExperience[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [content, setContent] = useState<PortfolioContent | null>(null);
+  const [_content, setContent] = useState<PortfolioContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);

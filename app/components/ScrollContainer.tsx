@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, ReactNode, UIEvent } from "react";
+import { useEffect, useState, useRef, ReactNode } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ComponentScrollConfig, ScrollDirection } from "@/app/lib/types";
 
@@ -116,7 +116,7 @@ export default function ScrollContainer({
       {/* Horizontal Scroll Track */}
       <div
         ref={containerRef}
-        onScroll={(e: UIEvent<HTMLDivElement>) => checkScrollState()}
+        onScroll={() => checkScrollState()}
         role="region"
         aria-label={ariaLabel}
         tabIndex={0}

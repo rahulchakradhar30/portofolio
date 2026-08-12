@@ -7,13 +7,10 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Sparkles,
-  ExternalLink,
-  Code2,
   Layers,
   ArrowRight,
   Search,
   Cpu,
-  CheckCircle2,
   Workflow,
   Sliders,
   HelpCircle,
