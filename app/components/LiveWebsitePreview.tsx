@@ -15,6 +15,7 @@ interface LiveWebsitePreviewProps {
   selectedSectionId?: string | null;
   selectedBlockId?: string | null;
   viewportMode?: PreviewViewportMode;
+  fitToView?: boolean;
   onSelectSection?: (sectionId: string) => void;
   className?: string;
 }
@@ -57,7 +58,7 @@ function LivePreviewCanvas({
 
   return (
     <PortfolioContentProvider overrideContent={draftPortfolioContent}>
-      <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 font-sans">
+      <div className="relative min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 font-sans select-text">
         <Header />
 
         {activeSections.length === 0 ? (
@@ -75,7 +76,10 @@ function LivePreviewCanvas({
             return (
               <div
                 key={section.id}
-                onClick={() => onSelectSection?.(section.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectSection?.(section.id);
+                }}
                 className={`relative group transition-all duration-200 cursor-pointer ${
                   isSelected
                     ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--background)] shadow-lg"
@@ -114,14 +118,17 @@ export default function LiveWebsitePreview({
   homepageConfig,
   selectedSectionId,
   viewportMode = "desktop",
+  fitToView = false,
   onSelectSection,
   className = "",
 }: LiveWebsitePreviewProps) {
   return (
-    <div className={`w-full overflow-x-auto bg-neutral-900/10 p-2 sm:p-4 rounded-2xl border border-[var(--border-color,rgba(0,0,0,0.1))] ${className}`}>
+    <div className={`w-full overflow-x-auto bg-neutral-900/10 p-2 sm:p-3 rounded-2xl border border-[var(--border-color,rgba(0,0,0,0.1))] ${className}`}>
       {/* Device Viewport Wrapper */}
       <div
-        className={`transition-all duration-300 mx-auto shadow-2xl overflow-y-auto max-h-[85vh] ${
+        className={`transition-all duration-300 mx-auto shadow-2xl overflow-y-auto max-h-[calc(100vh-210px)] min-h-[450px] ${
+          fitToView ? "scale-[0.88] origin-top my-1" : ""
+        } ${
           viewportMode === "mobile"
             ? "w-[375px] max-w-full rounded-[36px] border-[8px] border-neutral-900 bg-[var(--background)] shadow-2xl my-2"
             : viewportMode === "tablet"

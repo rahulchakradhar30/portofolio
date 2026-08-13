@@ -27,6 +27,12 @@ import {
   Tablet,
   Smartphone,
   Split,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Minimize2,
 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type {
@@ -71,6 +77,75 @@ export default function HomepageBuilderTab() {
   const [activeSubTab, setActiveSubTab] = useState<"sections" | "blocks" | "navigation">("sections");
   const [viewportMode, setViewportMode] = useState<PreviewViewportMode>("desktop");
   const [viewLayout, setViewLayout] = useState<"split" | "full_preview" | "editor_only">("split");
+
+  // Split-Pane & UI Preference State
+  const [sidebarWidth, setSidebarWidth] = useState<number>(460);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [fitToView, setFitToView] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  // Restore UI preferences from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedPrefs = localStorage.getItem("homepage_builder_ui_prefs");
+      if (savedPrefs) {
+        const parsed = JSON.parse(savedPrefs);
+        if (typeof parsed.sidebarWidth === "number") setSidebarWidth(parsed.sidebarWidth);
+        if (typeof parsed.sidebarCollapsed === "boolean") setSidebarCollapsed(parsed.sidebarCollapsed);
+        if (typeof parsed.fitToView === "boolean") setFitToView(parsed.fitToView);
+        if (parsed.viewportMode) setViewportMode(parsed.viewportMode);
+        if (parsed.viewLayout) setViewLayout(parsed.viewLayout);
+      }
+    } catch (e) {
+      console.warn("Could not load homepage builder UI preferences:", e);
+    }
+  }, []);
+
+  // Save UI preferences to localStorage on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "homepage_builder_ui_prefs",
+        JSON.stringify({
+          sidebarWidth,
+          sidebarCollapsed,
+          fitToView,
+          viewportMode,
+          viewLayout,
+        })
+      );
+    } catch {
+      // Ignore quota error
+    }
+  }, [sidebarWidth, sidebarCollapsed, fitToView, viewportMode, viewLayout]);
+
+  // Drag handle logic for resizable split pane
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Calculate width bounded between min 320px and max 720px
+      const newWidth = Math.min(Math.max(e.clientX - 260, 320), Math.min(window.innerWidth * 0.55, 720));
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
   // Load content configuration
   const loadConfig = useCallback(async () => {
@@ -385,7 +460,7 @@ export default function HomepageBuilderTab() {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Viewport Switcher */}
+          {/* Viewport Switcher & Fit Control */}
           <div className="inline-flex items-center p-1 rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] gap-1">
             <button
               type="button"
@@ -426,15 +501,45 @@ export default function HomepageBuilderTab() {
               <Smartphone className="w-4 h-4" />
               <span className="hidden sm:inline">Mobile</span>
             </button>
+            <button
+              type="button"
+              onClick={() => setFitToView(!fitToView)}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all border-l border-[var(--foreground)]/20 ${
+                fitToView
+                  ? "bg-[var(--accent)] text-white shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title={fitToView ? "Fit to View Active" : "Fit Preview inside Container"}
+            >
+              <Minimize2 className="w-4 h-4" />
+              <span className="hidden lg:inline">Fit</span>
+            </button>
           </div>
 
-          {/* View Layout Mode Switcher */}
+          {/* View Layout & Sidebar Collapse Toggle */}
           <div className="inline-flex items-center p-1 rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] gap-1">
             <button
               type="button"
-              onClick={() => setViewLayout("split")}
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
               className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                viewLayout === "split"
+                sidebarCollapsed
+                  ? "bg-[var(--accent)] text-white shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title={sidebarCollapsed ? "Expand Editor Sidebar" : "Collapse Editor Sidebar"}
+            >
+              {sidebarCollapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
+              <span className="hidden sm:inline">{sidebarCollapsed ? "Open Editor" : "Collapse"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setViewLayout("split");
+                setSidebarCollapsed(false);
+              }}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                viewLayout === "split" && !sidebarCollapsed
                   ? "bg-[var(--foreground)] text-[var(--surface)] shadow-sm"
                   : "text-[var(--foreground)] opacity-70 hover:opacity-100"
               }`}
@@ -509,11 +614,16 @@ export default function HomepageBuilderTab() {
         </div>
       )}
 
-      {/* SPLIT VIEW MODE */}
+      {/* SPLIT VIEW MODE (RESIZABLE SPLIT PANE + COLLAPSIBLE SIDEBAR) */}
       {viewLayout === "split" && (
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.15fr] gap-6 items-start">
-          {/* LEFT PANEL: EDITOR CONTROLS */}
-          <div className="space-y-6">
+        <div className="flex flex-col lg:flex-row gap-0 items-start relative w-full border-2 border-[var(--foreground)] rounded-2xl bg-[var(--surface)] shadow-[6px_6px_0_0_rgba(42,36,31,0.08)] overflow-hidden">
+          {/* LEFT PANEL: EDITOR CONTROLS (INDEPENDENT SCROLL) */}
+          <div
+            style={{ width: sidebarCollapsed ? 0 : `${sidebarWidth}px` }}
+            className={`transition-[width] duration-200 ease-out flex-shrink-0 ${
+              sidebarCollapsed ? "hidden" : "block"
+            } w-full lg:w-auto max-h-[calc(100vh-210px)] overflow-y-auto p-4 sm:p-6 space-y-6 border-r border-[var(--border-color,rgba(0,0,0,0.12))]`}
+          >
             {/* Sub-Tab Navigation */}
             <div className="flex border-b-2 border-[var(--foreground)] gap-2">
               <button
@@ -1336,13 +1446,40 @@ export default function HomepageBuilderTab() {
       )}
           </div>
 
-          {/* RIGHT PANEL: TRUE LIVE WEBSITE PREVIEW */}
-          <div className="sticky top-20 space-y-3">
-            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[var(--surface-soft)] border border-[var(--border-color,rgba(0,0,0,0.1))] text-xs font-bold shadow-sm">
-              <span className="flex items-center gap-1.5 text-[var(--accent)]">
-                <Sparkles className="w-4 h-4" />
-                <span>Live Website Renderer Preview</span>
-              </span>
+          {/* DRAGGABLE RESIZING DIVIDER */}
+          {!sidebarCollapsed && (
+            <div
+              onMouseDown={handleMouseDown}
+              className={`hidden lg:flex w-3 hover:w-3.5 group cursor-col-resize select-none items-center justify-center transition-all self-stretch min-h-[500px] ${
+                isDragging
+                  ? "bg-[var(--accent)] text-white shadow-md"
+                  : "bg-[var(--surface-soft)] hover:bg-[var(--accent)]/20 border-x border-[var(--foreground)]/10"
+              }`}
+              title="Drag horizontally to resize editor vs preview"
+            >
+              <GripVertical className="w-3.5 h-3.5 text-[var(--foreground)]/40 group-hover:text-[var(--accent)] transition-colors" />
+            </div>
+          )}
+
+          {/* RIGHT PANEL: TRUE LIVE WEBSITE PREVIEW (INDEPENDENT SCROLL) */}
+          <div className="flex-1 min-w-0 p-4 sm:p-6 space-y-3 max-h-[calc(100vh-210px)] overflow-y-auto bg-[var(--surface-soft)] w-full">
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--border-color,rgba(0,0,0,0.1))] text-xs font-bold shadow-sm">
+              <div className="flex items-center gap-2">
+                {sidebarCollapsed && (
+                  <button
+                    type="button"
+                    onClick={() => setSidebarCollapsed(false)}
+                    className="paper-button inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-black text-[var(--accent)]"
+                  >
+                    <PanelLeftOpen className="w-3.5 h-3.5" />
+                    <span>Open Editor Controls</span>
+                  </button>
+                )}
+                <span className="flex items-center gap-1.5 text-[var(--accent)]">
+                  <Sparkles className="w-4 h-4" />
+                  <span>Live Website Renderer Preview</span>
+                </span>
+              </div>
               <span className="text-[var(--foreground)] opacity-60">
                 Click any section to select for editing
               </span>
@@ -1352,6 +1489,7 @@ export default function HomepageBuilderTab() {
               homepageConfig={config}
               selectedSectionId={selectedSectionId}
               viewportMode={viewportMode}
+              fitToView={fitToView}
               onSelectSection={(secId) => setSelectedSectionId(secId)}
             />
           </div>
