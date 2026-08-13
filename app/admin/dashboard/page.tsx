@@ -24,9 +24,10 @@ import AIAssistant from "@/app/components/AIAssistant";
 import type { AdminUser } from "@/app/lib/types";
 
 // Import modular tab components
-import { Palette } from "lucide-react";
+import { Palette, Layers } from "lucide-react";
 import SessionGuard from "./components/SessionGuard";
 import ThemesTab from "./components/ThemesTab";
+import GlassmorphismTab from "./components/GlassmorphismTab";
 import OverviewTab from "./components/OverviewTab";
 import ContentTab from "./components/ContentTab";
 import ProjectsTab from "./components/ProjectsTab";
@@ -99,6 +100,7 @@ export default function AdminDashboard() {
     { id: "seo", label: "SEO Settings", icon: Globe },
     { id: "animations", label: "Animation Prefs", icon: Sparkles },
     { id: "themes", label: "Color Themes", icon: Palette },
+    { id: "glassmorphism", label: "Glass Design", icon: Layers },
     { id: "users", label: "Admin Users", icon: Users },
     { id: "activity", label: "Audit Logs", icon: Activity },
     { id: "settings", label: "System & Media", icon: SettingsIcon },
@@ -200,6 +202,7 @@ export default function AdminDashboard() {
 
           {activeTab === "animations" && <AnimationsTab />}
           {activeTab === "themes" && <ThemesTab />}
+          {activeTab === "glassmorphism" && <GlassmorphismTab />}
           {activeTab === "users" && <UsersTab />}
           {activeTab === "activity" && <ActivityTab />}
           {activeTab === "settings" && <SettingsTab />}

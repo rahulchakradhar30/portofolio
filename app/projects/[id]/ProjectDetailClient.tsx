@@ -176,7 +176,7 @@ export default function ProjectDetailClient({ project }: ProjectDetailClientProp
             viewport={{ once: true }}
             className="mb-16 sm:mb-20"
           >
-            <div className="overflow-hidden rounded-3xl border border-[#7a5f47]/12 bg-white shadow-2xl backdrop-blur">
+            <div className="overflow-hidden rounded-3xl border border-[#7a5f47]/12 bg-white glass-surface shadow-2xl backdrop-blur">
               <div className="bg-gradient-to-r from-[#c4a884] to-[#eadbbf] px-5 py-5 sm:px-6 md:px-8 md:py-6">
                 <h2 className="flex items-center gap-3 text-xl font-bold text-[#2f241b] sm:text-2xl md:text-3xl">
                   <Play className="h-6 w-6 rounded-full bg-white/60 p-1 sm:h-7 sm:w-7 sm:p-1.5" />

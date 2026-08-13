@@ -70,7 +70,7 @@ export default function Header() {
       initial={reducedMotion ? false : { y: -100 }}
       animate={reducedMotion ? undefined : { y: 0 }}
       transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
-      className="fixed top-0 left-0 right-0 z-50 bg-[var(--surface)] border-b-2 border-[var(--foreground)]"
+      className="fixed top-0 left-0 right-0 z-50 bg-[var(--surface)] border-b-2 border-[var(--foreground)] glass-surface"
     >
       <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between">

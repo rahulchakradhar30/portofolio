@@ -198,7 +198,7 @@ export default function Contact() {
               </motion.div>
             </div>
 
-            <div className="paper-card p-6 sm:p-8">
+            <div className="paper-card glass-surface p-6 sm:p-8">
               <p className="text-xs font-bold uppercase tracking-widest text-[var(--accent)]">{siteCopy.contactSocialPrompt}</p>
               <div className="mt-5 flex flex-wrap gap-4">
                 <motion.a
@@ -244,7 +244,7 @@ export default function Contact() {
             transition={reducedMotion ? undefined : { duration: 0.8, ease: [0.42, 0, 0.58, 1] }}
             viewport={{ once: true, amount: 0.2 }}
             onSubmit={handleSubmit}
-            className="paper-card p-6 md:p-10"
+            className="paper-card glass-surface p-6 md:p-10"
           >
             <h3 className="text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">{siteCopy.contactFormTitle}</h3>
             <p className="mt-3 text-base font-medium">

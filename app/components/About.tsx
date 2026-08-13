@@ -105,7 +105,7 @@ export default function About() {
                     whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
                     transition={reducedMotion ? undefined : { duration: 0.6, delay: idx * 0.1, ease: [0.42, 0, 0.58, 1] }}
                     viewport={{ once: true, amount: 0.2 }}
-                    className="paper-card p-6 sm:p-8"
+                    className="paper-card glass-surface p-6 sm:p-8"
                   >
                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                       <Icon className="h-5 w-5" />
@@ -136,7 +136,7 @@ export default function About() {
               viewport={{ once: true, amount: 0.2 }}
               className="relative"
             >
-              <div className="paper-card p-8 sm:p-10">
+              <div className="paper-card glass-surface p-8 sm:p-10">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                   <Layers3 className="h-5 w-5" />
                   Proof points

@@ -18,6 +18,7 @@ import {
   normalizeThemeConfig,
   applyThemeTokensToDOM,
 } from "@/app/lib/themeResolver";
+import { applyGlassTokensToDOM } from "@/app/lib/glassResolver";
 import { LocalInput } from "@/app/components/LocalInput";
 import { AdminCard, adminPrimaryButtonClassName, adminSubtleButtonClassName } from "@/app/components/AdminUIComponents";
 
@@ -65,6 +66,7 @@ export default function ThemesTab() {
         : nextConfig.customThemes.find((t) => t.id === themeId) || PERMANENT_DEFAULT_THEME;
 
     applyThemeTokensToDOM(activeItem.tokens);
+    applyGlassTokensToDOM(activeItem.tokens, content?.glassConfig || content);
 
     setSaving(true);
     try {
@@ -111,6 +113,7 @@ export default function ThemesTab() {
     setIsCreating(false);
 
     applyThemeTokensToDOM(editingTheme.tokens);
+    applyGlassTokensToDOM(editingTheme.tokens, content?.glassConfig || content);
 
     setSaving(true);
     try {

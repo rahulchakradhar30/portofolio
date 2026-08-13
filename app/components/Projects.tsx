@@ -129,7 +129,7 @@ export default function Projects() {
                       }}
                       whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
                       viewport={{ once: true, amount: 0.2 }}
-                      className="paper-card group overflow-hidden"
+                      className="paper-card glass-surface group overflow-hidden"
                     >
                     <div className="relative h-48 overflow-hidden bg-[var(--surface-soft)] sm:h-56 border-b-2 border-[var(--foreground)]">
                       {project.image ? (

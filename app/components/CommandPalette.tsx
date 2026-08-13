@@ -134,7 +134,7 @@ export default function CommandPalette() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -24, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="mx-auto mt-20 w-[92%] max-w-3xl rounded-3xl border border-[#7a5f47]/12 bg-white/95 p-4 shadow-[0_30px_100px_rgba(122,95,71,0.18)] sm:p-5"
+            className="mx-auto mt-20 w-[92%] max-w-3xl rounded-3xl border border-[var(--foreground)]/12 bg-[var(--surface)] glass-surface p-4 shadow-2xl sm:p-5"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center gap-3 rounded-2xl border border-[#7a5f47]/10 bg-[#fbf7f0] px-3 py-2">

@@ -156,6 +156,7 @@ export interface PortfolioContent {
   // Dynamic Configuration Extensions
   animationConfig?: UnifiedAnimationConfig;
   themeConfig?: UnifiedThemeConfig;
+  glassConfig?: UnifiedGlassConfig;
   
   // Cinematic Intro Experience
   introEnabled?: boolean;
@@ -170,6 +171,42 @@ export interface PortfolioContent {
   faviconConfig?: FaviconConfig;
   // Scroll & Component Layout Configurations
   scrollConfigs?: ScrollConfigRegistry;
+}
+
+export type GlassPreset = "subtle" | "balanced" | "strong" | "custom";
+
+export interface GlassParams {
+  intensity: number;      // 0.1 to 1.0
+  blur: number;           // 4 to 24 (in px)
+  transparency: number;   // 0.1 to 0.9 (surface alpha)
+  borderStrength: number; // 0.1 to 0.8
+  surfaceContrast: number;// 0.1 to 1.0
+  shadowDepth: number;    // 0.1 to 1.0
+}
+
+export interface GlassComponentOverride {
+  enabled?: boolean;
+  preset?: GlassPreset;
+  intensity?: number;
+}
+
+export interface UnifiedGlassConfig {
+  enabled: boolean;
+  preset: GlassPreset;
+  global: GlassParams;
+  sections?: Record<string, GlassComponentOverride>;
+  components?: Record<string, GlassComponentOverride>;
+}
+
+export interface GlassTokens {
+  glassEnabled: string;
+  glassBg: string;
+  glassBorder: string;
+  glassBlur: string;
+  glassSaturation: string;
+  glassShadow: string;
+  glassHighlight: string;
+  glassPreset: string;
 }
 
 export interface FaviconConfig {

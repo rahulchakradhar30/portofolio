@@ -34,7 +34,7 @@ export default function CertificationDetailClient({ certification }: Certificati
           Back
         </BackButton>
 
-        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-[#7a5f47]/12 bg-white p-5 shadow-2xl sm:p-6 md:p-8">
+        <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-3xl border border-[#7a5f47]/12 bg-white glass-surface p-5 shadow-2xl sm:p-6 md:p-8">
           <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl">{certification.title}</h1>
           <p className="mt-2 text-[#7a5f47]">{certification.issuer}</p>
           <p className="mt-1 text-sm text-[#8d6b4e]">Issued {certification.issuedDate ? new Date(certification.issuedDate).toLocaleDateString() : 'N/A'}</p>
@@ -69,7 +69,7 @@ export default function CertificationDetailClient({ certification }: Certificati
         </motion.section>
 
         {certification.galleryImages && certification.galleryImages.length > 0 && (
-          <section className="mt-10 rounded-3xl border border-[#7a5f47]/12 bg-white p-5 sm:p-6 md:p-8">
+          <section className="mt-10 rounded-3xl border border-[#7a5f47]/12 bg-white glass-surface p-5 sm:p-6 md:p-8">
             <h2 className="mb-5 text-xl font-bold text-[#2f241b] sm:mb-6 sm:text-2xl">Gallery</h2>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
               {certification.galleryImages.map((image, idx) => (
@@ -88,7 +88,7 @@ export default function CertificationDetailClient({ certification }: Certificati
         )}
 
         {youtubeIds.length > 0 && (
-          <section className="mt-10 rounded-3xl border border-[#7a5f47]/12 bg-white p-5 sm:p-6 md:p-8">
+          <section className="mt-10 rounded-3xl border border-[#7a5f47]/12 bg-white glass-surface p-5 sm:p-6 md:p-8">
             <h2 className="mb-5 text-xl font-bold text-[#2f241b] sm:mb-6 sm:text-2xl">Videos</h2>
             <div className="grid gap-4 md:grid-cols-2 sm:gap-6">
               {youtubeIds.map((id, idx) => (

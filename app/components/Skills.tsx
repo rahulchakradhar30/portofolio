@@ -119,7 +119,7 @@ export default function Skills() {
                     transition={reducedMotion ? undefined : { duration: 0.6, delay: index * 0.05, ease: [0.42, 0, 0.58, 1] }}
                     whileHover={reducedMotion ? undefined : { y: -6, scale: 1.02 }}
                     viewport={{ once: true, amount: 0.2 }}
-                    className="paper-card p-6 md:p-8 h-full flex flex-col justify-between"
+                    className="paper-card glass-surface p-6 md:p-8 h-full flex flex-col justify-between"
                   >
                     <div>
                       <div className="mb-6 flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] shadow-[2px_2px_0_0_rgba(42,36,31,0.1)] transition-transform duration-300 md:h-16 md:w-16">

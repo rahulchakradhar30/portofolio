@@ -55,7 +55,7 @@ export default function ProofModeEntry() {
 
             {/* Visual Evidence Badges */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="paper-card p-5 bg-[var(--surface)] border border-[var(--foreground)]/20 shadow-[4px_4px_0_0_rgba(42,36,31,0.1)]">
+              <div className="paper-card glass-surface p-5 bg-[var(--surface)] border border-[var(--foreground)]/20 shadow-[4px_4px_0_0_rgba(42,36,31,0.1)]">
                 <div className="flex items-center gap-3 mb-2">
                   <Cpu className="h-5 w-5 text-[var(--accent)]" />
                   <span className="font-extrabold text-sm text-[var(--foreground)]">Architectures</span>
@@ -65,7 +65,7 @@ export default function ProofModeEntry() {
                 </p>
               </div>
 
-              <div className="paper-card p-5 bg-[var(--surface)] border border-[var(--foreground)]/20 shadow-[4px_4px_0_0_rgba(42,36,31,0.1)]">
+              <div className="paper-card glass-surface p-5 bg-[var(--surface)] border border-[var(--foreground)]/20 shadow-[4px_4px_0_0_rgba(42,36,31,0.1)]">
                 <div className="flex items-center gap-3 mb-2">
                   <Activity className="h-5 w-5 text-[var(--accent)]" />
                   <span className="font-extrabold text-sm text-[var(--foreground)]">Real Outcomes</span>
@@ -75,7 +75,7 @@ export default function ProofModeEntry() {
                 </p>
               </div>
 
-              <div className="paper-card sm:col-span-2 p-5 bg-[var(--surface)] border border-[var(--foreground)]/20 shadow-[4px_4px_0_0_rgba(42,36,31,0.1)] flex items-center justify-between">
+              <div className="paper-card glass-surface sm:col-span-2 p-5 bg-[var(--surface)] border border-[var(--foreground)]/20 shadow-[4px_4px_0_0_rgba(42,36,31,0.1)] flex items-center justify-between">
                 <div>
                   <span className="font-extrabold text-sm text-[var(--foreground)] block">
                     Zero Mock Content Guarantee

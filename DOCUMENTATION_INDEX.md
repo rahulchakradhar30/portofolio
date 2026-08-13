@@ -10,6 +10,7 @@
 | **How to fix (quick)** | [QUICK_EMAIL_FIX.md](QUICK_EMAIL_FIX.md) | 2 min |
 | **Detailed fix steps** | [REGISTRATION_SETUP.md](REGISTRATION_SETUP.md) | 10 min |
 | **Debug email sending** | [EMAIL_DEBUGGING_GUIDE.md](EMAIL_DEBUGGING_GUIDE.md) | 5 min |
+| **Glassmorphism System** | [CONFIGURABLE_GLASSMORPHISM_SYSTEM.md](CONFIGURABLE_GLASSMORPHISM_SYSTEM.md) | 5 min |
 | **Test email endpoint** | [EMAIL_DEBUGGING_GUIDE.md#-step-1-test-email-sending-directly-easiest](EMAIL_DEBUGGING_GUIDE.md) | 2 min |
 
 ---

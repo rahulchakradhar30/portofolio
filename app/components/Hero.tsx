@@ -147,7 +147,7 @@ export default function Hero() {
             className="mt-12 grid gap-6 sm:grid-cols-3"
           >
             {siteCopy.heroSpotlights.map((item) => (
-              <div key={item.title} className="paper-card p-6">
+              <div key={item.title} className="paper-card glass-surface p-6">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[var(--accent)]">
                   <Layers3 className="h-4 w-4" />
                   {item.title}

@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState, useCallback } 
 import { usePortfolioContent } from "./PortfolioContentProvider";
 import { getResolvedAnimation, ResolvedAnimationResult } from "@/app/lib/animationResolver";
 import { getActiveTheme, applyThemeTokensToDOM } from "@/app/lib/themeResolver";
+import { applyGlassTokensToDOM } from "@/app/lib/glassResolver";
 
 type MotionMode = "system" | "full" | "reduced";
 
@@ -29,13 +30,14 @@ export function MotionProvider({ children }: { children: React.ReactNode }) {
   const [magnifierEnabled, setMagnifierEnabled] = useState<boolean>(true);
   const [systemReduced, setSystemReduced] = useState<boolean>(false);
 
-  // Apply active paper theme to document :root whenever portfolio content updates
+  // Apply active paper theme & glass tokens to document :root whenever portfolio content updates
   useEffect(() => {
     try {
       const activeTheme = getActiveTheme(content?.themeConfig || content);
       applyThemeTokensToDOM(activeTheme.tokens);
+      applyGlassTokensToDOM(activeTheme.tokens, content?.glassConfig || content);
     } catch (err) {
-      console.error("Failed to apply theme tokens:", err);
+      console.error("Failed to apply theme/glass tokens:", err);
     }
   }, [content]);
 

@@ -132,7 +132,7 @@ export default function Certifications() {
                       }}
                       whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
                       viewport={{ once: true, amount: 0.2 }}
-                      className="paper-card group flex h-full flex-col overflow-hidden text-left"
+                      className="paper-card glass-surface group flex h-full flex-col overflow-hidden text-left"
                       onClick={() => setSelectedCert(cert)}
                     >
                       <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-soft)] border-b-2 border-[var(--foreground)]">
