@@ -24,12 +24,13 @@ import AIAssistant from "@/app/components/AIAssistant";
 import type { AdminUser } from "@/app/lib/types";
 
 // Import modular tab components
-import { Palette, Layers } from "lucide-react";
+import { Palette, Layers, LayoutGrid } from "lucide-react";
 import SessionGuard from "./components/SessionGuard";
 import ThemesTab from "./components/ThemesTab";
 import GlassmorphismTab from "./components/GlassmorphismTab";
 import OverviewTab from "./components/OverviewTab";
 import ContentTab from "./components/ContentTab";
+import HomepageBuilderTab from "./components/HomepageBuilderTab";
 import ProjectsTab from "./components/ProjectsTab";
 import SkillsTab from "./components/SkillsTab";
 import CertificationsTab from "./components/CertificationsTab";
@@ -89,6 +90,7 @@ export default function AdminDashboard() {
 
   const adminTabs = [
     { id: "overview", label: "Overview", icon: BarChart3 },
+    { id: "builder", label: "Homepage Builder", icon: LayoutGrid },
     { id: "content", label: "Content Copy", icon: Edit2 },
     { id: "projects", label: "Projects", icon: Plus },
     { id: "skills", label: "Skills Grid", icon: Plus },
@@ -190,6 +192,7 @@ export default function AdminDashboard() {
         {/* Content Area */}
         <div className="overflow-x-hidden p-3 md:p-6">
           {activeTab === "overview" && <OverviewTab />}
+          {activeTab === "builder" && <HomepageBuilderTab />}
           {activeTab === "content" && <ContentTab />}
           {activeTab === "projects" && <ProjectsTab />}
           {activeTab === "skills" && <SkillsTab />}

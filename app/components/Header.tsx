@@ -16,15 +16,57 @@ export default function Header() {
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
 
-  const navItems = [
-    { name: siteCopy.navHome, href: "#home", sectionId: "home" },
-    { name: siteCopy.navAbout, href: "#about", sectionId: "about" },
-    { name: siteCopy.navAcademic, href: "#roadmap", sectionId: "roadmap" },
-    { name: siteCopy.navRadar, href: "#radar", sectionId: "radar" },
-    { name: siteCopy.navSkills, href: "#skills", sectionId: "skills" },
-    { name: siteCopy.navProjects, href: "#projects", sectionId: "projects" },
-    { name: siteCopy.navContact, href: "#contact", sectionId: "contact" },
-  ];
+  const navItems = useMemo(() => {
+    const defaultItems = [
+      { name: siteCopy.navHome, href: "#home", sectionId: "home" },
+      { name: siteCopy.navAbout, href: "#about", sectionId: "about" },
+      { name: siteCopy.navAcademic, href: "#roadmap", sectionId: "roadmap" },
+      { name: siteCopy.navRadar, href: "#radar", sectionId: "radar" },
+      { name: siteCopy.navSkills, href: "#skills", sectionId: "skills" },
+      { name: siteCopy.navProjects, href: "#projects", sectionId: "projects" },
+      { name: siteCopy.navContact, href: "#contact", sectionId: "contact" },
+    ];
+
+    if (!content?.homepageConfig) return defaultItems;
+
+    const { sections, navItems: configuredNavs } = content.homepageConfig;
+
+    if (Array.isArray(configuredNavs) && configuredNavs.length > 0) {
+      const items = configuredNavs
+        .filter((item) => item.visibleInNav !== false)
+        .sort((a, b) => a.order - b.order)
+        .map((item) => {
+          const sec = sections.find((s) => s.id === item.sectionId);
+          // Don't render link if the section itself is set to invisible
+          if (sec && sec.visible === false) return null;
+
+          const anchorId = item.sectionId === "hero" ? "home" : item.sectionId;
+          return {
+            name: item.navLabel || sec?.publicDisplayTitle || item.sectionId,
+            href: `#${anchorId}`,
+            sectionId: anchorId,
+          };
+        })
+        .filter((item): item is { name: string; href: string; sectionId: string } => Boolean(item));
+
+      return items.length > 0 ? items : defaultItems;
+    }
+
+    // Fallback if navItems array is missing: build from visible sections
+    const activeSections = sections
+      .filter((s) => s.visible !== false && s.visibleInNav !== false)
+      .sort((a, b) => a.order - b.order)
+      .map((s) => {
+        const anchorId = s.id === "hero" ? "home" : s.id;
+        return {
+          name: s.navLabel || s.publicDisplayTitle || s.id,
+          href: `#${anchorId}`,
+          sectionId: anchorId,
+        };
+      });
+
+    return activeSections.length > 0 ? activeSections : defaultItems;
+  }, [content, siteCopy]);
 
   useEffect(() => {
     const syncActiveSection = () => {

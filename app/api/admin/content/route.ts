@@ -4,6 +4,7 @@ import { assertAdminSession } from '@/app/lib/adminAuth';
 import { logAdminAudit } from '@/app/lib/adminAudit';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
 import { DEFAULT_SITE_COPY } from '@/app/lib/siteCopy';
+import { getDefaultHomepageConfig, normalizeHomepageConfig } from '@/app/lib/homepageConfig';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,6 +129,7 @@ export async function GET() {
             sectionVisibility: DEFAULT_SECTION_VISIBILITY,
             siteCopy: DEFAULT_SITE_COPY,
             radarConfig: DEFAULT_RADAR_CONFIG,
+            homepageConfig: getDefaultHomepageConfig(),
             aboutStats: [
               { label: 'Major Projects', value: '3+' },
               { label: 'Certifications', value: '5+' },
@@ -140,7 +142,13 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ content }, { status: 200 });
+    const contentObj = content as Record<string, unknown>;
+    const normalized = {
+      ...contentObj,
+      homepageConfig: normalizeHomepageConfig(contentObj.homepageConfig),
+    };
+
+    return NextResponse.json({ content: normalized }, { status: 200 });
   } catch (error) {
     console.error('Fetch content error:', error);
     return NextResponse.json(
@@ -163,6 +171,10 @@ export async function PUT(request: NextRequest) {
     
     // Strip fields that must not be directly overwritten via the public body
     const { id: _id, created_at: _created_at, updated_at: _updated_at, createdAt: _createdAt, updatedAt: _updatedAt, ...updatePayload } = body;
+
+    if (updatePayload.homepageConfig) {
+      updatePayload.homepageConfig = normalizeHomepageConfig(updatePayload.homepageConfig);
+    }
 
     const updatedContent = await serverFirebaseHelpers.updatePortfolioContent(updatePayload);
 

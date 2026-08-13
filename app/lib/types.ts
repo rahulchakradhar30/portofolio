@@ -171,6 +171,8 @@ export interface PortfolioContent {
   faviconConfig?: FaviconConfig;
   // Scroll & Component Layout Configurations
   scrollConfigs?: ScrollConfigRegistry;
+  // Homepage Content & Section Builder Configuration
+  homepageConfig?: HomepageConfig;
 }
 
 export type GlassPreset = "subtle" | "balanced" | "strong" | "custom";
@@ -463,5 +465,166 @@ export interface ProofExperience {
   created_at?: string;
   updated_at?: string;
 }
+
+// ============================================================
+// HOMEPAGE BUILDER & SECTION/BLOCK REGISTRY TYPES
+// ============================================================
+
+export type BuiltInSectionId =
+  | "hero"
+  | "about"
+  | "roadmap"
+  | "radar"
+  | "skills"
+  | "projects"
+  | "certifications"
+  | "contact";
+
+export type SectionType = BuiltInSectionId | "custom";
+
+export type BlockType =
+  | "rich_text"
+  | "heading"
+  | "paragraph"
+  | "button"
+  | "button_group"
+  | "card"
+  | "card_grid"
+  | "stat_box"
+  | "metric_grid"
+  | "highlight_box"
+  | "tag_group"
+  | "image"
+  | "timeline_group"
+  | "divider";
+
+export type ButtonStylePreset = "primary" | "secondary" | "outline" | "ghost" | "accent" | "proof";
+export type ButtonDestinationType = "hash" | "route" | "url" | "email";
+
+export interface BlockButton {
+  id: string;
+  text: string;
+  destinationType: ButtonDestinationType;
+  destination: string;
+  stylePreset: ButtonStylePreset;
+  icon?: string;
+  visible: boolean;
+  order: number;
+}
+
+export interface BlockCard {
+  id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  icon?: string;
+  badge?: string;
+  tags?: string[];
+  statValue?: string;
+  statLabel?: string;
+  button?: BlockButton;
+  visible: boolean;
+  order: number;
+}
+
+export interface BlockTimelineItem {
+  id: string;
+  stageNumber?: string;
+  stageTitle: string;
+  label?: string;
+  institution?: string;
+  period?: string;
+  description: string;
+  percentageOrStat?: string;
+  statLabel?: string;
+  tags?: string[];
+  isCurrent?: boolean;
+  visible: boolean;
+  order: number;
+}
+
+export interface BlockContent {
+  text?: string;
+  headingText?: string;
+  headingLevel?: "h2" | "h3" | "h4";
+  paragraphText?: string;
+  align?: "left" | "center" | "right";
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  color?: string;
+
+  // Highlighting / Callout / Stat
+  highlightTitle?: string;
+  highlightText?: string;
+  highlightIcon?: string;
+  statValue?: string;
+  statLabel?: string;
+  statSubtext?: string;
+
+  // Image
+  imageUrl?: string;
+  imageAlt?: string;
+  caption?: string;
+
+  // Embedded Item Collections
+  buttons?: BlockButton[];
+  cards?: BlockCard[];
+  timelineItems?: BlockTimelineItem[];
+  tags?: string[];
+}
+
+export interface BlockStyle {
+  spacing?: "compact" | "normal" | "spacious";
+  width?: "narrow" | "standard" | "wide";
+  align?: "left" | "center" | "right";
+  columnsDesktop?: 1 | 2 | 3 | 4;
+  columnsTablet?: 1 | 2 | 3;
+  columnsMobile?: 1 | 2;
+  variant?: "default" | "paper" | "glass" | "highlight" | "outline";
+  animationPreset?: "fade" | "slide" | "scale" | "stagger";
+}
+
+export interface HomepageBlock {
+  id: string;
+  type: BlockType;
+  visible: boolean;
+  order: number;
+  content: BlockContent;
+  style?: BlockStyle;
+}
+
+export interface NavigationItemConfig {
+  sectionId: string;
+  visibleInNav: boolean;
+  navLabel: string;
+  order: number;
+  isCta?: boolean;
+}
+
+export interface HomepageSectionConfig {
+  id: string;
+  type: SectionType;
+  internalName: string;
+  publicDisplayTitle: string;
+  visible: boolean;
+  order: number;
+  navLabel: string;
+  visibleInNav: boolean;
+  isBuiltIn: boolean;
+  layoutPreset?: "standard" | "paper" | "hero" | "timeline" | "grid";
+  animationPreset?: "fade" | "slide" | "scale";
+  bgTreatment?: "default" | "soft" | "strong" | "glass";
+  blocks: HomepageBlock[];
+}
+
+export interface HomepageConfig {
+  version: number;
+  sections: HomepageSectionConfig[];
+  navItems: NavigationItemConfig[];
+  updatedAt?: string;
+}
+
 
 

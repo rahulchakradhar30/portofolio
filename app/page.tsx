@@ -3,16 +3,7 @@ import serverFirebaseHelpers from "@/app/lib/firebaseServer";
 import type { PortfolioContent } from "@/app/lib/types";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS } from "@/app/lib/seoSchemas";
 import Header from "./components/Header";
-import Hero from "./components/Hero";
-import About from "./components/About";
-import StudyRoadmap from "./components/StudyRoadmap";
-import PortfolioRadar from "./components/PortfolioRadar";
-import Skills from "./components/Skills";
-import Projects from "./components/Projects";
-import Certifications from "./components/Certifications";
-import Contact from "./components/Contact";
 import Footer from "./components/Footer";
-import SectionErrorBoundary from "./components/SectionErrorBoundary";
 import IntroOverlay from "./components/IntroOverlay";
 
 
@@ -86,54 +77,24 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Home() {
+import SectionRegistry from "./components/SectionRegistry";
+import { normalizeHomepageConfig } from "@/app/lib/homepageConfig";
+
+export default async function Home() {
+  const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
+  const homepageConfig = normalizeHomepageConfig(content?.homepageConfig);
+
+  // Render visible sections in order
+  const activeSections = homepageConfig.sections.filter((sec) => sec.visible !== false);
+
   return (
     <main>
       <IntroOverlay>
         <Header />
-      <section id="home" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="Hero">
-          <Hero />
-        </SectionErrorBoundary>
-      </section>
-      <section id="about" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="About">
-          <About />
-        </SectionErrorBoundary>
-      </section>
-      <section id="roadmap" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="StudyRoadmap">
-          <StudyRoadmap />
-        </SectionErrorBoundary>
-      </section>
-      <section id="radar" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="PortfolioRadar">
-          <PortfolioRadar />
-        </SectionErrorBoundary>
-      </section>
-      <section id="skills" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="Skills">
-          <Skills />
-        </SectionErrorBoundary>
-      </section>
-      <section id="projects" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-
-
-        <SectionErrorBoundary sectionName="Projects">
-          <Projects />
-        </SectionErrorBoundary>
-      </section>
-      <section id="certifications" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="Certifications">
-          <Certifications />
-        </SectionErrorBoundary>
-      </section>
-      <section id="contact" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
-        <SectionErrorBoundary sectionName="Contact">
-          <Contact />
-        </SectionErrorBoundary>
-      </section>
-      <Footer />
+        {activeSections.map((section) => (
+          <SectionRegistry key={section.id} section={section} />
+        ))}
+        <Footer />
       </IntroOverlay>
     </main>
   );
