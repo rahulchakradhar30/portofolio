@@ -17,7 +17,13 @@ const PortfolioContentContext = createContext<PortfolioContentContextType>({
   error: null,
 });
 
-export function PortfolioContentProvider({ children }: { children: React.ReactNode }) {
+export function PortfolioContentProvider({
+  children,
+  overrideContent,
+}: {
+  children: React.ReactNode;
+  overrideContent?: PortfolioContent | null;
+}) {
   const [content, setContent] = useState<PortfolioContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -89,8 +95,11 @@ export function PortfolioContentProvider({ children }: { children: React.ReactNo
     return () => unsubscribe();
   }, []);
 
+  const activeContent = overrideContent !== undefined ? overrideContent : content;
+  const activeLoading = overrideContent !== undefined ? false : loading;
+
   return (
-    <PortfolioContentContext.Provider value={{ content, loading, error }}>
+    <PortfolioContentContext.Provider value={{ content: activeContent, loading: activeLoading, error }}>
       {children}
     </PortfolioContentContext.Provider>
   );

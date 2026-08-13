@@ -23,6 +23,10 @@ import {
   FileText,
   MousePointer,
   HelpCircle,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Split,
 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type {
@@ -40,6 +44,7 @@ import type {
 import { getDefaultHomepageConfig, normalizeHomepageConfig, sanitizeDestinationUrl } from "@/app/lib/homepageConfig";
 import BlockRegistry from "@/app/components/blocks/BlockRegistry";
 import CustomSectionRenderer from "@/app/components/blocks/CustomSectionRenderer";
+import LiveWebsitePreview, { PreviewViewportMode } from "@/app/components/LiveWebsitePreview";
 
 const BLOCK_TYPE_OPTIONS: { type: BlockType; label: string; description: string }[] = [
   { type: "heading", label: "Heading", description: "Section heading or subhead (H2, H3, H4)" },
@@ -64,6 +69,8 @@ export default function HomepageBuilderTab() {
   const [selectedSectionId, setSelectedSectionId] = useState<string>("hero");
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [activeSubTab, setActiveSubTab] = useState<"sections" | "blocks" | "navigation">("sections");
+  const [viewportMode, setViewportMode] = useState<PreviewViewportMode>("desktop");
+  const [viewLayout, setViewLayout] = useState<"split" | "full_preview" | "editor_only">("split");
 
   // Load content configuration
   const loadConfig = useCallback(async () => {
@@ -377,24 +384,98 @@ export default function HomepageBuilderTab() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Viewport Switcher */}
+          <div className="inline-flex items-center p-1 rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] gap-1">
+            <button
+              type="button"
+              onClick={() => setViewportMode("desktop")}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                viewportMode === "desktop"
+                  ? "bg-[var(--accent)] text-white shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title="Desktop Viewport"
+            >
+              <Monitor className="w-4 h-4" />
+              <span className="hidden sm:inline">Desktop</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewportMode("tablet")}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                viewportMode === "tablet"
+                  ? "bg-[var(--accent)] text-white shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title="Tablet Viewport (768px)"
+            >
+              <Tablet className="w-4 h-4" />
+              <span className="hidden sm:inline">Tablet</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewportMode("mobile")}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                viewportMode === "mobile"
+                  ? "bg-[var(--accent)] text-white shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title="Mobile Viewport (375px)"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span className="hidden sm:inline">Mobile</span>
+            </button>
+          </div>
+
+          {/* View Layout Mode Switcher */}
+          <div className="inline-flex items-center p-1 rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] gap-1">
+            <button
+              type="button"
+              onClick={() => setViewLayout("split")}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                viewLayout === "split"
+                  ? "bg-[var(--foreground)] text-[var(--surface)] shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title="Split View (Editor + Live Preview)"
+            >
+              <Split className="w-4 h-4" />
+              <span className="hidden md:inline">Split View</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewLayout("full_preview")}
+              className={`p-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                viewLayout === "full_preview"
+                  ? "bg-[var(--foreground)] text-[var(--surface)] shadow-sm"
+                  : "text-[var(--foreground)] opacity-70 hover:opacity-100"
+              }`}
+              title="Full Live Preview"
+            >
+              <Eye className="w-4 h-4" />
+              <span className="hidden md:inline">Full Preview</span>
+            </button>
+          </div>
+
           <button
             type="button"
             onClick={loadConfig}
-            className="paper-button inline-flex items-center gap-2 px-4 py-2.5 text-sm"
+            className="paper-button inline-flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold"
+            title="Discard unsaved local draft changes"
           >
             <RotateCcw className="h-4 w-4" />
-            Reset Draft
+            <span>Reset Draft</span>
           </button>
 
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-xl border-2 border-[var(--foreground)] bg-[var(--accent)] px-6 py-2.5 text-sm font-black text-white shadow-[4px_4px_0_0_rgba(42,36,31,0.9)] transition-all duration-300 hover:bg-[var(--accent-strong)] hover:shadow-[6px_6px_0_0_rgba(42,36,31,1)]"
+            className="inline-flex items-center gap-2 rounded-xl border-2 border-[var(--foreground)] bg-[var(--accent)] px-5 py-2.5 text-xs font-black text-white shadow-[4px_4px_0_0_rgba(42,36,31,0.9)] transition-all duration-300 hover:bg-[var(--accent-strong)] hover:shadow-[6px_6px_0_0_rgba(42,36,31,1)]"
           >
             <Save className="h-4 w-4" />
-            {saving ? "Publishing..." : "Publish Layout"}
+            <span>{saving ? "Publishing..." : "Publish Layout"}</span>
           </button>
         </div>
       </div>
@@ -406,48 +487,75 @@ export default function HomepageBuilderTab() {
         </div>
       )}
 
-      {/* Sub-Tab Navigation */}
-      <div className="flex border-b-2 border-[var(--foreground)] gap-2">
-        <button
-          onClick={() => setActiveSubTab("sections")}
-          className={`flex items-center gap-2 border-b-4 px-5 py-3 font-bold text-sm transition-colors ${
-            activeSubTab === "sections"
-              ? "border-[var(--accent)] text-[var(--accent)]"
-              : "border-transparent text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
-          }`}
-        >
-          <Layers className="h-4 w-4" />
-          Homepage Sections ({config.sections.length})
-        </button>
+      {/* FULL PREVIEW VIEW MODE */}
+      {viewLayout === "full_preview" && (
+        <div className="space-y-4">
+          <div className="p-3.5 rounded-xl bg-[var(--surface-soft)] border border-[var(--border-color,rgba(0,0,0,0.1))] flex flex-wrap items-center justify-between gap-3 text-xs font-bold text-[var(--foreground)]">
+            <span className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-[var(--accent)]" />
+              <span>Full Website Live Renderer Preview (Active In-Memory Draft)</span>
+            </span>
+            <span className="opacity-70">
+              Viewport: <strong className="uppercase">{viewportMode}</strong> • Click any section to select for editing
+            </span>
+          </div>
 
-        <button
-          onClick={() => setActiveSubTab("blocks")}
-          className={`flex items-center gap-2 border-b-4 px-5 py-3 font-bold text-sm transition-colors ${
-            activeSubTab === "blocks"
-              ? "border-[var(--accent)] text-[var(--accent)]"
-              : "border-transparent text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
-          }`}
-        >
-          <Edit3 className="h-4 w-4" />
-          Block Builder ({currentSection?.blocks.length || 0})
-        </button>
+          <LiveWebsitePreview
+            homepageConfig={config}
+            selectedSectionId={selectedSectionId}
+            viewportMode={viewportMode}
+            onSelectSection={(secId) => setSelectedSectionId(secId)}
+          />
+        </div>
+      )}
 
-        <button
-          onClick={() => setActiveSubTab("navigation")}
-          className={`flex items-center gap-2 border-b-4 px-5 py-3 font-bold text-sm transition-colors ${
-            activeSubTab === "navigation"
-              ? "border-[var(--accent)] text-[var(--accent)]"
-              : "border-transparent text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
-          }`}
-        >
-          <Menu className="h-4 w-4" />
-          Navbar Controls
-        </button>
-      </div>
+      {/* SPLIT VIEW MODE */}
+      {viewLayout === "split" && (
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_1.15fr] gap-6 items-start">
+          {/* LEFT PANEL: EDITOR CONTROLS */}
+          <div className="space-y-6">
+            {/* Sub-Tab Navigation */}
+            <div className="flex border-b-2 border-[var(--foreground)] gap-2">
+              <button
+                onClick={() => setActiveSubTab("sections")}
+                className={`flex items-center gap-2 border-b-4 px-4 py-2.5 font-bold text-xs sm:text-sm transition-colors ${
+                  activeSubTab === "sections"
+                    ? "border-[var(--accent)] text-[var(--accent)]"
+                    : "border-transparent text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+                }`}
+              >
+                <Layers className="h-4 w-4" />
+                Sections ({config.sections.length})
+              </button>
 
-      {/* SUB-TAB 1: SECTIONS MANAGER */}
-      {activeSubTab === "sections" && (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.2fr] gap-6">
+              <button
+                onClick={() => setActiveSubTab("blocks")}
+                className={`flex items-center gap-2 border-b-4 px-4 py-2.5 font-bold text-xs sm:text-sm transition-colors ${
+                  activeSubTab === "blocks"
+                    ? "border-[var(--accent)] text-[var(--accent)]"
+                    : "border-transparent text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+                }`}
+              >
+                <Edit3 className="h-4 w-4" />
+                Blocks ({currentSection?.blocks.length || 0})
+              </button>
+
+              <button
+                onClick={() => setActiveSubTab("navigation")}
+                className={`flex items-center gap-2 border-b-4 px-4 py-2.5 font-bold text-xs sm:text-sm transition-colors ${
+                  activeSubTab === "navigation"
+                    ? "border-[var(--accent)] text-[var(--accent)]"
+                    : "border-transparent text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+                }`}
+              >
+                <Menu className="h-4 w-4" />
+                Navbar Controls
+              </button>
+            </div>
+
+            {/* SUB-TAB 1: SECTIONS MANAGER */}
+            {activeSubTab === "sections" && (
+              <div className="space-y-6">
           {/* Section List & Ordering */}
           <div className="space-y-4 rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface)] p-6 shadow-[4px_4px_0_0_rgba(42,36,31,0.08)]">
             <div className="flex items-center justify-between">
@@ -1223,6 +1331,29 @@ export default function HomepageBuilderTab() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+          </div>
+
+          {/* RIGHT PANEL: TRUE LIVE WEBSITE PREVIEW */}
+          <div className="sticky top-20 space-y-3">
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[var(--surface-soft)] border border-[var(--border-color,rgba(0,0,0,0.1))] text-xs font-bold shadow-sm">
+              <span className="flex items-center gap-1.5 text-[var(--accent)]">
+                <Sparkles className="w-4 h-4" />
+                <span>Live Website Renderer Preview</span>
+              </span>
+              <span className="text-[var(--foreground)] opacity-60">
+                Click any section to select for editing
+              </span>
+            </div>
+
+            <LiveWebsitePreview
+              homepageConfig={config}
+              selectedSectionId={selectedSectionId}
+              viewportMode={viewportMode}
+              onSelectSection={(secId) => setSelectedSectionId(secId)}
+            />
           </div>
         </div>
       )}
