@@ -720,6 +720,87 @@ const serverFirebaseHelpers = {
       throw error;
     }
   },
+
+  // Experience management
+  getAllExperiences: async () => {
+    try {
+      debugLog('Server: Getting all experiences');
+      const db = getAdminDb();
+      const snapshot = await db.collection('experiences').get();
+      const items: any[] = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() });
+      });
+      items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      return items;
+    } catch (error) {
+      console.error('Server: Error getting experiences:', error);
+      return [];
+    }
+  },
+
+  getVisibleExperiences: async () => {
+    try {
+      debugLog('Server: Getting visible experiences');
+      const db = getAdminDb();
+      const snapshot = await db.collection('experiences').where('visible', '==', true).get();
+      const items: any[] = [];
+      snapshot.forEach((doc) => {
+        items.push({ id: doc.id, ...doc.data() });
+      });
+      items.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      return items;
+    } catch (error) {
+      console.error('Server: Error getting visible experiences:', error);
+      return [];
+    }
+  },
+
+  createExperience: async (data: Record<string, any>) => {
+    try {
+      debugLog('Server: Creating experience item');
+      const db = getAdminDb();
+      const now = new Date().toISOString();
+      const safeData = removeUndefinedValues(data);
+      const docRef = await db.collection('experiences').add({
+        ...safeData,
+        created_at: now,
+        updated_at: now,
+      });
+      return { id: docRef.id, ...safeData, created_at: now, updated_at: now };
+    } catch (error) {
+      console.error('Server: Error creating experience:', error);
+      throw error;
+    }
+  },
+
+  updateExperience: async (id: string, data: Record<string, any>) => {
+    try {
+      debugLog('Server: Updating experience item:', id);
+      const db = getAdminDb();
+      const now = new Date().toISOString();
+      const safeData = removeUndefinedValues(data);
+      await db.collection('experiences').doc(id).update({
+        ...safeData,
+        updated_at: now,
+      });
+      return { id, ...safeData, updated_at: now };
+    } catch (error) {
+      console.error('Server: Error updating experience:', error);
+      throw error;
+    }
+  },
+
+  deleteExperience: async (id: string) => {
+    try {
+      debugLog('Server: Deleting experience item:', id);
+      const db = getAdminDb();
+      await db.collection('experiences').doc(id).delete();
+    } catch (error) {
+      console.error('Server: Error deleting experience:', error);
+      throw error;
+    }
+  },
 };
 
 

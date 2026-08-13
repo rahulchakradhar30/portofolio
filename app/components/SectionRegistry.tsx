@@ -10,6 +10,7 @@ import Skills from "./Skills";
 import Projects from "./Projects";
 import Certifications from "./Certifications";
 import Contact from "./Contact";
+import Experience from "./Experience";
 import CustomSectionRenderer from "./blocks/CustomSectionRenderer";
 import SectionErrorBoundary from "./SectionErrorBoundary";
 import BlockRegistry from "./blocks/BlockRegistry";
@@ -82,6 +83,20 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
             )}
           </SectionErrorBoundary>
         </section>
+      );
+
+    case "experience":
+      return (
+        <SectionErrorBoundary sectionName="Experience">
+          <Experience section={section} />
+          {extraBlocks.length > 0 && (
+            <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-14 pb-12 space-y-6">
+              {extraBlocks.map((block) => (
+                <BlockRegistry key={block.id} block={block} />
+              ))}
+            </div>
+          )}
+        </SectionErrorBoundary>
       );
 
     case "skills":

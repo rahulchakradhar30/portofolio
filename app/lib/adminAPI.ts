@@ -135,6 +135,77 @@ export const adminAPI = {
     }
   },
 
+  // Experience
+  async getExperiences() {
+    try {
+      const res = await fetch('/api/admin/experiences', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) throw new Error('Failed to fetch experiences');
+      const data = await res.json();
+      return { success: true, experiences: data.experiences || [] };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async createExperience(experienceData: Record<string, unknown>) {
+    try {
+      const res = await fetch('/api/admin/experiences', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(experienceData),
+      });
+      if (!res.ok) throw new Error('Failed to create experience');
+      const data = await res.json();
+      return { success: true, experience: data.experience };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async updateExperience(experienceId: string, updateData: Record<string, unknown>) {
+    try {
+      const res = await fetch(`/api/admin/experiences/${experienceId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updateData),
+      });
+      if (!res.ok) throw new Error('Failed to update experience');
+      const data = await res.json();
+      return { success: true, experience: data.experience };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async deleteExperience(experienceId: string) {
+    try {
+      const res = await fetch(`/api/admin/experiences/${experienceId}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) throw new Error('Failed to delete experience');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
+  async reorderExperiences(orderedIds: string[]) {
+    try {
+      const res = await fetch('/api/admin/experiences/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds }),
+      });
+      if (!res.ok) throw new Error('Failed to reorder experiences');
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: String(error) };
+    }
+  },
+
   // Portfolio Content
   async getPortfolioContent() {
     try {

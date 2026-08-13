@@ -577,6 +577,42 @@ export default function HomepageBuilderTab() {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/80 mb-1">
+                    Section Subtitle / Lead Text
+                  </label>
+                  <input
+                    type="text"
+                    value={currentSection.subtitle || ""}
+                    onChange={(e) => handleUpdateSectionMeta(currentSection.id, { subtitle: e.target.value })}
+                    placeholder="Professional Career & Industry Experience"
+                    className="w-full rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface-soft)] px-4 py-2.5 font-bold text-sm"
+                  />
+                </div>
+
+                {currentSection.id === "experience" && (
+                  <div className="p-4 rounded-xl border-2 border-[var(--accent)] bg-[var(--surface-soft)] space-y-3">
+                    <label className="block text-xs font-black uppercase tracking-wider text-[var(--accent)]">
+                      Experience Presentation Layout Mode
+                    </label>
+                    <select
+                      value={currentSection.layoutMode || "vertical"}
+                      onChange={(e) =>
+                        handleUpdateSectionMeta(currentSection.id, {
+                          layoutMode: e.target.value as "vertical" | "horizontal",
+                        })
+                      }
+                      className="w-full rounded-xl border-2 border-[var(--foreground)] bg-[var(--surface)] px-3 py-2.5 font-bold text-sm"
+                    >
+                      <option value="vertical">Vertical Timeline Layout (Default)</option>
+                      <option value="horizontal">Horizontal / Snake Roadmap Layout</option>
+                    </select>
+                    <p className="text-xs text-[var(--foreground)]/70 font-medium">
+                      Vertical renders a classic chronological timeline. Horizontal / Snake renders a multi-column connected roadmap that adapts safely on mobile devices.
+                    </p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-[var(--foreground)]/80 mb-1">

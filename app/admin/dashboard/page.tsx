@@ -42,6 +42,7 @@ import SEOTab from "./components/SEOTab";
 import AnimationsTab from "./components/AnimationsTab";
 import IntroTab from "./components/IntroTab";
 import ProofModeTab from "./components/ProofModeTab";
+import ExperienceTab from "./components/ExperienceTab";
 
 
 export default function AdminDashboard() {
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
     { id: "overview", label: "Overview", icon: BarChart3 },
     { id: "builder", label: "Homepage Builder", icon: LayoutGrid },
     { id: "content", label: "Content Copy", icon: Edit2 },
+    { id: "experience", label: "Experience", icon: Briefcase },
     { id: "projects", label: "Projects", icon: Plus },
     { id: "skills", label: "Skills Grid", icon: Plus },
     { id: "certifications", label: "Certifications", icon: Award },
@@ -193,8 +195,9 @@ export default function AdminDashboard() {
         <div className="overflow-x-hidden p-3 md:p-6">
           {activeTab === "overview" && <OverviewTab />}
           {activeTab === "builder" && <HomepageBuilderTab />}
-          {activeTab === "content" && <ContentTab />}
-          {activeTab === "projects" && <ProjectsTab />}
+          { activeTab === "content" && <ContentTab /> }
+          { activeTab === "experience" && <ExperienceTab /> }
+          { activeTab === "projects" && <ProjectsTab /> }
           {activeTab === "skills" && <SkillsTab />}
           {activeTab === "certifications" && <CertificationsTab />}
           {activeTab === "messages" && <MessagesTab inboxType="contact" />}

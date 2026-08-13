@@ -173,6 +173,8 @@ export interface PortfolioContent {
   scrollConfigs?: ScrollConfigRegistry;
   // Homepage Content & Section Builder Configuration
   homepageConfig?: HomepageConfig;
+  // Experience Section Data
+  experiences?: ExperienceItem[];
 }
 
 export type GlassPreset = "subtle" | "balanced" | "strong" | "custom";
@@ -294,6 +296,7 @@ export interface SectionVisibility {
   about: boolean;
   roadmap: boolean;
   radar: boolean;
+  experience?: boolean;
   skills: boolean;
   projects: boolean;
   certifications: boolean;
@@ -470,11 +473,39 @@ export interface ProofExperience {
 // HOMEPAGE BUILDER & SECTION/BLOCK REGISTRY TYPES
 // ============================================================
 
+export type ExperienceLayoutMode = "vertical" | "horizontal";
+
+export interface ExperienceItem {
+  id: string;
+  companyName: string;
+  companyLogo?: string;
+  companyLogoPublicId?: string;
+  role: string;
+  employmentType?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrent: boolean;
+  location?: string;
+  workMode?: string;
+  shortDescription?: string;
+  detailedDescription?: string;
+  achievements?: string[];
+  skills?: string[];
+  technologies?: string[];
+  relatedProjectId?: string;
+  companyUrl?: string;
+  order: number;
+  visible: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export type BuiltInSectionId =
   | "hero"
   | "about"
   | "roadmap"
   | "radar"
+  | "experience"
   | "skills"
   | "projects"
   | "certifications"
@@ -614,6 +645,8 @@ export interface HomepageSectionConfig {
   visibleInNav: boolean;
   isBuiltIn: boolean;
   layoutPreset?: "standard" | "paper" | "hero" | "timeline" | "grid";
+  layoutMode?: ExperienceLayoutMode;
+  subtitle?: string;
   animationPreset?: "fade" | "slide" | "scale";
   bgTreatment?: "default" | "soft" | "strong" | "glass";
   blocks: HomepageBlock[];
