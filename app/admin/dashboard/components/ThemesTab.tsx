@@ -255,113 +255,14 @@ export default function ThemesTab() {
             </button>
             <button
               type="button"
-              disabled={saving}
-              onClick={() => handleToggleThemeMode("spatial")}
-              className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                currentThemeMode === "spatial"
-                  ? "bg-[var(--accent)] text-white shadow-md font-extrabold"
-                  : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
-              }`}
+              disabled
+              className="px-4 py-2.5 rounded-lg text-xs font-bold transition-all text-[var(--foreground)]/40 cursor-not-allowed"
+              title="Theme 02 is currently being rebuilt"
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              THEME 02 — IMMERSIVE ROOM
+              THEME 02 (REBUILDING)
             </button>
           </div>
         </div>
-
-        {currentThemeMode === "spatial" && (
-          <div className="mt-5 pt-4 border-t border-[var(--foreground)]/10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <label className="block text-xs font-bold mb-1">Spotlight Intensity</label>
-              <input
-                type="range"
-                min="0.2"
-                max="1.5"
-                step="0.1"
-                value={themeConfig.spatialRoomConfig?.spotlightIntensity ?? 1.0}
-                onChange={async (e) => {
-                  const val = parseFloat(e.target.value);
-                  const nextConfig: UnifiedThemeConfig = {
-                    ...themeConfig,
-                    spatialRoomConfig: { ...themeConfig.spatialRoomConfig, spotlightIntensity: val },
-                  };
-                  setThemeConfig(nextConfig);
-                  await adminAPI.updatePortfolioContent({ ...content, themeConfig: nextConfig });
-                }}
-                className="w-full"
-              />
-              <span className="text-[11px] font-mono opacity-70">
-                {themeConfig.spatialRoomConfig?.spotlightIntensity ?? 1.0}x
-              </span>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold mb-1">Room Ambient Darkness</label>
-              <input
-                type="range"
-                min="0.2"
-                max="1.0"
-                step="0.1"
-                value={themeConfig.spatialRoomConfig?.roomDarkness ?? 0.8}
-                onChange={async (e) => {
-                  const val = parseFloat(e.target.value);
-                  const nextConfig: UnifiedThemeConfig = {
-                    ...themeConfig,
-                    spatialRoomConfig: { ...themeConfig.spatialRoomConfig, roomDarkness: val },
-                  };
-                  setThemeConfig(nextConfig);
-                  await adminAPI.updatePortfolioContent({ ...content, themeConfig: nextConfig });
-                }}
-                className="w-full"
-              />
-              <span className="text-[11px] font-mono opacity-70">
-                {Math.round((themeConfig.spatialRoomConfig?.roomDarkness ?? 0.8) * 100)}%
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 pt-4">
-              <input
-                type="checkbox"
-                id="showRoomNav"
-                checked={themeConfig.spatialRoomConfig?.showRoomNavigation !== false}
-                onChange={async (e) => {
-                  const val = e.target.checked;
-                  const nextConfig: UnifiedThemeConfig = {
-                    ...themeConfig,
-                    spatialRoomConfig: { ...themeConfig.spatialRoomConfig, showRoomNavigation: val },
-                  };
-                  setThemeConfig(nextConfig);
-                  await adminAPI.updatePortfolioContent({ ...content, themeConfig: nextConfig });
-                }}
-                className="rounded cursor-pointer"
-              />
-              <label htmlFor="showRoomNav" className="text-xs font-bold cursor-pointer">
-                Show Room Navigation Rail
-              </label>
-            </div>
-
-            <div className="flex items-center gap-2 pt-4">
-              <input
-                type="checkbox"
-                id="enableParticles"
-                checked={themeConfig.spatialRoomConfig?.enableParticles !== false}
-                onChange={async (e) => {
-                  const val = e.target.checked;
-                  const nextConfig: UnifiedThemeConfig = {
-                    ...themeConfig,
-                    spatialRoomConfig: { ...themeConfig.spatialRoomConfig, enableParticles: val },
-                  };
-                  setThemeConfig(nextConfig);
-                  await adminAPI.updatePortfolioContent({ ...content, themeConfig: nextConfig });
-                }}
-                className="rounded cursor-pointer"
-              />
-              <label htmlFor="enableParticles" className="text-xs font-bold cursor-pointer">
-                Enable Ambient Light Particles
-              </label>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Header Banner */}
