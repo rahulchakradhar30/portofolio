@@ -22,6 +22,13 @@ export const DEFAULT_UNIFIED_THEME_CONFIG: UnifiedThemeConfig = {
   activeThemeId: PERMANENT_DEFAULT_THEME.id,
   themeMode: "paper",
   customThemes: [],
+  spatialRoomConfig: {
+    roomDarkness: 0.8,
+    spotlightIntensity: 1.0,
+    showRoomNavigation: true,
+    enableParticles: true,
+    materialPreset: "aluminium",
+  },
 };
 
 export function normalizeThemeConfig(
@@ -38,6 +45,22 @@ export function normalizeThemeConfig(
   }
 
   const themeMode: ThemeMode = rawThemeMode === "spatial" ? "spatial" : "paper";
+
+  // Extract spatialRoomConfig if available
+  const rawRoomConfig =
+    ("spatialRoomConfig" in input && input.spatialRoomConfig)
+      ? input.spatialRoomConfig
+      : ("themeConfig" in input && input.themeConfig?.spatialRoomConfig)
+      ? input.themeConfig.spatialRoomConfig
+      : undefined;
+
+  const spatialRoomConfig = {
+    roomDarkness: rawRoomConfig?.roomDarkness ?? 0.8,
+    spotlightIntensity: rawRoomConfig?.spotlightIntensity ?? 1.0,
+    showRoomNavigation: rawRoomConfig?.showRoomNavigation !== false,
+    enableParticles: rawRoomConfig?.enableParticles !== false,
+    materialPreset: rawRoomConfig?.materialPreset || "aluminium",
+  };
 
   if ("activeThemeId" in input && Array.isArray(input.customThemes)) {
     const validCustom = input.customThemes.slice(0, MAX_CUSTOM_THEMES).map((theme, index) => ({
@@ -60,12 +83,14 @@ export function normalizeThemeConfig(
       activeThemeId: input.activeThemeId || PERMANENT_DEFAULT_THEME.id,
       themeMode,
       customThemes: validCustom,
+      spatialRoomConfig,
     };
   }
 
   return {
     ...DEFAULT_UNIFIED_THEME_CONFIG,
     themeMode,
+    spatialRoomConfig,
   };
 }
 

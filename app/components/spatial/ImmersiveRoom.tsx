@@ -7,7 +7,8 @@ import ImmersiveWall from "./ImmersiveWall";
 import RoomLighting from "./RoomLighting";
 import RoomNavigation from "./RoomNavigation";
 import AtmosphericParticles from "./AtmosphericParticles";
-import { useMotionPreferences } from "../MotionProvider";
+import { usePortfolioContent } from "../PortfolioContentProvider";
+import { normalizeThemeConfig } from "@/app/lib/themeResolver";
 
 interface ImmersiveRoomProps {
   sections: HomepageSectionConfig[];
@@ -20,6 +21,9 @@ export default function ImmersiveRoom({
   motionBlurEnabled = false,
   isIntroPlaying = false,
 }: ImmersiveRoomProps) {
+  const { content } = usePortfolioContent();
+  const { spatialRoomConfig } = useMemo(() => normalizeThemeConfig(content?.themeConfig || content), [content]);
+
   const { reducedMotion } = useMotionPreferences();
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [roomEntering, setRoomEntering] = useState<boolean>(true);
@@ -248,10 +252,14 @@ export default function ImmersiveRoom({
       <RoomLighting
         activeWallIndex={activeIndex}
         totalWalls={sections.length}
+        spotlightIntensity={spatialRoomConfig?.spotlightIntensity}
+        roomDarkness={spatialRoomConfig?.roomDarkness}
       />
 
       {/* Sparse Architectural Dust Motes */}
-      <AtmosphericParticles activeWallIndex={activeIndex} />
+      {spatialRoomConfig?.enableParticles !== false && (
+        <AtmosphericParticles activeWallIndex={activeIndex} />
+      )}
 
       {/* Architectural Floor Grid Plane */}
       <div 
@@ -317,7 +325,7 @@ export default function ImmersiveRoom({
                 isAdjacent={isAdjacent}
                 isDistant={isDistant}
                 transform3D={transform3D}
-                spotlightIntensity={isActive ? 1 : 0.2}
+                spotlightIntensity={isActive ? (spatialRoomConfig?.spotlightIntensity ?? 1) : 0.2}
                 onSelect={() => changeWall(idx)}
                 reducedMotion={reducedMotion}
               />
@@ -327,13 +335,15 @@ export default function ImmersiveRoom({
       </div>
 
       {/* Spatial Navigation Rail & Compass Overlay */}
-      <RoomNavigation
-        sections={sections}
-        activeIndex={activeIndex}
-        onSelectWall={changeWall}
-        onNextWall={goToNextWall}
-        onPrevWall={goToPrevWall}
-      />
+      {spatialRoomConfig?.showRoomNavigation !== false && (
+        <RoomNavigation
+          sections={sections}
+          activeIndex={activeIndex}
+          onSelectWall={changeWall}
+          onNextWall={goToNextWall}
+          onPrevWall={goToPrevWall}
+        />
+      )}
     </div>
   );
 }

@@ -7,25 +7,31 @@ interface RoomLightingProps {
   activeWallIndex: number;
   totalWalls: number;
   scrollEffectsEnabled?: boolean;
+  spotlightIntensity?: number;
+  roomDarkness?: number;
 }
 
 export default function RoomLighting({
   activeWallIndex,
   totalWalls,
   scrollEffectsEnabled = true,
+  spotlightIntensity = 1.0,
+  roomDarkness = 0.8,
 }: RoomLightingProps) {
   // Compute spotlight rotation angle pointing to active wall
   const wallAngleStep = 360 / Math.max(totalWalls, 1);
   const currentAngle = activeWallIndex * wallAngleStep;
+
+  const spotlightOpacityBase = 0.45 * Math.max(0.1, spotlightIntensity);
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
       {/* Primary Overhead Ceiling-Mounted Architectural Spotlight Beam */}
       <motion.div
         key={`spotlight-${activeWallIndex}`}
-        initial={{ opacity: 0.3, scale: 0.95 }}
+        initial={{ opacity: spotlightOpacityBase * 0.7, scale: 0.95 }}
         animate={{
-          opacity: [0.4, 0.55, 0.4],
+          opacity: [spotlightOpacityBase, spotlightOpacityBase * 1.3, spotlightOpacityBase],
           scale: [1, 1.04, 1],
         }}
         transition={{
@@ -43,8 +49,9 @@ export default function RoomLighting({
 
       {/* Indirect Low-Key Room Fill Light */}
       <div 
-        className="absolute inset-0 opacity-70 mix-blend-screen"
+        className="absolute inset-0 mix-blend-screen"
         style={{
+          opacity: Math.max(0.2, Math.min(1.0, roomDarkness)),
           background: `radial-gradient(circle at 50% 50%, rgba(15, 20, 28, 0.85) 0%, rgba(4, 5, 7, 0.98) 85%)`,
         }}
       />

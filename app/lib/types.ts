@@ -321,10 +321,19 @@ export interface ThemeConfigItem {
 
 export type ThemeMode = "paper" | "spatial";
 
+export interface SpatialRoomConfig {
+  roomDarkness?: number; // 0.1 to 1.0
+  spotlightIntensity?: number; // 0.1 to 1.0
+  showRoomNavigation?: boolean;
+  enableParticles?: boolean;
+  materialPreset?: "aluminium" | "glass" | "dark_matte";
+}
+
 export interface UnifiedThemeConfig {
   activeThemeId: string;
   themeMode?: ThemeMode;
   customThemes: ThemeConfigItem[];
+  spatialRoomConfig?: SpatialRoomConfig;
 }
 
 export interface SectionVisibility {
