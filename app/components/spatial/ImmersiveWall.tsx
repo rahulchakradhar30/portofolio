@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { HomepageSectionConfig } from "@/app/lib/types";
 import SectionRegistry from "../SectionRegistry";
-import { Sparkles, Layers, Box, Briefcase, Award, Code, Mail, ShieldCheck } from "lucide-react";
+import { Sparkles, Layers, Box, Briefcase, Award, Code, Mail, ShieldCheck, Compass } from "lucide-react";
 
 interface ImmersiveWallProps {
   section: HomepageSectionConfig;
@@ -31,7 +31,7 @@ export default function ImmersiveWall({
   onSelect,
   reducedMotion = false,
 }: ImmersiveWallProps) {
-  // Format wall number (e.g. WALL 01, WALL 02)
+  // Format wall number (e.g. EXHIBIT 01, EXHIBIT 02)
   const wallNumber = useMemo(() => {
     const num = wallIndex + 1;
     return num < 10 ? `0${num}` : `${num}`;
@@ -39,21 +39,87 @@ export default function ImmersiveWall({
 
   const displayTitle = section.publicDisplayTitle || section.navLabel || section.id;
 
-  // Section Type Icon
-  const sectionIcon = useMemo(() => {
+  // Section-specific metadata & iconography
+  const sectionMeta = useMemo(() => {
     const type = (section.type || section.id).toLowerCase();
-    if (type.includes("hero")) return <Box className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("about")) return <Layers className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("project")) return <Code className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("skill")) return <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("experience")) return <Briefcase className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("certif")) return <Award className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("proof")) return <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    if (type.includes("contact")) return <Mail className="w-3.5 h-3.5 text-[var(--accent)]" />;
-    return <Box className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("hero")) {
+      return {
+        tag: "PERSONAL IDENTITY",
+        sub: "EXHIBIT INTRODUCTION",
+        icon: <Box className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("about")) {
+      return {
+        tag: "BACKGROUND & IMPACT",
+        sub: "CURATED PROFILE",
+        icon: <Layers className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("roadmap") || type.includes("academic")) {
+      return {
+        tag: "ACADEMIC ROADMAP",
+        sub: "EDUCATIONAL TIMELINE",
+        icon: <Compass className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("radar")) {
+      return {
+        tag: "PORTFOLIO RADAR",
+        sub: "SYSTEM INSTALLATION",
+        icon: <Sparkles className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("skill")) {
+      return {
+        tag: "TECHNICAL CAPABILITIES",
+        sub: "SKILLS MATRIX",
+        icon: <Code className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("experience")) {
+      return {
+        tag: "CAREER HISTORY",
+        sub: "PROFESSIONAL TIMELINE",
+        icon: <Briefcase className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("project")) {
+      return {
+        tag: "FEATURED PROJECTS",
+        sub: "SYSTEMS GALLERY",
+        icon: <Code className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("certif")) {
+      return {
+        tag: "CERTIFICATIONS",
+        sub: "CREDENTIAL GALLERY",
+        icon: <Award className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("proof")) {
+      return {
+        tag: "PROOF EVIDENCE",
+        sub: "INTERACTIVE DEMOS",
+        icon: <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    if (type.includes("contact")) {
+      return {
+        tag: "CONNECT & HIRE",
+        sub: "EXHIBIT CONCLUSION",
+        icon: <Mail className="w-4 h-4 text-[var(--accent)]" />,
+      };
+    }
+    return {
+      tag: "CUSTOM EXHIBIT",
+      sub: "SECTION PANEL",
+      icon: <Box className="w-4 h-4 text-[var(--accent)]" />,
+    };
   }, [section]);
 
-  // Don't render heavy inner DOM for distant walls
+  // Performance scoping: distant walls rendered as lightweight placeholders
   if (isDistant && !isActive && !isAdjacent) {
     return (
       <div
@@ -92,7 +158,7 @@ export default function ImmersiveWall({
         !isActive ? "cursor-pointer hover:opacity-60" : ""
       }`}
     >
-      {/* Physical Architectural Exhibition Wall Panel */}
+      {/* Physical Architectural Exhibition Wall Frame */}
       <div 
         className={`relative w-full h-full rounded-2xl md:rounded-3xl border transition-all duration-700 overflow-hidden flex flex-col ${
           isActive
@@ -100,8 +166,8 @@ export default function ImmersiveWall({
             : "border-white/10 bg-[#08090d]/80 shadow-2xl hover:border-white/20"
         }`}
       >
-        {/* Top Metallic Architectural Header Bar */}
-        <div className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-white/10 bg-gradient-to-r from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-md select-none shrink-0">
+        {/* Top Metallic Architectural Exhibition Header Bar */}
+        <div className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4 border-b border-white/10 bg-gradient-to-r from-white/[0.06] via-white/[0.02] to-transparent backdrop-blur-md select-none shrink-0">
           {/* Wall Section Tag & Indicator */}
           <div className="flex items-center gap-3">
             <div className="relative flex items-center justify-center">
@@ -118,19 +184,19 @@ export default function ImmersiveWall({
             </div>
             
             <div className="flex items-center gap-2.5 text-xs font-mono font-bold tracking-widest uppercase text-white/90">
-              <span className="text-[var(--accent)]">WALL {wallNumber}</span>
+              <span className="text-[var(--accent)]">EXHIBIT {wallNumber}</span>
               <span className="text-white/30">//</span>
-              {sectionIcon}
-              <span className="tracking-wide text-white/80">{displayTitle}</span>
+              {sectionMeta.icon}
+              <span className="tracking-wide text-white/90">{displayTitle}</span>
             </div>
           </div>
 
-          {/* Spatial Room Coordinate & Wall Count */}
+          {/* Spatial Room Subtitle & Wall Count */}
           <div className="flex items-center gap-3 text-[11px] font-mono text-white/40">
-            <span className="hidden sm:inline-block uppercase tracking-wider text-white/30">
-              {isActive ? "ACTIVE EXHIBIT" : "PANEL STANDBY"}
+            <span className="hidden sm:inline-block uppercase tracking-wider text-white/40">
+              {sectionMeta.sub}
             </span>
-            <span className="px-2.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-white/70 font-semibold">
+            <span className="px-2.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-white/80 font-semibold">
               {wallNumber} / {totalWalls < 10 ? `0${totalWalls}` : totalWalls}
             </span>
           </div>
@@ -147,7 +213,7 @@ export default function ImmersiveWall({
           }}
         />
 
-        {/* Wall Exhibition Surface (Houses Real Section Content) */}
+        {/* Wall Exhibition Display Surface (Houses Real Section Content) */}
         <div className={`relative z-10 flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 lg:p-10 text-[var(--foreground)] ${
           isActive ? "pointer-events-auto" : "pointer-events-none select-none"
         }`}>
@@ -156,7 +222,7 @@ export default function ImmersiveWall({
           </div>
         </div>
 
-        {/* Corner Metallic Architectural Accents */}
+        {/* Corner Metallic Architectural Brackets */}
         <div className="pointer-events-none absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-white/20 rounded-tl-sm" />
         <div className="pointer-events-none absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-white/20 rounded-tr-sm" />
         <div className="pointer-events-none absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-white/20 rounded-bl-sm" />
