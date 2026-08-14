@@ -1,4 +1,4 @@
-import type { ThemeConfigItem, ThemeTokens, UnifiedThemeConfig, PortfolioContent } from "./types";
+import type { ThemeConfigItem, ThemeTokens, UnifiedThemeConfig, PortfolioContent, ThemeMode } from "./types";
 
 export const PERMANENT_DEFAULT_THEME: ThemeConfigItem = {
   id: "paper-default",
@@ -20,6 +20,7 @@ export const MAX_CUSTOM_THEMES = 5;
 
 export const DEFAULT_UNIFIED_THEME_CONFIG: UnifiedThemeConfig = {
   activeThemeId: PERMANENT_DEFAULT_THEME.id,
+  themeMode: "paper",
   customThemes: [],
 };
 
@@ -27,6 +28,16 @@ export function normalizeThemeConfig(
   input?: Partial<UnifiedThemeConfig> | Partial<PortfolioContent> | null
 ): UnifiedThemeConfig {
   if (!input) return DEFAULT_UNIFIED_THEME_CONFIG;
+
+  // Extract raw themeMode if present directly on themeConfig or top-level content
+  let rawThemeMode: string | undefined = undefined;
+  if ("themeMode" in input && typeof (input as Record<string, unknown>).themeMode === "string") {
+    rawThemeMode = (input as Record<string, unknown>).themeMode as string;
+  } else if ("themeConfig" in input && input.themeConfig && typeof input.themeConfig.themeMode === "string") {
+    rawThemeMode = input.themeConfig.themeMode;
+  }
+
+  const themeMode: ThemeMode = rawThemeMode === "spatial" ? "spatial" : "paper";
 
   if ("activeThemeId" in input && Array.isArray(input.customThemes)) {
     const validCustom = input.customThemes.slice(0, MAX_CUSTOM_THEMES).map((theme, index) => ({
@@ -47,11 +58,20 @@ export function normalizeThemeConfig(
 
     return {
       activeThemeId: input.activeThemeId || PERMANENT_DEFAULT_THEME.id,
+      themeMode,
       customThemes: validCustom,
     };
   }
 
-  return DEFAULT_UNIFIED_THEME_CONFIG;
+  return {
+    ...DEFAULT_UNIFIED_THEME_CONFIG,
+    themeMode,
+  };
+}
+
+export function getActiveThemeMode(rawConfig?: UnifiedThemeConfig | Partial<PortfolioContent> | null): ThemeMode {
+  const config = normalizeThemeConfig(rawConfig);
+  return config.themeMode || "paper";
 }
 
 export function getActiveTheme(rawConfig?: UnifiedThemeConfig | Partial<PortfolioContent> | null): ThemeConfigItem {

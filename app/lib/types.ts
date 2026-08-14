@@ -319,8 +319,11 @@ export interface ThemeConfigItem {
   updatedAt?: string;
 }
 
+export type ThemeMode = "paper" | "spatial";
+
 export interface UnifiedThemeConfig {
   activeThemeId: string;
+  themeMode?: ThemeMode;
   customThemes: ThemeConfigItem[];
 }
 

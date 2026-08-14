@@ -175,6 +175,28 @@ export default function ThemesTab() {
     }
   };
 
+  const handleToggleThemeMode = async (mode: "paper" | "spatial") => {
+    const nextConfig: UnifiedThemeConfig = {
+      ...themeConfig,
+      themeMode: mode,
+    };
+    setThemeConfig(nextConfig);
+    setSaving(true);
+    try {
+      const res = await adminAPI.updatePortfolioContent({
+        ...content,
+        themeConfig: nextConfig,
+      });
+      if (!res.success) {
+        alert("Failed to update visual theme mode on server");
+      }
+    } catch (err) {
+      console.error("Error updating theme mode:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const startCreateTheme = () => {
     if (themeConfig.customThemes.length >= MAX_CUSTOM_THEMES) {
       alert(`Maximum of ${MAX_CUSTOM_THEMES} custom themes reached.`);
@@ -192,28 +214,75 @@ export default function ThemesTab() {
   };
 
   if (loading) {
-    return <div className="text-center py-10 text-[var(--foreground)]/60">Loading Paper Color Themes...</div>;
+    return <div className="text-center py-10 text-[var(--foreground)]/60">Loading Color & Visual Themes...</div>;
   }
 
   const allThemes = [PERMANENT_DEFAULT_THEME, ...themeConfig.customThemes];
   const activeTheme = allThemes.find((t) => t.id === themeConfig.activeThemeId) || PERMANENT_DEFAULT_THEME;
   const currentPreviewTokens = editingTheme ? editingTheme.tokens : activeTheme.tokens;
+  const currentThemeMode = themeConfig.themeMode || "paper";
 
   return (
     <div className="space-y-6">
+      {/* Visual Layout Mode Selector */}
+      <div className="paper-card p-5 md:p-6 border-2 border-[var(--accent)]/40 bg-[var(--surface-soft)]/50">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--accent)]">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Visual Experience Architecture
+            </div>
+            <h3 className="text-xl font-black text-[var(--foreground)] mt-1">
+              Select Portfolio Theme Architecture
+            </h3>
+            <p className="text-xs md:text-sm text-[var(--foreground)]/70 mt-1 max-w-xl">
+              Switch between Theme 01 (Editorial Paper Layout) and Theme 02 (Spatial Cinematic Experience). Admin content and database remain 100% identical.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 bg-[var(--surface)] p-1.5 rounded-xl border border-[var(--border-thin)] shadow-sm">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleToggleThemeMode("paper")}
+              className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                currentThemeMode === "paper"
+                  ? "bg-[var(--foreground)] text-[var(--background)] shadow-sm font-extrabold"
+                  : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+              }`}
+            >
+              THEME 01 — PAPER
+            </button>
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => handleToggleThemeMode("spatial")}
+              className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                currentThemeMode === "spatial"
+                  ? "bg-[var(--accent)] text-white shadow-md font-extrabold"
+                  : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              THEME 02 — SPATIAL CINEMATIC
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Header Banner */}
       <div className="paper-card p-5 shadow-none md:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border-2 border-[var(--foreground)]/10 bg-[var(--surface-soft)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]/70">
               <Palette className="h-3.5 w-3.5" />
-              Paper Color Studio
+              Color Palette Studio
             </div>
             <h2 className="mt-3 text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">
-              Paper Layout Color Themes
+              Palette & Accent Tokens
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/65 md:text-base">
-              Customize design tokens for paper surface, text, accents, and dotted patterns while retaining the classic paper layout aesthetic.
+              Customize design tokens for background, text, surface, accents, and highlights. Both Theme 01 and Theme 02 dynamically reflect your active color tokens.
             </p>
           </div>
           <button

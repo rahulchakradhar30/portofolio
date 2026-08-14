@@ -4,7 +4,7 @@ import CookieConsent from "./components/CookieConsent";
 import { MotionProvider } from "./components/MotionProvider";
 import AppShell from "./components/AppShell";
 import DevtoolsGuard from "./components/DevtoolsGuard";
-import PaperBackground from "./components/PaperBackground";
+import ThemeBackground from "./components/ThemeBackground";
 import { PortfolioContentProvider } from "./components/PortfolioContentProvider";
 import { NavigationProvider } from "./components/NavigationContext";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS, getGlobalJsonLdGraph } from "@/app/lib/seoSchemas";
@@ -105,7 +105,7 @@ export default function RootLayout({
         />
         <PortfolioContentProvider>
           <MotionProvider>
-            <PaperBackground />
+            <ThemeBackground />
             <DevtoolsGuard />
             <NavigationProvider>
               <AppShell>{children}</AppShell>

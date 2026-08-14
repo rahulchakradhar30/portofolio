@@ -2,8 +2,6 @@ import type { Metadata, Viewport } from "next";
 import serverFirebaseHelpers from "@/app/lib/firebaseServer";
 import type { PortfolioContent } from "@/app/lib/types";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS } from "@/app/lib/seoSchemas";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
 import IntroOverlay from "./components/IntroOverlay";
 
 export const dynamic = "force-dynamic";
@@ -84,7 +82,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-import SectionRegistry from "./components/SectionRegistry";
+import ThemeRenderer from "./components/ThemeRenderer";
 import { normalizeHomepageConfig } from "@/app/lib/homepageConfig";
 
 export default async function Home() {
@@ -97,11 +95,7 @@ export default async function Home() {
   return (
     <main>
       <IntroOverlay>
-        <Header />
-        {activeSections.map((section) => (
-          <SectionRegistry key={section.id} section={section} />
-        ))}
-        <Footer />
+        <ThemeRenderer initialSections={activeSections} />
       </IntroOverlay>
     </main>
   );
