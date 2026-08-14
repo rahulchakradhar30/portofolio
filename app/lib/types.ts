@@ -176,6 +176,18 @@ export interface PortfolioContent {
   homepageConfig?: HomepageConfig;
   // Experience Section Data
   experiences?: ExperienceItem[];
+  // Section Collections Data
+  projects?: Project[];
+  skills?: Skill[];
+  certifications?: Certification[];
+  roadmapItems?: StudyRoadmapItem[];
+  aboutHeading?: string;
+  aboutShortTitle?: string;
+  aboutShortCopy?: string;
+  aboutBody1?: string;
+  aboutBody2?: string;
+  aboutTags?: string[];
+  aboutFooter?: string;
 }
 
 export type MotionBlurPreset = "off" | "subtle" | "cinematic" | "custom";
