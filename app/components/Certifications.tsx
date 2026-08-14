@@ -28,6 +28,7 @@ function getCertificationTags(cert: Certification) {
 
 import { usePortfolioContent } from "./PortfolioContentProvider";
 import ScrollContainer from "./ScrollContainer";
+import MotionBlurWrapper from "./MotionBlurWrapper";
 
 export default function Certifications() {
   const { content, loading: contentLoading, error: _contentError } = usePortfolioContent();
@@ -121,20 +122,25 @@ export default function Certifications() {
                 {visibleCertifications.map((cert, index) => {
                   const cardAnim = getAnimation("certifications", cert.id);
                   return (
-                    <motion.button
+                    <MotionBlurWrapper
                       key={cert.id}
-                      type="button"
-                      initial={cardAnim.variants.initial}
-                      whileInView={cardAnim.variants.whileInView || cardAnim.variants.animate}
-                      transition={{
-                        ...cardAnim.variants.transition,
-                        delay: (cardAnim.params.delay || 0) + index * (cardAnim.params.staggerStep || 0.05),
-                      }}
-                      whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      className="paper-card glass-surface group flex h-full flex-col overflow-hidden text-left"
-                      onClick={() => setSelectedCert(cert)}
+                      sectionId="certifications"
+                      componentId={cert.id}
+                      rawConfig={content?.motionBlurConfig}
                     >
+                      <motion.button
+                        type="button"
+                        initial={cardAnim.variants.initial}
+                        whileInView={cardAnim.variants.whileInView || cardAnim.variants.animate}
+                        transition={{
+                          ...cardAnim.variants.transition,
+                          delay: (cardAnim.params.delay || 0) + index * (cardAnim.params.staggerStep || 0.05),
+                        }}
+                        whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        className="paper-card glass-surface group flex h-full flex-col overflow-hidden text-left"
+                        onClick={() => setSelectedCert(cert)}
+                      >
                       <div className="relative aspect-[16/9] overflow-hidden bg-[var(--surface-soft)] border-b-2 border-[var(--foreground)]">
                         {cert.image ? (
                           <Image
@@ -193,6 +199,7 @@ export default function Certifications() {
                         </div>
                       </div>
                     </motion.button>
+                  </MotionBlurWrapper>
                   );
                 })}
               </ScrollContainer>

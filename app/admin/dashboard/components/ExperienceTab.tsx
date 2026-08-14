@@ -14,13 +14,8 @@ import {
   EyeOff,
   Building2,
   Upload,
-  CheckCircle,
   X,
   Sparkles,
-  Layers,
-  Globe,
-  Calendar,
-  MapPin,
   Save,
 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
@@ -418,6 +413,7 @@ export default function ExperienceTab() {
                 {/* Company Logo Thumbnail */}
                 <div className="w-12 h-12 rounded-xl bg-[var(--surface-soft)] border border-[var(--border-color,rgba(0,0,0,0.1))] p-1.5 flex items-center justify-center shrink-0 overflow-hidden">
                   {item.companyLogo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={item.companyLogo}
                       alt={item.companyName}
@@ -654,6 +650,7 @@ export default function ExperienceTab() {
                   {/* Current Logo Preview */}
                   <div className="w-20 h-20 rounded-2xl bg-[var(--surface-soft)] border border-[var(--border-color,rgba(0,0,0,0.15))] p-2 flex items-center justify-center shrink-0 overflow-hidden relative shadow-sm">
                     {formCompanyLogo ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={formCompanyLogo}
                         alt="Company logo preview"

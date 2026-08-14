@@ -11,6 +11,7 @@ import LoadingSkeleton from "./LoadingSkeleton";
 import ExpandableSection from "./ExpandableSection";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
+import MotionBlurWrapper from "./MotionBlurWrapper";
 
 function getProjectHighlights(project: Project) {
   const source = [project.longDescription, project.details, project.description].filter(Boolean).join(" ");
@@ -119,18 +120,23 @@ export default function Projects() {
                 visibleProjects.map((project, index) => {
                   const cardAnim = getAnimation("projects", project.id);
                   return (
-                    <motion.div
+                    <MotionBlurWrapper
                       key={project.id || index}
-                      initial={cardAnim.variants.initial}
-                      whileInView={cardAnim.variants.whileInView || cardAnim.variants.animate}
-                      transition={{
-                        ...cardAnim.variants.transition,
-                        delay: (cardAnim.params.delay || 0) + index * (cardAnim.params.staggerStep || 0.05),
-                      }}
-                      whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      className="paper-card glass-surface group overflow-hidden"
+                      sectionId="projects"
+                      componentId={project.id}
+                      rawConfig={content?.motionBlurConfig}
                     >
+                      <motion.div
+                        initial={cardAnim.variants.initial}
+                        whileInView={cardAnim.variants.whileInView || cardAnim.variants.animate}
+                        transition={{
+                          ...cardAnim.variants.transition,
+                          delay: (cardAnim.params.delay || 0) + index * (cardAnim.params.staggerStep || 0.05),
+                        }}
+                        whileHover={reducedMotion ? undefined : { y: -6, scale: 1.01 }}
+                        viewport={{ once: true, amount: 0.2 }}
+                        className="paper-card glass-surface group overflow-hidden"
+                      >
                     <div className="relative h-48 overflow-hidden bg-[var(--surface-soft)] sm:h-56 border-b-2 border-[var(--foreground)]">
                       {project.image ? (
                         <Image 
@@ -236,6 +242,7 @@ export default function Projects() {
                       </div>
                     </div>
                   </motion.div>
+                </MotionBlurWrapper>
                 );
               })
               )}

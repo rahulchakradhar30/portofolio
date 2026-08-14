@@ -22,6 +22,13 @@
   --glass-shadow: 6px 6px 0 0 rgba(42, 36, 31, 0.15);
   --glass-highlight: none;
   --glass-preset: off;
+
+  /* Motion Blur System Tokens (Admin Controlled) */
+  --motion-blur-enabled: 0;
+  --motion-blur-preset: off;
+  --motion-blur-radius: 0px;
+  --motion-blur-duration: 0ms;
+  --motion-blur-intensity: 0;
 }
 
 @theme inline {
@@ -242,4 +249,26 @@ html[data-glass='true'] [data-glass-surface='true']:hover,
     -webkit-backdrop-filter: blur(min(var(--glass-blur), 10px)) saturate(110%);
   }
 }
+
+/* ============================================================
+   ADMIN-CONTROLLED MOTION BLUR DESIGN SYSTEM
+   ============================================================ */
+
+/* Directional motion blur active class */
+html[data-motion-blur='true'] .motion-blur-active,
+.motion-blur-force {
+  filter: blur(var(--motion-blur-radius));
+  will-change: filter, transform;
+  transform: translateZ(0);
+  transition: filter var(--motion-blur-duration) cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Reduced motion safety override for motion blur */
+@media (prefers-reduced-motion: reduce) {
+  html[data-motion-blur='true'] .motion-blur-active,
+  .motion-blur-force {
+    filter: blur(0px) !important;
+  }
+}
+
 

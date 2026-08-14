@@ -155,6 +155,7 @@ export interface PortfolioContent {
   
   // Dynamic Configuration Extensions
   animationConfig?: UnifiedAnimationConfig;
+  motionBlurConfig?: UnifiedMotionBlurConfig;
   themeConfig?: UnifiedThemeConfig;
   glassConfig?: UnifiedGlassConfig;
   
@@ -175,6 +176,38 @@ export interface PortfolioContent {
   homepageConfig?: HomepageConfig;
   // Experience Section Data
   experiences?: ExperienceItem[];
+}
+
+export type MotionBlurPreset = "off" | "subtle" | "cinematic" | "custom";
+
+export interface MotionBlurParams {
+  intensity: number;          // 0.1 to 1.0
+  maxBlurPx: number;          // 2 to 16 (in px)
+  transitionDurationMs: number;// 150 to 800 (in ms)
+  decaySpeed: number;         // 0.1 to 1.0
+}
+
+export interface MotionBlurOverride {
+  enabled?: boolean;
+  preset?: MotionBlurPreset;
+  intensity?: number;
+  maxBlurPx?: number;
+}
+
+export interface UnifiedMotionBlurConfig {
+  enabled: boolean;
+  preset: MotionBlurPreset;
+  global: MotionBlurParams;
+  sections?: Record<string, MotionBlurOverride>;
+  components?: Record<string, MotionBlurOverride>;
+}
+
+export interface MotionBlurTokens {
+  motionBlurEnabled: string;
+  motionBlurPreset: string;
+  motionBlurRadius: string;
+  motionBlurDuration: string;
+  motionBlurIntensity: string;
 }
 
 export type GlassPreset = "subtle" | "balanced" | "strong" | "custom";

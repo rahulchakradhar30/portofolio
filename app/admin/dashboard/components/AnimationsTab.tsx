@@ -15,12 +15,20 @@ import type {
   SupportedAnimationType,
   SupportedEasing,
   Project,
+  UnifiedMotionBlurConfig,
 } from "@/app/lib/types";
 import {
   DEFAULT_UNIFIED_ANIMATION_CONFIG,
   normalizeAnimationConfig,
   getResolvedAnimation,
 }  from "@/app/lib/animationResolver";
+import {
+  DEFAULT_UNIFIED_MOTION_BLUR_CONFIG,
+  normalizeMotionBlurConfig,
+  getResolvedMotionBlur,
+  applyMotionBlurTokensToDOM,
+} from "@/app/lib/motionBlurResolver";
+import MotionBlurWrapper from "@/app/components/MotionBlurWrapper";
 
 const ANIMATION_TYPE_OPTIONS: { value: SupportedAnimationType; label: string }[] = [
   { value: "slide", label: "Slide Up & Fade In" },
@@ -58,6 +66,8 @@ export default function AnimationsTab() {
   const [previewKey, setPreviewKey] = useState(0);
 
   const [animConfig, setAnimConfig] = useState<UnifiedAnimationConfig>(DEFAULT_UNIFIED_ANIMATION_CONFIG);
+  const [blurConfig, setBlurConfig] = useState<UnifiedMotionBlurConfig>(DEFAULT_UNIFIED_MOTION_BLUR_CONFIG);
+  const [blurPreviewActive, setBlurPreviewActive] = useState(false);
 
   // Active Scope Controls
   const [activeScope, setActiveScope] = useState<"global" | "section" | "component">("global");
@@ -84,8 +94,11 @@ export default function AnimationsTab() {
 
       if (res.success && res.content) {
         setContent(res.content);
-        const norm = normalizeAnimationConfig(res.content.animationConfig || res.content);
-        setAnimConfig(norm);
+        const normAnim = normalizeAnimationConfig(res.content.animationConfig || res.content);
+        setAnimConfig(normAnim);
+        const normBlur = normalizeMotionBlurConfig(res.content.motionBlurConfig);
+        setBlurConfig(normBlur);
+        applyMotionBlurTokensToDOM(normBlur);
       }
     } catch (error) {
       console.error("Error loading animation settings:", error);
@@ -100,6 +113,7 @@ export default function AnimationsTab() {
       const res = await adminAPI.updatePortfolioContent({
         ...content,
         animationConfig: animConfig,
+        motionBlurConfig: blurConfig,
         // Sync legacy flags for backward compatibility
         animationsEnabled: animConfig.enabled,
         animationType: animConfig.global.type === "scale" ? "zoom" : (animConfig.global.type as "fade" | "slide" | "zoom"),
@@ -108,9 +122,10 @@ export default function AnimationsTab() {
       });
 
       if (res.success) {
-        alert("Animation configuration saved and synchronized!");
+        applyMotionBlurTokensToDOM(blurConfig);
+        alert("Animation & Motion Blur configuration saved and synchronized!");
       } else {
-        alert("Failed to save animation settings: " + (res.error || "Unknown error"));
+        alert("Failed to save motion settings: " + (res.error || "Unknown error"));
       }
     } catch (_error) {
       alert("Error saving animation configuration");
@@ -130,6 +145,20 @@ export default function AnimationsTab() {
     return getResolvedAnimation(animConfig, secId, compId);
   }, [animConfig, activeScope, selectedSection, selectedComponent]);
 
+  // Resolved Motion Blur for the currently inspected scope
+  const inspectedBlurResolution = useMemo(() => {
+    const secId = activeScope === "global" ? undefined : selectedSection;
+    const compId = activeScope === "component" ? selectedComponent : undefined;
+    return getResolvedMotionBlur(blurConfig, secId, compId);
+  }, [blurConfig, activeScope, selectedSection, selectedComponent]);
+
+  const triggerBlurImpulse = () => {
+    setBlurPreviewActive(true);
+    setTimeout(() => {
+      setBlurPreviewActive(false);
+    }, inspectedBlurResolution.params.transitionDurationMs || 400);
+  };
+
   if (loading) {
     return <div className="text-center py-10 text-[var(--foreground)]/60">Loading Motion Controls...</div>;
   }
@@ -145,10 +174,10 @@ export default function AnimationsTab() {
               Motion Settings Studio
             </div>
             <h2 className="mt-3 text-2xl font-black tracking-tight text-[var(--foreground)] md:text-3xl">
-              Hierarchical Animation Controls
+              Hierarchical Animation Controls & Motion Blur Studio
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-[var(--foreground)]/65 md:text-base">
-              Configure animation behavior at the Global, Section, or Component level. Overrides take priority (Component → Section → Global → Safe Default).
+              Configure Framer Motion behaviors and directional Motion Blur visual treatments at Global, Section, or Component levels.
             </p>
           </div>
           <button
@@ -480,6 +509,96 @@ export default function AnimationsTab() {
                 </div>
               </motion.div>
             </AnimatePresence>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================================
+          ADMIN-CONTROLLED MOTION BLUR SYSTEM STUDIO PANEL
+         ============================================================ */}
+      <div className="paper-card p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-[var(--foreground)]/10 pb-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--foreground)]/15 bg-[var(--surface-soft)] px-3 py-1 text-xs font-bold text-[var(--accent)]">
+              <Sparkles className="h-3.5 w-3.5" /> Motion Blur Engine
+            </div>
+            <h3 className="text-xl font-black text-[var(--foreground)] mt-2">
+              Directional Motion Blur Studio
+            </h3>
+            <p className="text-xs text-[var(--foreground)]/65">
+              Enable GPU-accelerated motion blur during active element movement. Resting state remains 100% sharp.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 mt-4 sm:mt-0">
+            <span className="text-xs font-extrabold text-[var(--foreground)]">Master Motion Blur</span>
+            <input
+              type="checkbox"
+              checked={blurConfig.enabled}
+              onChange={(e) => {
+                const newConf = { ...blurConfig, enabled: e.target.checked };
+                setBlurConfig(newConf);
+                applyMotionBlurTokensToDOM(newConf);
+              }}
+              className="h-6 w-6 accent-[var(--accent)] cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* Preset Selector Grid */}
+        <div>
+          <label className="block text-xs font-extrabold text-[var(--foreground)] uppercase tracking-wider mb-3">
+            Motion Blur Presets
+          </label>
+          <div className="grid grid-cols-3 gap-3">
+            {(["off", "subtle", "cinematic"] as const).map((preset) => {
+              const isSelected = blurConfig.preset === preset;
+              return (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => {
+                    const newConf: UnifiedMotionBlurConfig = { ...blurConfig, preset };
+                    setBlurConfig(newConf);
+                    applyMotionBlurTokensToDOM(newConf);
+                  }}
+                  className={`p-4 rounded-2xl border-2 text-center transition-all ${
+                    isSelected
+                      ? "border-[var(--accent)] bg-[var(--surface-soft)] shadow-md"
+                      : "border-[var(--foreground)]/15 bg-[var(--surface)] hover:bg-[var(--surface-soft)]"
+                  }`}
+                >
+                  <p className="font-extrabold text-sm capitalize text-[var(--foreground)]">{preset}</p>
+                  <p className="text-[11px] text-[var(--foreground)]/60 mt-1">
+                    {preset === "off" && "No blur effect"}
+                    {preset === "subtle" && "4px max blur • 250ms decay"}
+                    {preset === "cinematic" && "10px max blur • 450ms decay"}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Live Interactive Blur Tester */}
+        <div className="paper-card p-5 bg-[var(--surface-soft)] border-dashed flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="space-y-1 text-left">
+            <h4 className="text-sm font-extrabold text-[var(--foreground)]">Motion Blur Real-Time Impulse Test</h4>
+            <p className="text-xs text-[var(--foreground)]/65">
+              Current Resolution: <span className="font-mono font-bold text-[var(--accent)]">{inspectedBlurResolution.preset.toUpperCase()}</span> (Max: {inspectedBlurResolution.params.maxBlurPx}px blur)
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <MotionBlurWrapper forceActive={blurPreviewActive} rawConfig={blurConfig}>
+              <button
+                type="button"
+                onClick={triggerBlurImpulse}
+                className="paper-button-primary px-5 py-2.5 text-xs font-bold flex items-center gap-2"
+              >
+                <Sparkles className="h-4 w-4" /> Trigger Motion Impulse
+              </button>
+            </MotionBlurWrapper>
           </div>
         </div>
       </div>

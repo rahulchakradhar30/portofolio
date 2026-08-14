@@ -74,7 +74,7 @@ async function main() {
     try {
       const vercelJson = JSON.parse(fs.readFileSync('vercel.json', 'utf-8'));
       projectId = vercelJson.projectId;
-    } catch (e) {
+    } catch (_e) {
       // Continue without projectId from vercel.json
     }
   }
@@ -140,7 +140,7 @@ async function main() {
           console.log('❌');
           deleteFailedCount++;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('❌');
         deleteFailedCount++;
       }

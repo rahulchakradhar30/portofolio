@@ -7,7 +7,6 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import readline from 'readline';
 
 const rl = readline.createInterface({
@@ -73,7 +72,7 @@ async function main() {
     try {
       const vercelJson = JSON.parse(fs.readFileSync('vercel.json', 'utf-8'));
       projectId = vercelJson.projectId;
-    } catch (e) {
+    } catch (_e) {
       // Continue without projectId from vercel.json
     }
   }

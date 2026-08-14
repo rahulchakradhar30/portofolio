@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Sparkles, Save, Layers, Sliders, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Sparkles, Save, Layers, CheckCircle2 } from "lucide-react";
 import { adminAPI } from "@/app/lib/adminAPI";
 import type {
   PortfolioContent,
@@ -17,7 +16,7 @@ import {
   applyGlassTokensToDOM,
 } from "@/app/lib/glassResolver";
 import { getActiveTheme } from "@/app/lib/themeResolver";
-import { AdminCard, adminPrimaryButtonClassName, adminSubtleButtonClassName } from "@/app/components/AdminUIComponents";
+import { AdminCard } from "@/app/components/AdminUIComponents";
 
 export default function GlassmorphismTab() {
   const [content, setContent] = useState<PortfolioContent | null>(null);

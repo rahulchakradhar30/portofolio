@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 
 const token = 'YOUR_VERCEL_TOKEN_HERE'; // Get from https://vercel.com/account/tokens
 const teamId = 'YOUR_TEAM_ID_HERE';
-const projectId = 'portofolio'; // Use project name
+const _projectId = 'portofolio'; // Use project name
 
 console.log('\n🚀 Starting Environment Variable Upload to Vercel\n');
 

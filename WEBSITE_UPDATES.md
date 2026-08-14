@@ -1,3 +1,74 @@
+# Update — Admin-Controlled Motion Blur System + Parallel Quality Pass (2026-08-14)
+
+## Architecture Overview & Parallel Engineering Pass
+
+Executed a coordinated multi-workstream engineering pass to deliver the **Admin-Controlled Motion Blur System** while simultaneously eliminating project ESLint warnings, TypeScript defects, and non-visual quality issues, verified continuously via Next.js Turbopack production builds.
+
+---
+
+## 1. Motion Blur System Architecture
+
+- **Framing & Coexistence**: Integrated directly with existing Framer Motion variants. Motion blur operates as an optional dynamic visual layer without replacing or distorting Framer Motion timing.
+- **Velocity-Driven Directional Blur**: Dynamic filter blur is applied during active movement/transition, immediately returning to `blur(0px)` upon coming to rest to ensure **100% crisp/sharp resting text and visual elements**.
+- **GPU Hardware Layer Promotion**: Enforces `will-change: filter, transform` and GPU layer promotion (`transform: translateZ(0)`) to maintain 60 FPS compositor rendering without full-DOM repaint overhead.
+- **Hierarchy Resolution Model**: Supports **Global → Section → Component** configuration hierarchy (`getResolvedMotionBlur`), allowing targeted component or section overrides.
+- **Presets Supported**:
+  - `Off`: No blur effect (`0px`)
+  - `Subtle`: `4px` maximum blur radius, `250ms` decay
+  - `Cinematic`: `10px` maximum blur radius, `450ms` decay
+- **Reduced Motion Safety**: Automatically checks `prefers-reduced-motion: reduce` both via JS (`MotionBlurWrapper`) and CSS media query overrides (`@media (prefers-reduced-motion: reduce)`), setting blur to `0px` when reduced motion is preferred.
+
+---
+
+## 2. Admin Motion Blur Studio & Live Preview
+
+- Integrated **Directional Motion Blur Studio** into `AnimationsTab.tsx`.
+- Features Master Toggle `[ON/OFF]`, Preset Selector (`Off`, `Subtle`, `Cinematic`), and an interactive **Impulse Tester** with live real-time preview.
+- **Draft/Publish Architecture**: Editing options update local state and DOM tokens (`applyMotionBlurTokensToDOM`) immediately for instant preview, persisting to Firestore only when the user clicks **Save Configuration**.
+
+---
+
+## 3. Parallel ESLint & Safe Quality Remediation
+
+- **ESLint Warnings Cleaned**: Reduced total warnings from **17 to 0** across all project files.
+- **Key Files Cleaned**:
+  - `ExperienceTab.tsx`: Removed unused imports (`CheckCircle`, `Layers`, `Globe`, `Calendar`, `MapPin`) and added safe `eslint-disable` comments for dynamic admin thumbnail images.
+  - `GlassmorphismTab.tsx`: Removed unused `motion`, `Sliders`, `ShieldAlert`, `adminPrimaryButtonClassName`, `adminSubtleButtonClassName`.
+  - `update-env-to-vercel.js`: Renamed unused caught error variables to `_e` / `_error`.
+  - `upload-env-to-vercel.js`: Removed unused `path` import and fixed catch parameter.
+  - `upload-env-v11.mjs`: Renamed unused `projectId` to `_projectId`.
+  - `MotionBlurWrapper.tsx`: Resolved React effect cascading render warnings (`react-hooks/set-state-in-effect`) using state lazy initializers and deferred impulse timers.
+
+---
+
+## 4. Verification & Baseline Benchmark Results
+
+- **TypeScript (`npx tsc --noEmit`)**: `0 errors`
+- **ESLint (`npm run lint`)**: `0 errors, 0 warnings`
+- **Production Build (`npm run build`)**: `SUCCESS` (43/43 Next.js Turbopack routes compiled cleanly)
+
+---
+
+## Files Created & Modified
+
+### Workstream A (Motion Blur)
+- [NEW] [motionBlurResolver.ts](file:///r:/Repo/portofolio/app/lib/motionBlurResolver.ts)
+- [NEW] [MotionBlurWrapper.tsx](file:///r:/Repo/portofolio/app/components/MotionBlurWrapper.tsx)
+- [MODIFY] [types.ts](file:///r:/Repo/portofolio/app/lib/types.ts)
+- [MODIFY] [globals.css](file:///r:/Repo/portofolio/app/globals.css)
+- [MODIFY] [AnimationsTab.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/AnimationsTab.tsx)
+- [MODIFY] [Projects.tsx](file:///r:/Repo/portofolio/app/components/Projects.tsx)
+- [MODIFY] [Certifications.tsx](file:///r:/Repo/portofolio/app/components/Certifications.tsx)
+
+### Workstream B (ESLint & Quality Cleanup)
+- [MODIFY] [ExperienceTab.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/ExperienceTab.tsx)
+- [MODIFY] [GlassmorphismTab.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/GlassmorphismTab.tsx)
+- [MODIFY] [update-env-to-vercel.js](file:///r:/Repo/portofolio/update-env-to-vercel.js)
+- [MODIFY] [upload-env-to-vercel.js](file:///r:/Repo/portofolio/upload-env-to-vercel.js)
+- [MODIFY] [upload-env-v11.mjs](file:///r:/Repo/portofolio/upload-env-v11.mjs)
+
+---
+
 # Update — 2026-08-09
 
 ## Issues Fixed
