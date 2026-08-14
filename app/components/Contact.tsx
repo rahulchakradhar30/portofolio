@@ -111,7 +111,7 @@ export default function Contact() {
   };
 
   return (
-    <section className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="contact">
+    <div className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="relative z-10 mx-auto max-w-[1600px] px-0 sm:px-2 lg:px-6">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}
@@ -124,7 +124,7 @@ export default function Contact() {
             <ShieldCheck className="h-4 w-4" />
             Fast response, clear scope
           </div>
-          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
+          <h2 id="contact-heading" className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.contactHeading}
           </h2>
           <p className="mx-auto max-w-2xl text-lg md:text-xl font-medium">
@@ -362,6 +362,6 @@ export default function Contact() {
           </div>
         </ExpandableSection>
       </div>
-    </section>
+    </div>
   );
 }

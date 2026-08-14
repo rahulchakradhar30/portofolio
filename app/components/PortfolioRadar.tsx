@@ -206,7 +206,7 @@ export default function PortfolioRadar() {
             <Sparkles className="h-4 w-4" />
             {siteCopy.radarBadge}
           </div>
-          <h2 className="mt-5 text-4xl font-black tracking-tighter text-[var(--foreground)] sm:text-5xl md:text-6xl">
+          <h2 id="radar-heading" className="mt-5 text-4xl font-black tracking-tighter text-[var(--foreground)] sm:text-5xl md:text-6xl">
             {siteCopy.radarHeading}
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-sm font-medium leading-relaxed text-[var(--foreground)]/75 sm:text-base md:text-lg">

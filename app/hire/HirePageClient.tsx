@@ -145,16 +145,17 @@ export default function HirePageClient() {
             )}
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <Field label="Full Name" icon={Users} value={formData.fullName} onChange={(v) => handleChange('fullName', v)} placeholder="Your name" required />
-              <Field label="Company / Organization" icon={Building2} value={formData.companyName} onChange={(v) => handleChange('companyName', v)} placeholder="Company name" />
-              <Field label="Email" icon={Mail} value={formData.email} onChange={(v) => handleChange('email', v)} placeholder="name@company.com" type="email" required />
-              <Field label="Phone" icon={Phone} value={formData.phone} onChange={(v) => handleChange('phone', v)} placeholder="Optional phone number" />
-              <Field label="Website" icon={Globe} value={formData.website} onChange={(v) => handleChange('website', v)} placeholder="https://..." />
-              <Field label="Role / Title Needed" icon={Briefcase} value={formData.role} onChange={(v) => handleChange('role', v)} placeholder="E.g. Developer, Designer" />
+              <Field id="hire-full-name" label="Full Name" icon={Users} value={formData.fullName} onChange={(v) => handleChange('fullName', v)} placeholder="Your name" required />
+              <Field id="hire-company" label="Company / Organization" icon={Building2} value={formData.companyName} onChange={(v) => handleChange('companyName', v)} placeholder="Company name" />
+              <Field id="hire-email" label="Email" icon={Mail} value={formData.email} onChange={(v) => handleChange('email', v)} placeholder="name@company.com" type="email" required />
+              <Field id="hire-phone" label="Phone" icon={Phone} value={formData.phone} onChange={(v) => handleChange('phone', v)} placeholder="Optional phone number" />
+              <Field id="hire-website" label="Website" icon={Globe} value={formData.website} onChange={(v) => handleChange('website', v)} placeholder="https://..." />
+              <Field id="hire-role" label="Role / Title Needed" icon={Briefcase} value={formData.role} onChange={(v) => handleChange('role', v)} placeholder="E.g. Developer, Designer" />
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Project Type</label>
+                <label htmlFor="hire-project-type" className="mb-2 block text-sm font-semibold text-[#2f241b]">Project Type</label>
                 <select
+                  id="hire-project-type"
                   value={formData.projectType}
                   onChange={(e) => handleChange('projectType', e.target.value)}
                   className="w-full rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-4 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
@@ -164,8 +165,9 @@ export default function HirePageClient() {
               </div>
 
               <div>
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Timeline</label>
+                <label htmlFor="hire-timeline" className="mb-2 block text-sm font-semibold text-[#2f241b]">Timeline</label>
                 <select
+                  id="hire-timeline"
                   value={formData.timeline}
                   onChange={(e) => handleChange('timeline', e.target.value)}
                   className="w-full rounded-2xl border border-[#7a5f47]/12 bg-[#fbf7f0] px-4 py-3 text-sm text-[#2f241b] outline-none transition focus:border-[#8d6b4e] focus:bg-white focus:ring-2 focus:ring-[#c4a884]/20"
@@ -175,8 +177,9 @@ export default function HirePageClient() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Budget Range</label>
+                <label htmlFor="hire-budget" className="mb-2 block text-sm font-semibold text-[#2f241b]">Budget Range</label>
                 <input
+                  id="hire-budget"
                   value={formData.budget}
                   onChange={(e) => handleChange('budget', e.target.value)}
                   placeholder="Example: ₹50,000 - ₹1,00,000"
@@ -185,8 +188,9 @@ export default function HirePageClient() {
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-sm font-semibold text-[#2f241b]">Project Description</label>
+                <label htmlFor="hire-description" className="mb-2 block text-sm font-semibold text-[#2f241b]">Project Description</label>
                 <textarea
+                  id="hire-description"
                   rows={6}
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
@@ -226,7 +230,8 @@ export default function HirePageClient() {
   );
 }
 
-function Field({ label, icon: Icon, value, onChange, placeholder, type = 'text', required = false }: {
+function Field({ id, label, icon: Icon, value, onChange, placeholder, type = 'text', required = false }: {
+  id: string;
   label: string;
   icon: ComponentType<{ className?: string }>;
   value: string;
@@ -237,10 +242,11 @@ function Field({ label, icon: Icon, value, onChange, placeholder, type = 'text',
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-[#2f241b]">{label}</label>
+      <label htmlFor={id} className="mb-2 block text-sm font-semibold text-[#2f241b]">{label}</label>
       <div className="relative">
         <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8d6b4e]" />
         <input
+          id={id}
           type={type}
           required={required}
           value={value}

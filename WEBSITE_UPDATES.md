@@ -466,3 +466,63 @@ Next.js 16.2.3 build completed with 100% static & dynamic route generation.
 ## Remaining Known Issues
 - None in audited scope. All ESLint errors resolved, TypeScript clean, production build passing.
 
+---
+
+# HTML / Accessibility / SEO Compliance Remediation
+
+## Audit Source
+Targeted compliance audit covering document head metadata, landmark headings, duplicate DOM IDs, asset 404 health, glassmorphism fallback queries, target=_blank accessibility, form control labels, and user-facing HTML sitemaps.
+
+## Issues Found & Root Causes
+1. **Forbidden `<link>` inside `<body>`**: Manual `<head>` in `layout.tsx` caused Next.js App Router to hoist metadata into `<body>` during SSR streaming.
+2. **Duplicate `id="roadmap"`**: `SectionRegistry.tsx` and `StudyRoadmap.tsx` both rendered `<section id="roadmap">`.
+3. **Duplicate `id="noise"`**: `PaperBackground.tsx` SVG noise filter ID collided when mounted multiple times.
+4. **Missing Primary `<h1>` & Section Heading Association**: Hero heading lacked `id="hero-heading"` and section landmarks lacked `aria-labelledby` attributes.
+5. **Broken Asset `/paper-texture.webp` (404)**: `IntroOverlay.module.css` referenced a non-existent image URL.
+6. **Glassmorphism Compatibility Warning**: `@supports not (backdrop-filter: blur(1px))` missed `-webkit-backdrop-filter` for older Safari/iOS browsers.
+7. **Proof Mode External Links**: `target="_blank"` links lacked screen reader warnings.
+8. **Hire Form Control Labels & Readability**: Form controls lacked `id` attributes linked to `<label htmlFor="...">`, and subtext fell below 12pt (16px).
+9. **User-Facing Sitemap**: Missing accessible HTML route for website directory.
+
+## Fixes Implemented
+1. **`app/layout.tsx`**: Removed manual `<head>` wrapper, allowing Next.js native metadata API to emit canonical, manifest, and author links strictly inside document `<head>`.
+2. **`app/components/StudyRoadmap.tsx`**: Changed outer wrapper to `<div>`, removing inner duplicate `id="roadmap"`, and added `id="roadmap-heading"` to `<h2>`.
+3. **`app/components/PaperBackground.tsx`**: Renamed SVG filter to `id="paper-background-noise"` and removed duplicate `<PaperBackground />` calls in page wrappers.
+4. **`app/components/Hero.tsx`**: Assigned `id="hero-heading"` to the primary `<h1>`.
+5. **`app/components/SectionRegistry.tsx`**: Added `aria-labelledby` attributes to all section landmarks pointing to their section `<h2>` headings.
+6. **`app/components/IntroOverlay.module.css`**: Replaced 404 `/paper-texture.webp` reference with pure CSS radial dot grid.
+7. **`app/globals.css`**: Updated `@supports` query to `@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px)))` for full vendor fallback.
+8. **`app/proof-mode/[id]/ProofDetailClient.tsx`**: Added `aria-label` and `<span className="sr-only">(opens in a new tab)</span>` to `target="_blank"` links.
+9. **`app/hire/HirePageClient.tsx`**: Linked all `<label htmlFor="...">` elements to form control `id` attributes and bumped subtext font size to `text-sm` / `text-base` (14px-16px).
+10. **`app/sitemap/page.tsx`**: Created accessible user-facing HTML sitemap and linked it in `Footer.tsx`.
+
+## Files Modified
+- [layout.tsx](file:///r:/Repo/portofolio/app/layout.tsx)
+- [SectionRegistry.tsx](file:///r:/Repo/portofolio/app/components/SectionRegistry.tsx)
+- [StudyRoadmap.tsx](file:///r:/Repo/portofolio/app/components/StudyRoadmap.tsx)
+- [PaperBackground.tsx](file:///r:/Repo/portofolio/app/components/PaperBackground.tsx)
+- [Hero.tsx](file:///r:/Repo/portofolio/app/components/Hero.tsx)
+- [About.tsx](file:///r:/Repo/portofolio/app/components/About.tsx)
+- [Skills.tsx](file:///r:/Repo/portofolio/app/components/Skills.tsx)
+- [Projects.tsx](file:///r:/Repo/portofolio/app/components/Projects.tsx)
+- [Certifications.tsx](file:///r:/Repo/portofolio/app/components/Certifications.tsx)
+- [Contact.tsx](file:///r:/Repo/portofolio/app/components/Contact.tsx)
+- [PortfolioRadar.tsx](file:///r:/Repo/portofolio/app/components/PortfolioRadar.tsx)
+- [Experience.tsx](file:///r:/Repo/portofolio/app/components/Experience.tsx)
+- [IntroOverlay.module.css](file:///r:/Repo/portofolio/app/components/IntroOverlay.module.css)
+- [globals.css](file:///r:/Repo/portofolio/app/globals.css)
+- [ProofDetailClient.tsx](file:///r:/Repo/portofolio/app/proof-mode/[id]/ProofDetailClient.tsx)
+- [proof-mode/page.tsx](file:///r:/Repo/portofolio/app/proof-mode/page.tsx)
+- [HirePageClient.tsx](file:///r:/Repo/portofolio/app/hire/HirePageClient.tsx)
+- [Footer.tsx](file:///r:/Repo/portofolio/app/components/Footer.tsx)
+- [WEBSITE_UPDATES.md](file:///r:/Repo/portofolio/WEBSITE_UPDATES.md)
+
+## Files Created
+- [page.tsx](file:///r:/Repo/portofolio/app/sitemap/page.tsx) — User-facing HTML Sitemap
+
+## Automated Tests & Verification
+- **TypeScript (`npx tsc --noEmit`)**: 0 errors.
+- **ESLint (`npm run lint`)**: 0 errors (17 warnings, zero errors).
+- **Production Build (`npm run build`)**: Next.js 16.2.3 build succeeded.
+
+

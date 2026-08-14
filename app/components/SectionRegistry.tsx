@@ -23,7 +23,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
   switch (section.id) {
     case "hero":
       return (
-        <section id="home" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="home" aria-labelledby="hero-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="Hero">
             <Hero />
             {extraBlocks.length > 0 && (
@@ -39,7 +39,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "about":
       return (
-        <section id="about" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="about" aria-labelledby="about-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="About">
             <About />
             {extraBlocks.length > 0 && (
@@ -55,7 +55,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "roadmap":
       return (
-        <section id="roadmap" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="roadmap" aria-labelledby="roadmap-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="StudyRoadmap">
             <StudyRoadmap />
             {extraBlocks.length > 0 && (
@@ -71,7 +71,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "radar":
       return (
-        <section id="radar" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="radar" aria-labelledby="radar-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="PortfolioRadar">
             <PortfolioRadar />
             {extraBlocks.length > 0 && (
@@ -101,7 +101,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "skills":
       return (
-        <section id="skills" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="skills" aria-labelledby="skills-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="Skills">
             <Skills />
             {extraBlocks.length > 0 && (
@@ -117,7 +117,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "projects":
       return (
-        <section id="projects" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="projects" aria-labelledby="projects-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="Projects">
             <Projects />
             {extraBlocks.length > 0 && (
@@ -133,7 +133,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "certifications":
       return (
-        <section id="certifications" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="certifications" aria-labelledby="certifications-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="Certifications">
             <Certifications />
             {extraBlocks.length > 0 && (
@@ -149,7 +149,7 @@ export default function SectionRegistry({ section }: { section: HomepageSectionC
 
     case "contact":
       return (
-        <section id="contact" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
+        <section id="contact" aria-labelledby="contact-heading" className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36">
           <SectionErrorBoundary sectionName="Contact">
             <Contact />
             {extraBlocks.length > 0 && (

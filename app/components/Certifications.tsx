@@ -96,7 +96,7 @@ export default function Certifications() {
             <Sparkles className="h-4 w-4" />
             Verified proof
           </div>
-          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
+          <h2 id="certifications-heading" className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.certificationsHeading}
           </h2>
           <p className="mx-auto max-w-2xl text-lg md:text-xl font-medium">

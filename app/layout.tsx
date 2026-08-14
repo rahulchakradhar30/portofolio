@@ -98,16 +98,11 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="h-full antialiased" suppressHydrationWarning>
-      <head>
-        {/* DNS prefetch & preconnect for Cloudinary CDN — reduces image load latency */}
-        <link rel="preconnect" href="https://res.cloudinary.com" />
-        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(globalJsonLd) }}
         />
-      </head>
-      <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
         <PortfolioContentProvider>
           <MotionProvider>
             <PaperBackground />

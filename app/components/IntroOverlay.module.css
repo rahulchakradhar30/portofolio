@@ -16,11 +16,9 @@
 .texture {
   position: absolute;
   inset: 0;
-  background-image: url('/paper-texture.webp');
-  background-size: cover;
-  background-position: center;
+  background-image: radial-gradient(circle, var(--foreground) 1px, transparent 1px);
+  background-size: 24px 24px;
   opacity: 0.08;
-  mix-blend-mode: multiply;
   pointer-events: none;
 }
 

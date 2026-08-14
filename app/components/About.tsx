@@ -81,7 +81,7 @@ export default function About() {
           <div className="paper-chip mx-auto mb-6 inline-flex uppercase tracking-[0.24em]">
             {siteCopy.aboutBadge}
           </div>
-          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
+          <h2 id="about-heading" className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             {siteCopy.aboutHeading}
           </h2>
           <div className="mx-auto h-1 w-24 bg-[var(--foreground)] editorial-border rounded-full" />

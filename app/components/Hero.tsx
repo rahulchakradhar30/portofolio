@@ -77,10 +77,11 @@ export default function Hero() {
           </motion.div>
 
           <motion.h1
+            id="hero-heading"
             initial={reducedMotion ? false : { opacity: 0, y: 30 }}
             animate={reducedMotion ? undefined : { opacity: 1, y: 0 }}
             transition={reducedMotion ? undefined : { duration: 0.8, delay: 0.1, ease: [0.42, 0, 0.58, 1] }}
-            className="mt-8 max-w-4xl text-5xl md:text-7xl xl:text-8xl"
+            className="mt-8 max-w-4xl text-5xl md:text-7xl xl:text-8xl font-black"
           >
             {heroData.heroTitle}
           </motion.h1>

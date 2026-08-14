@@ -17,10 +17,8 @@ import {
   Zap,
 } from "lucide-react";
 
-import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import { BackButton } from "@/app/components/NavigationContext";
-import PaperBackground from "@/app/components/PaperBackground";
 import LoadingSkeleton from "@/app/components/LoadingSkeleton";
 import ScrollContainer from "@/app/components/ScrollContainer";
 import { useMotionPreferences } from "@/app/components/MotionProvider";
@@ -100,9 +98,6 @@ export default function ProofModePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)] relative">
-      <PaperBackground />
-      <Header />
-
       <main className="flex-grow pt-28 pb-20 px-4 sm:px-6 lg:px-10 max-w-[1600px] mx-auto w-full z-10">
         {/* Header Breadcrumb & Title */}
         <div className="mb-10">

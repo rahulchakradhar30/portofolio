@@ -210,7 +210,7 @@ export default function StudyRoadmap() {
   if (!enabled || visibleItems.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10" id="roadmap">
+    <div ref={sectionRef} className="relative overflow-hidden px-4 py-24 sm:px-6 lg:py-32 lg:px-10">
       <div className="relative z-10 mx-auto max-w-[1600px]">
         <motion.div
           initial={reducedMotion ? false : { opacity: 0, y: 30 }}
@@ -223,7 +223,7 @@ export default function StudyRoadmap() {
             <GraduationCap className="h-4 w-4" />
             Study roadmap
           </div>
-          <h2 className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
+          <h2 id="roadmap-heading" className="mb-6 text-4xl font-black md:text-6xl tracking-tighter text-[var(--foreground)]">
             Academic Journey
           </h2>
           <p className="mx-auto max-w-3xl text-lg md:text-xl font-medium">
@@ -293,6 +293,6 @@ export default function StudyRoadmap() {
           </ExpandableSection>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

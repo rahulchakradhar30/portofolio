@@ -93,6 +93,7 @@ export default function Experience({ section }: ExperienceProps) {
   return (
     <section
       id="experience"
+      aria-labelledby="experience-heading"
       className="scroll-mt-28 sm:scroll-mt-32 lg:scroll-mt-36 py-12 lg:py-16 relative overflow-hidden"
     >
       <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-14">
@@ -109,7 +110,7 @@ export default function Experience({ section }: ExperienceProps) {
             <span>Career Journey</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--foreground)] tracking-tight">
+          <h2 id="experience-heading" className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--foreground)] tracking-tight">
             {title}
           </h2>
 

@@ -16,9 +16,7 @@ import {
   FileCode,
 } from "lucide-react";
 
-import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
-import PaperBackground from "@/app/components/PaperBackground";
 import { BackButton } from "@/app/components/NavigationContext";
 import InteractiveProofVisualizer from "@/app/components/InteractiveProofVisualizer";
 import ImageLightbox from "@/app/components/ImageLightbox";
@@ -46,9 +44,6 @@ export default function ProofDetailClient({
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)] relative">
-      <PaperBackground />
-      <Header />
-
       <main className="flex-grow pt-28 pb-20 px-4 sm:px-6 lg:px-10 max-w-[1400px] mx-auto w-full z-10">
         {/* Top Back Navigation */}
         <div className="mb-8">
@@ -131,10 +126,12 @@ export default function ProofDetailClient({
                   href={associatedProject.demo}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Live Project (opens in a new tab)"
                   className="paper-button-primary px-4 py-2 text-xs font-extrabold inline-flex items-center gap-2"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
-                  Live Project
+                  <span>Live Project</span>
+                  <span className="sr-only">(opens in a new tab)</span>
                 </a>
               )}
               {associatedProject?.github && (
@@ -142,10 +139,12 @@ export default function ProofDetailClient({
                   href={associatedProject.github}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Source Repository (opens in a new tab)"
                   className="paper-button px-4 py-2 text-xs font-extrabold inline-flex items-center gap-2"
                 >
                   <Code2 className="h-3.5 w-3.5" />
-                  Source Repository
+                  <span>Source Repository</span>
+                  <span className="sr-only">(opens in a new tab)</span>
                 </a>
               )}
               {proofExperience.evidenceLinks?.map((link, idx) => (
@@ -154,10 +153,12 @@ export default function ProofDetailClient({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`${link.label} (opens in a new tab)`}
                   className="paper-button px-4 py-2 text-xs font-bold inline-flex items-center gap-2"
                 >
                   <ExternalLink className="h-3.5 w-3.5 text-[var(--accent)]" />
-                  {link.label}
+                  <span>{link.label}</span>
+                  <span className="sr-only">(opens in a new tab)</span>
                 </a>
               ))}
             </div>

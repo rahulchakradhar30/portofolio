@@ -113,6 +113,7 @@ export default function Footer() {
                 <li><Link href="#projects" className="transition hover:text-[var(--accent)]">{siteCopy.navProjects}</Link></li>
                 <li><Link href="/hire" className="transition hover:text-[var(--accent)]">{siteCopy.navHire}</Link></li>
                 <li><Link href="#contact" className="transition hover:text-[var(--accent)]">{siteCopy.navContact}</Link></li>
+                <li><Link href="/sitemap" className="transition hover:text-[var(--accent)]">HTML Sitemap</Link></li>
               </ul>
             </motion.div>
 
