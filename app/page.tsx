@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import serverFirebaseHelpers from "@/app/lib/firebaseServer";
 import type { PortfolioContent } from "@/app/lib/types";
 import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS } from "@/app/lib/seoSchemas";
@@ -6,9 +6,17 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import IntroOverlay from "./components/IntroOverlay";
 
-
-
 export const dynamic = "force-dynamic";
+
+export async function generateViewport(): Promise<Viewport> {
+  const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
+  return {
+    themeColor: content?.seoThemeColor || "#2f241b",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  };
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const content = (await serverFirebaseHelpers.getPortfolioContent()) as PortfolioContent | null;
@@ -69,7 +77,6 @@ export async function generateMetadata(): Promise<Metadata> {
       site: "@rahulchakradhar",
       creator: "@rahulchakradhar",
     },
-    themeColor: content?.seoThemeColor || "#2f241b",
     robots: {
       index: true,
       follow: true,

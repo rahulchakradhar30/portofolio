@@ -6,7 +6,7 @@ import { PortfolioContentProvider, usePortfolioContent } from "./PortfolioConten
 import Header from "./Header";
 import Footer from "./Footer";
 import SectionRegistry from "./SectionRegistry";
-import { Eye, Layers, Sparkles } from "lucide-react";
+import { Layers, Sparkles } from "lucide-react";
 
 export type PreviewViewportMode = "desktop" | "tablet" | "mobile";
 

@@ -7,8 +7,9 @@ import LoadingSkeleton from "./LoadingSkeleton";
 import { useMotionPreferences } from "./MotionProvider";
 import { useIsMobile } from "./useViewport";
 import { getSiteCopy } from "@/app/lib/siteCopy";
-import { ArrowRight, Sparkles, Layers3 } from "lucide-react";
+import { ArrowRight, Sparkles, Layers3, FileText, ExternalLink } from "lucide-react";
 import { usePortfolioContent } from "./PortfolioContentProvider";
+import { resolveLink } from "@/app/lib/urlPolicy";
 
 const DEFAULT_HERO_DATA = {
   heroTitle: "Rahul Chakradhar",
@@ -16,10 +17,6 @@ const DEFAULT_HERO_DATA = {
   heroTagline: "Focused on scalable platforms, intelligent tools, and impactful digital experiences.",
   profileImage: "",
   bannerImage: "",
-  resumeUrl: "",
-  instagram: "https://www.instagram.com/rahul_chakradhar_30/?hl=en",
-  linkedin: "https://www.linkedin.com/in/perepogu-rahul-chakradhar-721017379/",
-  github: "https://github.com/rahulchakradhar30",
 };
 
 export default function Hero() {
@@ -35,12 +32,12 @@ export default function Hero() {
       heroTagline: content.heroTagline || DEFAULT_HERO_DATA.heroTagline,
       profileImage: content.profileImage || DEFAULT_HERO_DATA.profileImage,
       bannerImage: content.bannerImage || DEFAULT_HERO_DATA.bannerImage,
-      resumeUrl: content.resumeUrl || DEFAULT_HERO_DATA.resumeUrl,
-      instagram: content.instagram || DEFAULT_HERO_DATA.instagram,
-      linkedin: content.linkedin || DEFAULT_HERO_DATA.linkedin,
-      github: content.github || DEFAULT_HERO_DATA.github,
     };
   }, [content]);
+
+  const resumeRes = useMemo(() => resolveLink(content?.resumeUrl), [content]);
+  const githubRes = useMemo(() => resolveLink(content?.github, "github"), [content]);
+  const linkedinRes = useMemo(() => resolveLink(content?.linkedin, "linkedin"), [content]);
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
   const isVisible = content ? content.sectionVisibility?.hero !== false : true;
@@ -128,14 +125,43 @@ export default function Hero() {
               <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
             </a>
 
-            {heroData.resumeUrl && (
+            {resumeRes.shouldDisplay && resumeRes.url && (
               <a
-                href={heroData.resumeUrl}
+                href={resumeRes.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="paper-chip px-6 py-4 text-sm font-bold ml-0 sm:ml-4"
+                className="paper-button inline-flex items-center justify-center gap-2 px-6 py-4 text-base font-bold"
+                aria-label="View Resume (PDF)"
               >
-                Resume
+                <FileText className="h-4 w-4" />
+                <span>Resume</span>
+                <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+              </a>
+            )}
+
+            {githubRes.shouldDisplay && githubRes.url && (
+              <a
+                href={githubRes.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="paper-chip inline-flex items-center gap-1.5 px-4 py-3 text-xs font-bold uppercase tracking-wider hover:border-[var(--accent)]"
+                aria-label="GitHub Profile"
+              >
+                GitHub
+                <ExternalLink className="h-3 w-3 opacity-70" />
+              </a>
+            )}
+
+            {linkedinRes.shouldDisplay && linkedinRes.url && (
+              <a
+                href={linkedinRes.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="paper-chip inline-flex items-center gap-1.5 px-4 py-3 text-xs font-bold uppercase tracking-wider hover:border-[var(--accent)]"
+                aria-label="LinkedIn Profile"
+              >
+                LinkedIn
+                <ExternalLink className="h-3 w-3 opacity-70" />
               </a>
             )}
           </motion.div>

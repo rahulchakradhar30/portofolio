@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Layers,
   Plus,
@@ -16,19 +15,13 @@ import {
   Edit3,
   LayoutGrid,
   Menu,
-  Type,
-  Maximize2,
   RotateCcw,
   CheckCircle,
-  FileText,
   MousePointer,
-  HelpCircle,
   Monitor,
   Tablet,
   Smartphone,
   Split,
-  ChevronLeft,
-  ChevronRight,
   GripVertical,
   PanelLeftClose,
   PanelLeftOpen,
@@ -40,16 +33,12 @@ import type {
   HomepageSectionConfig,
   HomepageBlock,
   BlockType,
-  BlockButton,
   BlockCard,
   BlockTimelineItem,
   NavigationItemConfig,
-  ButtonStylePreset,
-  ButtonDestinationType,
 } from "@/app/lib/types";
-import { getDefaultHomepageConfig, normalizeHomepageConfig, sanitizeDestinationUrl } from "@/app/lib/homepageConfig";
+import { getDefaultHomepageConfig, normalizeHomepageConfig } from "@/app/lib/homepageConfig";
 import BlockRegistry from "@/app/components/blocks/BlockRegistry";
-import CustomSectionRenderer from "@/app/components/blocks/CustomSectionRenderer";
 import LiveWebsitePreview, { PreviewViewportMode } from "@/app/components/LiveWebsitePreview";
 
 const BLOCK_TYPE_OPTIONS: { type: BlockType; label: string; description: string }[] = [
@@ -713,7 +702,7 @@ export default function HomepageBuilderTab() {
                           )}
                         </div>
                         <div className="text-xs text-[var(--foreground)]/60 font-medium">
-                          ID: #{sec.id} • Nav: "{sec.navLabel}"
+                          ID: #{sec.id} • Nav: &quot;{sec.navLabel}&quot;
                         </div>
                       </div>
                     </div>

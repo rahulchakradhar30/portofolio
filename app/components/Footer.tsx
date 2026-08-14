@@ -8,12 +8,9 @@ import { usePortfolioContent } from "./PortfolioContentProvider";
 import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 
-const DEFAULT_SOCIALS = {
-  email: "rahulchakradharperepogu@gmail.com",
-  instagram: "https://www.instagram.com/rahul_chakradhar_30/?hl=en",
-  linkedin: "https://www.linkedin.com/in/perepogu-rahul-chakradhar-721017379/",
-  github: "https://github.com/rahulchakradhar30",
-};
+
+
+import { resolveLink } from "@/app/lib/urlPolicy";
 
 export default function Footer() {
   const { content } = usePortfolioContent();
@@ -22,14 +19,12 @@ export default function Footer() {
 
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
 
-  const socials = useMemo(() => {
-    if (!content) return DEFAULT_SOCIALS;
-    return {
-      email: content.email || DEFAULT_SOCIALS.email,
-      instagram: content.instagram || DEFAULT_SOCIALS.instagram,
-      linkedin: content.linkedin || DEFAULT_SOCIALS.linkedin,
-      github: content.github || DEFAULT_SOCIALS.github,
-    };
+  const githubRes = useMemo(() => resolveLink(content?.github, "github"), [content]);
+  const linkedinRes = useMemo(() => resolveLink(content?.linkedin, "linkedin"), [content]);
+  const instagramRes = useMemo(() => resolveLink(content?.instagram, "instagram"), [content]);
+  const emailRes = useMemo(() => {
+    const raw = content?.email || "rahulchakradharperepogu@gmail.com";
+    return resolveLink(raw.startsWith("mailto:") ? raw : `mailto:${raw}`);
   }, [content]);
 
   return (
@@ -51,48 +46,56 @@ export default function Footer() {
                 {siteCopy.footerLead}
               </p>
               <div className="flex flex-wrap gap-4">
-                <motion.a
-                  whileHover={reducedMotion ? undefined : { y: -4 }}
-                  whileTap={reducedMotion ? undefined : { y: 0 }}
-                  href={socials.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub profile"
-                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
-                >
-                  <Code2 className="h-6 w-6" />
-                </motion.a>
-                <motion.a
-                  whileHover={reducedMotion ? undefined : { y: -4 }}
-                  whileTap={reducedMotion ? undefined : { y: 0 }}
-                  href={socials.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn profile"
-                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
-                >
-                  <Link2 className="h-6 w-6" />
-                </motion.a>
-                <motion.a
-                  whileHover={reducedMotion ? undefined : { y: -4 }}
-                  whileTap={reducedMotion ? undefined : { y: 0 }}
-                  href={socials.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram profile"
-                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
-                >
-                  <Camera className="h-6 w-6" />
-                </motion.a>
-                <motion.a
-                  whileHover={reducedMotion ? undefined : { y: -4 }}
-                  whileTap={reducedMotion ? undefined : { y: 0 }}
-                  href={`mailto:${socials.email}`}
-                  aria-label="Send email"
-                  className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
-                >
-                  <Mail className="h-6 w-6" />
-                </motion.a>
+                {githubRes.shouldDisplay && githubRes.url && (
+                  <motion.a
+                    whileHover={reducedMotion ? undefined : { y: -4 }}
+                    whileTap={reducedMotion ? undefined : { y: 0 }}
+                    href={githubRes.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="GitHub profile"
+                    className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
+                  >
+                    <Code2 className="h-6 w-6" />
+                  </motion.a>
+                )}
+                {linkedinRes.shouldDisplay && linkedinRes.url && (
+                  <motion.a
+                    whileHover={reducedMotion ? undefined : { y: -4 }}
+                    whileTap={reducedMotion ? undefined : { y: 0 }}
+                    href={linkedinRes.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="LinkedIn profile"
+                    className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
+                  >
+                    <Link2 className="h-6 w-6" />
+                  </motion.a>
+                )}
+                {instagramRes.shouldDisplay && instagramRes.url && (
+                  <motion.a
+                    whileHover={reducedMotion ? undefined : { y: -4 }}
+                    whileTap={reducedMotion ? undefined : { y: 0 }}
+                    href={instagramRes.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram profile"
+                    className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
+                  >
+                    <Camera className="h-6 w-6" />
+                  </motion.a>
+                )}
+                {emailRes.shouldDisplay && emailRes.url && (
+                  <motion.a
+                    whileHover={reducedMotion ? undefined : { y: -4 }}
+                    whileTap={reducedMotion ? undefined : { y: 0 }}
+                    href={emailRes.url}
+                    aria-label="Send email"
+                    className="paper-card inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--surface)] text-[var(--foreground)]"
+                  >
+                    <Mail className="h-6 w-6" />
+                  </motion.a>
+                )}
               </div>
             </motion.div>
 

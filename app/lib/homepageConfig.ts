@@ -5,9 +5,6 @@ import type {
   NavigationItemConfig,
   BuiltInSectionId,
   ButtonDestinationType,
-  BlockButton,
-  BlockCard,
-  BlockTimelineItem,
 } from "./types";
 
 export const BUILT_IN_SECTIONS: {

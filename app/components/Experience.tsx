@@ -14,6 +14,7 @@ import {
   ArrowRight,
   ChevronRight,
 } from "lucide-react";
+import Image from "next/image";
 import type {
   HomepageSectionConfig,
   ExperienceItem,
@@ -30,7 +31,7 @@ interface ExperienceProps {
 }
 
 export default function Experience({ section }: ExperienceProps) {
-  const { content } = usePortfolioContent();
+  const { content: _content } = usePortfolioContent();
   const { reducedMotion } = useMotionPreferences();
 
   const [experiences, setExperiences] = useState<ExperienceItem[]>([]);
@@ -328,9 +329,12 @@ function ExperienceCard({ item, skillMap, projectMap }: CardProps) {
             {/* Company Logo or Fallback SVG Icon */}
             <div className="w-12 h-12 rounded-xl bg-[var(--surface-soft)] border border-[var(--border-color,rgba(0,0,0,0.08))] p-2 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
               {item.companyLogo && !logoError ? (
-                <img
+                <Image
                   src={item.companyLogo}
                   alt={`${item.companyName} logo`}
+                  width={48}
+                  height={48}
+                  unoptimized
                   className="w-full h-full object-contain"
                   onError={() => setLogoError(true)}
                 />

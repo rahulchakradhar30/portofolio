@@ -27,7 +27,7 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
-import type { HomepageBlock, BlockButton, BlockCard, BlockTimelineItem } from "@/app/lib/types";
+import type { HomepageBlock, BlockButton } from "@/app/lib/types";
 import { useMotionPreferences } from "../MotionProvider";
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -198,14 +198,14 @@ export default function BlockRegistry({ block }: { block: HomepageBlock }) {
     }
 
     case "highlight_box": {
-      const Icon = getLucideIcon(content.highlightIcon);
+      const HighlightIcon = getLucideIcon(content.highlightIcon);
 
       return (
         <motion.div {...animationVariant} className={`${spacingClass} max-w-4xl ${alignClass}`}>
           <div className="relative rounded-2xl border-2 border-[var(--foreground)] bg-[var(--surface-strong)] p-6 sm:p-8 shadow-[6px_6px_0_0_rgba(42,36,31,0.9)]">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl border-2 border-[var(--foreground)] bg-[var(--accent)] text-white shadow-[3px_3px_0_0_rgba(42,36,31,0.9)]">
-                <Icon className="h-6 w-6" />
+                {React.createElement(HighlightIcon, { className: "h-6 w-6" })}
               </div>
               <div>
                 {content.highlightTitle && (
