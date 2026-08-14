@@ -236,7 +236,7 @@ export default function ThemesTab() {
               Select Portfolio Theme Architecture
             </h3>
             <p className="text-xs md:text-sm text-[var(--foreground)]/70 mt-1 max-w-xl">
-              Switch between Theme 01 (Editorial Paper Layout) and Theme 02 (Spatial Cinematic Experience). Admin content and database remain 100% identical.
+              Switch between Theme 01 (Editorial Paper Layout) and Theme 02 (Immersive Portfolio Room). Admin content and database remain 100% identical.
             </p>
           </div>
 
@@ -264,7 +264,7 @@ export default function ThemesTab() {
               }`}
             >
               <CheckCircle2 className="w-3.5 h-3.5" />
-              THEME 02 — SPATIAL CINEMATIC
+              THEME 02 — IMMERSIVE ROOM
             </button>
           </div>
         </div>

@@ -1,122 +1,61 @@
-# Theme 02 — Spatial Cinematic Experience
+# Theme 02 — Immersive Portfolio Room
 
 ## Concept
-Theme 02 is a second complete visual website theme that transforms the portfolio into an interactive 3D cinematic spatial environment. Instead of traditional document scrolling, the viewport acts as a 3D camera and each portfolio section acts as an immersive spatial scene.
+Theme 02 is an **Immersive Portfolio Room** — a premium dark architectural exhibition gallery. The visitor enters a dark, high-end exhibition space where they are conceptually standing INSIDE the room. Around the visitor are spatial exhibition walls/panels, each representing one Admin-controlled homepage section.
 
 ---
 
-## Why It Exists
-To provide a radically distinct visual language, navigation paradigm, and interactive presentation while consuming the **exact same Admin-managed content**, database records, business logic, and security features without duplication or schema changes.
+## Visual Direction
+- **Atmosphere**: Premium modern architectural interior / dark exhibition gallery / futuristic studio.
+- **Materials**: Dark matte aluminium, metallic bevels, corner brackets, subtle reflective floor grid, indirect overhead lighting, cinematic spotlights.
+- **Coloring**: Deep blacks (`#050608`), high-contrast active exhibit surfaces, theme-derived accent lighting.
+- **Goal**: "An expensive interactive portfolio installation."
 
 ---
 
-## Difference From Theme 01
-| Attribute | Theme 01 — Paper Layout | Theme 02 — Spatial Cinematic |
-| :--- | :--- | :--- |
-| **Visual Language** | Tactile, editorial paper & dotted grid | 3D depth, atmospheric lighting, spatial scene planes |
-| **Navigation** | Vertical document scrolling | Fixed viewport camera scene navigation (`100dvh`) |
-| **Viewport** | Long scrolling document | Fixed camera viewport |
-| **Transitions** | Standard page scroll / section reveal | Spatial camera pan, depth zoom, perspective rotate & fade |
-| **Navigation UI** | Sticky header nav links | Spatial Scene Navigation Rail & floating indicators |
-
----
-
-## Scene Architecture
-- Every section registered in `homepageConfig` (Hero, About, Academic, Radar, Skills, Experience, Projects, Certifications, Contact, and Admin Custom Sections) is wrapped as a `<SpatialScene />`.
-- Sections are rendered inside 3D perspective card surfaces (`perspective: 1000px`, backdrop blur, surface contrast).
-- Reordering sections in Admin automatically reorders the scene sequence.
-
----
-
-## Navigation Model & Input Handling
-- **Mouse Wheel / Trackpad**: Velocity thresholding (50px delta lock) prevents accidental multi-scene skipping.
-- **Touch Gestures**: Safe touch swipe thresholding for mobile/tablet gesture navigation.
-- **Keyboard Navigation**: Arrow keys (`Up`/`Down`), `PageUp`/`PageDown`, `Home`, `End`, `Space`.
-- **Navigation Rail**: Interactive vertical dot rail with scene labels and direct scene jumping.
-- **Deep Linking**: URL hashes (`#about`, `#projects`, `#skills`, `#contact`) automatically navigate to target scene and sync with browser history (`history.replaceState`).
-
----
-
-## Theme Resolution & Shared Content Model
+## Room Architecture (`ImmersiveRoom`)
 ```
-ADMIN CMS (Firestore / REST)
-       ↓
-PUBLISHED CONTENT
-       ↓
-UNIFIED THEME CONFIG (themeMode: "paper" | "spatial")
-       ↓
-THEME RENDERER
-  ├── "paper"   → Paper Background & Stacked Section Layout
-  └── "spatial" → Spatial Background & Spatial Scene Manager
+ImmersiveRoom
+ ├── Floor (Concrete/dark grid plane with radial floor glow)
+ ├── Ceiling (Architectural canopy structure)
+ ├── Walls (Spatial 3D polygon wall ring, one wall per section)
+ ├── Lighting (RoomLighting: low-key ambient fill + active wall spotlight)
+ ├── Section Panels (ImmersiveWall: renders SectionRegistry section content)
+ ├── Camera / Viewpoint (Perspective 3D camera pan & rotate controller)
+ └── Navigation Controller (RoomNavigation: compass, minimap, wall rail)
 ```
 
 ---
 
-## Animation, Motion Blur, & Glassmorphism
-- **Framer Motion**: Drives GPU-composited 3D transitions (`transform`, `opacity`, `scale`, `rotateX`).
-- **Motion Blur**: Inherits Admin `motionBlurConfig`. During scene transitions, dynamic motion blur filters are applied.
-- **Glassmorphism**: Inherits Admin `glassConfig`. Scene surfaces automatically apply backdrop blur, edge highlights, and transparency based on active glass tokens.
-- **Color Palettes**: Dynamically inherits `--background`, `--foreground`, `--surface`, `--accent`, `--accent-strong` from Admin color themes.
+## Section → Wall Mapping
+- Dynamic Admin section configuration (`homepageConfig.sections`) is authoritative.
+- Dynamic spatial polygon calculation (`angleStep = 360 / N`, 3D positioning `rotateY`, `translateZ`).
+- Active Wall: illuminated by focused spotlight beam, crisp text, high contrast surface, subtle elevation glow.
+- Adjacent/Inactive Walls: dimmed atmospheric light, soft ambient outline, clickable for instant camera focus.
 
 ---
 
-## Performance & Optimization
-- **Active Scene**: Fully rendered, interactive, full GPU composite.
-- **Nearby Scenes**: Lightweight prepared containers.
-- **Distant Scenes**: Off-DOM / minimal element rendering to prevent unnecessary memory consumption.
-- **Will-Change & GPU Compositing**: Applied to background light nodes and scene card transforms.
+## Intro → Room Transition
+- Theme 2 begins at the existing Cinematic Intro layer (`IntroOverlay.tsx`).
+- Intro is fully Admin-configurable (`introBrandText`, `introSubtitle`, `introLogoUrl`, `introDuration`, etc.).
+- When intro completes:
+  1. Dark overlay screen darkens.
+  2. Architectural room geometry begins appearing.
+  3. Camera/viewpoint enters the room (`translateZ: -400px -> 0px`).
+  4. Front wall becomes visible and primary spotlight activates.
 
 ---
 
-## Accessibility & Reduced Motion
-- Full keyboard access for screen readers and keyboard users.
-- `prefers-reduced-motion: reduce` or `motionMode === "reduced"` automatically disables 3D zoom/rotate camera movements, replacing them with subtle crossfades.
-- All semantic HTML tags (`<section>`, `<h1>`, `<h2>`, `<nav>`) remain intact inside every scene.
+## Admin Theme Switching & Shared CMS Model
+- **Theme 01 — Paper**: Classic tactile paper layout.
+- **Theme 02 — Immersive Room**: 3D spatial room exhibition.
+- **Zero Content Duplication**: Theme 02 consumes the exact same Admin-managed sections, blocks, projects, skills, certifications, and theme tokens.
+- **Fallback Safety**: `<SpatialErrorBoundary />` automatically catches unexpected WebGL/runtime errors and safely falls back to Theme 01.
 
 ---
 
-## Mobile Experience
-- Fixed viewport (`100dvh`) touch swipe gesture navigation with touch thresholds.
-- Responsive spatial card scaling and mobile drawer navigation.
-
----
-
-## SEO & Discoverability
-- Direct hash routing (`#about`, `#projects`, etc.) and deep routes (`/projects`, `/proof-mode`) remain fully functional.
-- Content remains standard semantic HTML in the DOM for search engine crawlers.
-
----
-
-## Fallback Safety
-- If Theme 02 encounters an unexpected runtime or WebGL error, `<SpatialErrorBoundary />` automatically catches it and falls back safely to Theme 01 Paper Layout.
-- Admin can instantly toggle between Theme 01 and Theme 02 without database migration.
-
----
-
-## Admin Controls & Live Preview
-- **Admin Dashboard -> Color Themes**: Top banner allows Admin to select `[ Theme 01 — Paper ]` or `[ Theme 02 — Spatial Cinematic ]`.
-- **Live Preview**: Admin Live Website Preview uses `<ThemeRenderer />`, enabling live preview testing of Theme 02 with draft section ordering, block edits, color palettes, and glass settings.
-
----
-
-## Files Created & Modified
-
-### New Files Created
-- [SpatialBackground.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialBackground.tsx)
-- [SpatialScene.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialScene.tsx)
-- [SpatialSceneManager.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialSceneManager.tsx)
-- [SpatialHeader.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialHeader.tsx)
-- [SpatialFooter.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialFooter.tsx)
-- [SpatialErrorBoundary.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialErrorBoundary.tsx)
-- [SpatialWebsiteView.tsx](file:///r:/Repo/portofolio/app/components/spatial/SpatialWebsiteView.tsx)
-- [ThemeBackground.tsx](file:///r:/Repo/portofolio/app/components/ThemeBackground.tsx)
-- [ThemeRenderer.tsx](file:///r:/Repo/portofolio/app/components/ThemeRenderer.tsx)
-- [THEME_02_SPATIAL_CINEMATIC.md](file:///r:/Repo/portofolio/THEME_02_SPATIAL_CINEMATIC.md)
-
-### Modified Files
-- [types.ts](file:///r:/Repo/portofolio/app/lib/types.ts)
-- [themeResolver.ts](file:///r:/Repo/portofolio/app/lib/themeResolver.ts)
-- [layout.tsx](file:///r:/Repo/portofolio/app/layout.tsx)
-- [page.tsx](file:///r:/Repo/portofolio/app/page.tsx)
-- [ThemesTab.tsx](file:///r:/Repo/portofolio/app/admin/dashboard/components/ThemesTab.tsx)
-- [LiveWebsitePreview.tsx](file:///r:/Repo/portofolio/app/components/LiveWebsitePreview.tsx)
+## Performance & Accessibility
+- Full keyboard support (`Up/Down/Left/Right/Space/PageUp/PageDown/Home/End`).
+- Mouse wheel velocity lock (45px thresholding).
+- Touch swipe gesture thresholding on mobile devices.
+- Automatic fallback to simplified 3D crossfade for `prefers-reduced-motion: reduce`.

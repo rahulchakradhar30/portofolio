@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import SpatialHeader from "./SpatialHeader";
 import SpatialFooter from "./SpatialFooter";
-import SpatialSceneManager from "./SpatialSceneManager";
+import ImmersiveRoom from "./ImmersiveRoom";
 import SpatialErrorBoundary from "./SpatialErrorBoundary";
 import { usePortfolioContent } from "../PortfolioContentProvider";
 import { normalizeHomepageConfig } from "@/app/lib/homepageConfig";
@@ -25,9 +25,9 @@ export default function SpatialWebsiteView() {
 
   return (
     <SpatialErrorBoundary activeSections={activeSections}>
-      <div className="relative w-full h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)] select-none">
+      <div className="relative w-full h-[100dvh] overflow-hidden bg-[#050608] text-white select-none">
         <SpatialHeader />
-        <SpatialSceneManager
+        <ImmersiveRoom
           sections={activeSections}
           motionBlurEnabled={motionBlurEnabled}
         />

@@ -85,14 +85,15 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
     } else if (phase === "logo") {
       timeout = setTimeout(() => setPhase("exit"), logoTime);
     } else if (phase === "exit") {
+      // Set status to 'done' so underlying page mounts smoothly under fading dark overlay
+      setStatus("done");
+      sessionStorage.setItem("introPlayed", "true");
+      if (bodyLockedRef.current) {
+        document.body.style.overflow = "";
+        bodyLockedRef.current = false;
+      }
       timeout = setTimeout(() => {
         setPhase("complete");
-        sessionStorage.setItem("introPlayed", "true");
-        if (bodyLockedRef.current) {
-          document.body.style.overflow = "";
-          bodyLockedRef.current = false;
-        }
-        setStatus("done");
       }, exitDelay);
     }
 
