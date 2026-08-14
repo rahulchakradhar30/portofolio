@@ -14,34 +14,38 @@ export default function RoomLighting({
   totalWalls,
   scrollEffectsEnabled = true,
 }: RoomLightingProps) {
-  // Compute spotlight angle based on active wall
-  const angle = (activeWallIndex / Math.max(totalWalls, 1)) * 360;
+  // Compute spotlight rotation angle pointing to active wall
+  const wallAngleStep = 360 / Math.max(totalWalls, 1);
+  const currentAngle = activeWallIndex * wallAngleStep;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
-      {/* Primary Overhead Architectural Spotlight Beam */}
+      {/* Primary Overhead Ceiling-Mounted Architectural Spotlight Beam */}
       <motion.div
+        key={`spotlight-${activeWallIndex}`}
+        initial={{ opacity: 0.3, scale: 0.95 }}
         animate={{
-          opacity: [0.35, 0.45, 0.35],
-          scale: [1, 1.05, 1],
+          opacity: [0.4, 0.55, 0.4],
+          scale: [1, 1.04, 1],
         }}
         transition={{
-          duration: 6,
+          duration: 4,
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-[70vw] h-[55vh] origin-top blur-[90px] opacity-40"
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-[75vw] h-[60vh] origin-top blur-[95px]"
         style={{
-          background: `radial-gradient(ellipse at 50% 0%, var(--accent) 0%, rgba(255,255,255,0.05) 50%, transparent 80%)`,
-          transform: `translateX(-50%) rotate(${Math.sin((angle * Math.PI) / 180) * 8}deg)`,
+          background: `radial-gradient(ellipse at 50% 0%, var(--accent) 0%, rgba(255,255,255,0.06) 45%, transparent 80%)`,
+          transform: `translateX(-50%) rotate(${Math.sin((currentAngle * Math.PI) / 180) * 10}deg)`,
+          transition: "transform 0.8s cubic-bezier(0.25, 1, 0.35, 1)",
         }}
       />
 
-      {/* Low-Key Ambient Dark Room Fill Light */}
+      {/* Indirect Low-Key Room Fill Light */}
       <div 
-        className="absolute inset-0 opacity-60 mix-blend-screen"
+        className="absolute inset-0 opacity-70 mix-blend-screen"
         style={{
-          background: `radial-gradient(circle at 50% 50%, rgba(20, 25, 35, 0.8) 0%, rgba(5, 6, 8, 0.95) 80%)`,
+          background: `radial-gradient(circle at 50% 50%, rgba(15, 20, 28, 0.85) 0%, rgba(4, 5, 7, 0.98) 85%)`,
         }}
       />
 
@@ -49,15 +53,15 @@ export default function RoomLighting({
       {scrollEffectsEnabled && (
         <motion.div
           animate={{
-            x: ["-10%", "10%", "-10%"],
+            x: ["-8%", "8%", "-8%"],
             opacity: [0.15, 0.25, 0.15],
           }}
           transition={{
-            duration: 18,
+            duration: 16,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[90vw] h-[40vh] rounded-full blur-[140px] opacity-20"
+          className="absolute -bottom-[20%] left-1/2 -translate-x-1/2 w-[85vw] h-[40vh] rounded-full blur-[150px] opacity-20"
           style={{
             background: `radial-gradient(circle, var(--accent) 0%, transparent 70%)`,
           }}

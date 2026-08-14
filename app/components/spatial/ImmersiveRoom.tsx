@@ -6,6 +6,7 @@ import type { HomepageSectionConfig } from "@/app/lib/types";
 import ImmersiveWall from "./ImmersiveWall";
 import RoomLighting from "./RoomLighting";
 import RoomNavigation from "./RoomNavigation";
+import AtmosphericParticles from "./AtmosphericParticles";
 import { useMotionPreferences } from "../MotionProvider";
 
 interface ImmersiveRoomProps {
@@ -24,7 +25,10 @@ export default function ImmersiveRoom({
   const [roomEntering, setRoomEntering] = useState<boolean>(true);
 
   const isTransitioningRef = useRef<boolean>(false);
+  const touchStartXRef = useRef<number>(0);
   const touchStartYRef = useRef<number>(0);
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartXRef = useRef<number>(0);
   const wheelDeltaAccumulator = useRef<number>(0);
 
   // Trigger room entrance transition after initial load or intro completion
@@ -57,10 +61,14 @@ export default function ImmersiveRoom({
   useEffect(() => {
     queueMicrotask(() => syncIndexFromHash());
     window.addEventListener("hashchange", syncIndexFromHash);
-    return () => window.removeEventListener("hashchange", syncIndexFromHash);
+    window.addEventListener("popstate", syncIndexFromHash);
+    return () => {
+      window.removeEventListener("hashchange", syncIndexFromHash);
+      window.removeEventListener("popstate", syncIndexFromHash);
+    };
   }, [syncIndexFromHash]);
 
-  // Navigate to target wall with cooldown lock
+  // Navigate to target wall with cooldown lock and browser history update
   const changeWall = useCallback(
     (newIndex: number) => {
       if (newIndex < 0 || newIndex >= sections.length) return;
@@ -69,16 +77,16 @@ export default function ImmersiveRoom({
       isTransitioningRef.current = true;
       setActiveIndex(newIndex);
 
-      // Update location hash without triggering jarring scroll jumps
+      // Push browser history entry for meaningful section changes
       const targetSec = sections[newIndex];
       if (targetSec && typeof window !== "undefined") {
         const hash = `#${targetSec.id}`;
         if (window.location.hash !== hash) {
-          window.history.replaceState(null, "", hash);
+          window.history.pushState(null, "", hash);
         }
       }
 
-      const cooldown = reducedMotion ? 300 : 600;
+      const cooldown = reducedMotion ? 300 : 650;
       setTimeout(() => {
         isTransitioningRef.current = false;
         wheelDeltaAccumulator.current = 0;
@@ -99,7 +107,7 @@ export default function ImmersiveRoom({
     }
   }, [activeIndex, changeWall]);
 
-  // Keyboard navigation
+  // Keyboard navigation listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -112,16 +120,18 @@ export default function ImmersiveRoom({
         return;
       }
 
-      if (e.key === "ArrowDown" || e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+      const key = e.key.toLowerCase();
+
+      if (key === "arrowright" || key === "d" || key === "arrowdown" || key === "pagedown" || key === " ") {
         e.preventDefault();
         goToNextWall();
-      } else if (e.key === "ArrowUp" || e.key === "ArrowLeft" || e.key === "PageUp") {
+      } else if (key === "arrowleft" || key === "a" || key === "arrowup" || key === "pageup") {
         e.preventDefault();
         goToPrevWall();
-      } else if (e.key === "Home") {
+      } else if (key === "home") {
         e.preventDefault();
         changeWall(0);
-      } else if (e.key === "End") {
+      } else if (key === "end") {
         e.preventDefault();
         changeWall(sections.length - 1);
       }
@@ -131,10 +141,9 @@ export default function ImmersiveRoom({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNextWall, goToPrevWall, changeWall, sections.length]);
 
-  // Wheel scroll with velocity threshold
+  // Mouse wheel listener with velocity thresholding
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      // Check if user is scrolling inside a wall content card with scrollable text
       const scrollable = (e.target as HTMLElement | null)?.closest(".overflow-y-auto");
       if (scrollable) {
         const { scrollTop, scrollHeight, clientHeight } = scrollable;
@@ -165,21 +174,25 @@ export default function ImmersiveRoom({
     return () => window.removeEventListener("wheel", handleWheel);
   }, [goToNextWall, goToPrevWall]);
 
-  // Touch swipe listener
+  // Touch swipe gesture listener
   useEffect(() => {
     const handleTouchStart = (e: TouchEvent) => {
+      touchStartXRef.current = e.touches[0].clientX;
       touchStartYRef.current = e.touches[0].clientY;
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      const touchEndY = e.changedTouches[0].clientY;
-      const deltaY = touchStartYRef.current - touchEndY;
+      const deltaX = touchStartXRef.current - e.changedTouches[0].clientX;
+      const deltaY = touchStartYRef.current - e.changedTouches[0].clientY;
 
       const SWIPE_THRESHOLD = 40;
-      if (deltaY > SWIPE_THRESHOLD) {
-        goToNextWall();
-      } else if (deltaY < -SWIPE_THRESHOLD) {
-        goToPrevWall();
+      // Prioritize horizontal swipe or vertical swipe depending on magnitude
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > SWIPE_THRESHOLD) goToNextWall();
+        else if (deltaX < -SWIPE_THRESHOLD) goToPrevWall();
+      } else {
+        if (deltaY > SWIPE_THRESHOLD) goToNextWall();
+        else if (deltaY < -SWIPE_THRESHOLD) goToPrevWall();
       }
     };
 
@@ -192,45 +205,63 @@ export default function ImmersiveRoom({
     };
   }, [goToNextWall, goToPrevWall]);
 
-  // Compute 3D Spatial Layout positioning for each wall around the room
-  const wallTransforms = useMemo(() => {
-    const total = sections.length;
-    const radius = 800; // 3D distance radius from center visitor viewpoint
+  // Mouse Drag / Look listener
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Only trigger drag look on room background, not inside interactive buttons/cards
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a") || target.closest(".overflow-y-auto")) {
+      return;
+    }
+    isDraggingRef.current = true;
+    dragStartXRef.current = e.clientX;
+  };
 
-    return sections.map((_, idx) => {
-      const offset = idx - activeIndex;
-      const angleStep = Math.min(45, 360 / Math.max(total, 4));
-      const rotationY = offset * angleStep;
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    const deltaX = dragStartXRef.current - e.clientX;
 
-      // Calculate 3D spatial transforms
-      if (reducedMotion) {
-        return `translate3d(0, 0, ${offset === 0 ? "0px" : "-400px"})`;
-      }
+    const DRAG_THRESHOLD = 50;
+    if (deltaX > DRAG_THRESHOLD) goToNextWall();
+    else if (deltaX < -DRAG_THRESHOLD) goToPrevWall();
+  };
 
-      const translateZ = offset === 0 ? 0 : -Math.abs(offset) * 320;
-      const translateX = offset * 260;
+  // Compute dynamic cylindrical room geometry around visitor
+  const total = Math.max(sections.length, 1);
+  const wallAngleStep = 360 / total;
 
-      return `translate3d(${translateX}px, 0px, ${translateZ}px) rotateY(${rotationY}deg)`;
-    });
-  }, [sections, activeIndex, reducedMotion]);
+  // Dynamic radius based on wall count to maintain optimal perspective space
+  const radius = useMemo(() => {
+    return Math.max(650, Math.min(1050, Math.round(500 / Math.sin(Math.PI / Math.max(total, 4)))));
+  }, [total]);
+
+  // Camera rotation angle to focus active wall
+  const cameraAngle = -activeIndex * wallAngleStep;
 
   return (
-    <div className="relative w-full h-[calc(100dvh-70px)] mt-[70px] overflow-hidden flex items-center justify-center select-none bg-[#050608]">
-      {/* Dynamic Physical Room Spotlights */}
+    <div 
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      className="relative w-full h-[calc(100dvh-70px)] mt-[70px] overflow-hidden flex items-center justify-center select-none bg-[#050608]"
+    >
+      {/* Physical Room Spotlights */}
       <RoomLighting
         activeWallIndex={activeIndex}
         totalWalls={sections.length}
       />
 
-      {/* Architectural Dark Floor Grid Plane */}
+      {/* Sparse Architectural Dust Motes */}
+      <AtmosphericParticles activeWallIndex={activeIndex} />
+
+      {/* Architectural Floor Grid Plane */}
       <div 
         className="absolute inset-0 z-0 pointer-events-none opacity-20"
-        style={{ perspective: "1000px" }}
+        style={{ perspective: "1200px" }}
       >
         <div
           className="absolute inset-x-[-50%] -bottom-[60%] h-[160%] origin-bottom transition-transform duration-1000"
           style={{
-            transform: "rotateX(78deg)",
+            transform: `rotateX(78deg) rotateZ(${-cameraAngle * 0.15}deg)`,
             backgroundImage: `
               linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px),
               linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)
@@ -241,40 +272,59 @@ export default function ImmersiveRoom({
       </div>
 
       {/* 3D Exhibition Room Spatial Wall Ring Container */}
-      <motion.div
+      <div
         className="relative z-10 w-full h-full flex items-center justify-center"
         style={{
           perspective: "1200px",
           perspectiveOrigin: "50% 50%",
         }}
-        initial={{ opacity: 0, scale: 0.9, z: -400 }}
-        animate={{
-          opacity: roomEntering ? 0 : 1,
-          scale: roomEntering ? 0.9 : 1,
-          z: roomEntering ? -400 : 0,
-        }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
       >
-        {sections.map((section, idx) => {
-          const isActive = idx === activeIndex;
-          const isAdjacent = Math.abs(idx - activeIndex) <= 1;
+        <motion.div
+          className="relative w-full h-full flex items-center justify-center"
+          style={{
+            transformStyle: "preserve-3d",
+          }}
+          initial={{ opacity: 0, scale: 0.9, z: -400 }}
+          animate={{
+            opacity: roomEntering ? 0 : 1,
+            scale: roomEntering ? 0.9 : 1,
+            rotateY: reducedMotion ? 0 : cameraAngle,
+          }}
+          transition={{
+            duration: reducedMotion ? 0.3 : 0.75,
+            ease: [0.25, 1, 0.35, 1],
+          }}
+        >
+          {sections.map((section, idx) => {
+            const isActive = idx === activeIndex;
+            const distance = Math.abs(idx - activeIndex);
+            const isAdjacent = distance === 1;
+            const isDistant = distance > 1;
 
-          return (
-            <ImmersiveWall
-              key={section.id}
-              section={section}
-              wallIndex={idx}
-              totalWalls={sections.length}
-              isActive={isActive}
-              isAdjacent={isAdjacent}
-              transform3D={wallTransforms[idx]}
-              spotlightIntensity={isActive ? 1 : 0.2}
-              onSelect={() => changeWall(idx)}
-              reducedMotion={reducedMotion}
-            />
-          );
-        })}
-      </motion.div>
+            // 3D positioning on cylindrical ring around camera center
+            const wallRotationY = idx * wallAngleStep;
+            const transform3D = reducedMotion
+              ? `translate3d(0, 0, ${isActive ? "0px" : "-400px"})`
+              : `rotateY(${wallRotationY}deg) translateZ(${radius}px)`;
+
+            return (
+              <ImmersiveWall
+                key={section.id}
+                section={section}
+                wallIndex={idx}
+                totalWalls={sections.length}
+                isActive={isActive}
+                isAdjacent={isAdjacent}
+                isDistant={isDistant}
+                transform3D={transform3D}
+                spotlightIntensity={isActive ? 1 : 0.2}
+                onSelect={() => changeWall(idx)}
+                reducedMotion={reducedMotion}
+              />
+            );
+          })}
+        </motion.div>
+      </div>
 
       {/* Spatial Navigation Rail & Compass Overlay */}
       <RoomNavigation

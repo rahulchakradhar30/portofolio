@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import type { HomepageSectionConfig } from "@/app/lib/types";
 import SectionRegistry from "../SectionRegistry";
+import { Sparkles, Layers, Box, Briefcase, Award, Code, Mail, ShieldCheck } from "lucide-react";
 
 interface ImmersiveWallProps {
   section: HomepageSectionConfig;
@@ -11,6 +12,7 @@ interface ImmersiveWallProps {
   totalWalls: number;
   isActive: boolean;
   isAdjacent: boolean;
+  isDistant: boolean;
   transform3D: string;
   spotlightIntensity: number;
   onSelect: () => void;
@@ -23,6 +25,7 @@ export default function ImmersiveWall({
   totalWalls,
   isActive,
   isAdjacent,
+  isDistant,
   transform3D,
   spotlightIntensity,
   onSelect,
@@ -36,8 +39,33 @@ export default function ImmersiveWall({
 
   const displayTitle = section.publicDisplayTitle || section.navLabel || section.id;
 
-  // Don't render heavy DOM for walls that are far away from view
-  const isVisibleWall = isActive || isAdjacent;
+  // Section Type Icon
+  const sectionIcon = useMemo(() => {
+    const type = (section.type || section.id).toLowerCase();
+    if (type.includes("hero")) return <Box className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("about")) return <Layers className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("project")) return <Code className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("skill")) return <Sparkles className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("experience")) return <Briefcase className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("certif")) return <Award className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("proof")) return <ShieldCheck className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    if (type.includes("contact")) return <Mail className="w-3.5 h-3.5 text-[var(--accent)]" />;
+    return <Box className="w-3.5 h-3.5 text-[var(--accent)]" />;
+  }, [section]);
+
+  // Don't render heavy inner DOM for distant walls
+  if (isDistant && !isActive && !isAdjacent) {
+    return (
+      <div
+        onClick={onSelect}
+        style={{
+          transform: transform3D,
+          transformStyle: "preserve-3d",
+        }}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-5xl h-[calc(100vh-160px)] rounded-3xl border border-white/5 bg-[#06070a]/40 opacity-10 cursor-pointer pointer-events-auto"
+      />
+    );
+  }
 
   return (
     <motion.div
@@ -48,23 +76,23 @@ export default function ImmersiveWall({
         willChange: "transform, opacity, filter",
       }}
       animate={{
-        opacity: isActive ? 1 : isAdjacent ? 0.35 : 0.12,
-        scale: isActive ? 1 : 0.94,
+        opacity: isActive ? 1 : isAdjacent ? 0.35 : 0.1,
+        scale: isActive ? 1 : 0.92,
         filter: isActive
           ? "brightness(1) contrast(1.05) blur(0px)"
           : isAdjacent
-          ? "brightness(0.5) contrast(0.85) blur(1px)"
-          : "brightness(0.2) contrast(0.7) blur(3px)",
+          ? "brightness(0.45) contrast(0.8) blur(1px)"
+          : "brightness(0.2) contrast(0.6) blur(4px)",
       }}
       transition={{
-        duration: reducedMotion ? 0.3 : 0.7,
-        ease: [0.22, 1, 0.36, 1],
+        duration: reducedMotion ? 0.3 : 0.65,
+        ease: [0.25, 1, 0.35, 1],
       }}
-      className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-5xl h-[calc(100vh-140px)] sm:h-[calc(100vh-160px)] transition-shadow duration-700 ${
+      className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[92vw] max-w-5xl h-[calc(100vh-140px)] sm:h-[calc(100vh-160px)] transition-shadow duration-500 ${
         !isActive ? "cursor-pointer hover:opacity-60" : ""
       }`}
     >
-      {/* Physical Architectural Wall Structure */}
+      {/* Physical Architectural Exhibition Wall Panel */}
       <div 
         className={`relative w-full h-full rounded-2xl md:rounded-3xl border transition-all duration-700 overflow-hidden flex flex-col ${
           isActive
@@ -73,7 +101,7 @@ export default function ImmersiveWall({
         }`}
       >
         {/* Top Metallic Architectural Header Bar */}
-        <div className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-white/10 bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent backdrop-blur-md select-none shrink-0">
+        <div className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3 sm:py-4 border-b border-white/10 bg-gradient-to-r from-white/[0.05] via-white/[0.02] to-transparent backdrop-blur-md select-none shrink-0">
           {/* Wall Section Tag & Indicator */}
           <div className="flex items-center gap-3">
             <div className="relative flex items-center justify-center">
@@ -89,9 +117,10 @@ export default function ImmersiveWall({
               )}
             </div>
             
-            <div className="flex items-center gap-2 text-xs font-mono font-bold tracking-widest uppercase text-white/90">
+            <div className="flex items-center gap-2.5 text-xs font-mono font-bold tracking-widest uppercase text-white/90">
               <span className="text-[var(--accent)]">WALL {wallNumber}</span>
               <span className="text-white/30">//</span>
+              {sectionIcon}
               <span className="tracking-wide text-white/80">{displayTitle}</span>
             </div>
           </div>
@@ -101,7 +130,7 @@ export default function ImmersiveWall({
             <span className="hidden sm:inline-block uppercase tracking-wider text-white/30">
               {isActive ? "ACTIVE EXHIBIT" : "PANEL STANDBY"}
             </span>
-            <span className="px-2 py-0.5 rounded bg-white/[0.06] border border-white/10 text-white/70 font-semibold">
+            <span className="px-2.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-white/70 font-semibold">
               {wallNumber} / {totalWalls < 10 ? `0${totalWalls}` : totalWalls}
             </span>
           </div>
@@ -119,16 +148,12 @@ export default function ImmersiveWall({
         />
 
         {/* Wall Exhibition Surface (Houses Real Section Content) */}
-        <div className="relative z-10 flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 lg:p-10 text-[var(--foreground)]">
-          {isVisibleWall ? (
-            <div className="relative z-10 mx-auto w-full">
-              <SectionRegistry section={section} />
-            </div>
-          ) : (
-            <div className="h-full flex items-center justify-center text-xs font-mono text-white/20">
-              EXHIBIT STANDBY :: WALL {wallNumber}
-            </div>
-          )}
+        <div className={`relative z-10 flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-8 lg:p-10 text-[var(--foreground)] ${
+          isActive ? "pointer-events-auto" : "pointer-events-none select-none"
+        }`}>
+          <div className="relative z-10 mx-auto w-full">
+            <SectionRegistry section={section} />
+          </div>
         </div>
 
         {/* Corner Metallic Architectural Accents */}
