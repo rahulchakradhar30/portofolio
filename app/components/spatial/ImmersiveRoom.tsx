@@ -8,6 +8,7 @@ import RoomLighting from "./RoomLighting";
 import RoomNavigation from "./RoomNavigation";
 import AtmosphericParticles from "./AtmosphericParticles";
 import { usePortfolioContent } from "../PortfolioContentProvider";
+import { useMotionPreferences } from "../MotionProvider";
 import { normalizeThemeConfig } from "@/app/lib/themeResolver";
 
 interface ImmersiveRoomProps {
