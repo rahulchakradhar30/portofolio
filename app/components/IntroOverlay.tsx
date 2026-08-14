@@ -86,7 +86,7 @@ export default function IntroOverlay({ children }: { children?: React.ReactNode 
       timeout = setTimeout(() => setPhase("exit"), logoTime);
     } else if (phase === "exit") {
       // Set status to 'done' so underlying page mounts smoothly under fading dark overlay
-      setStatus("done");
+      setTimeout(() => setStatus("done"), 0);
       sessionStorage.setItem("introPlayed", "true");
       if (bodyLockedRef.current) {
         document.body.style.overflow = "";

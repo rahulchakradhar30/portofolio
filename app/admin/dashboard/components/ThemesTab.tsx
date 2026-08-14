@@ -255,11 +255,15 @@ export default function ThemesTab() {
             </button>
             <button
               type="button"
-              disabled
-              className="px-4 py-2.5 rounded-lg text-xs font-bold transition-all text-[var(--foreground)]/40 cursor-not-allowed"
-              title="Theme 02 is currently being rebuilt"
+              disabled={saving}
+              onClick={() => handleToggleThemeMode("spatial")}
+              className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                currentThemeMode === "spatial"
+                  ? "bg-[var(--foreground)] text-[var(--background)] shadow-sm font-extrabold"
+                  : "text-[var(--foreground)]/70 hover:text-[var(--foreground)]"
+              }`}
             >
-              THEME 02 (REBUILDING)
+              THEME 02 — IMMERSIVE ROOM
             </button>
           </div>
         </div>

@@ -29,7 +29,12 @@ export function normalizeThemeConfig(
 ): UnifiedThemeConfig {
   if (!input) return DEFAULT_UNIFIED_THEME_CONFIG;
 
-  const themeMode: ThemeMode = "paper";
+  const themeMode: ThemeMode =
+    input && "themeMode" in input && input.themeMode === "spatial"
+      ? "spatial"
+      : input && "themeConfig" in input && (input.themeConfig as Partial<UnifiedThemeConfig>)?.themeMode === "spatial"
+      ? "spatial"
+      : "paper";
 
   if ("activeThemeId" in input && Array.isArray(input.customThemes)) {
     const validCustom = input.customThemes.slice(0, MAX_CUSTOM_THEMES).map((theme, index) => ({
@@ -62,7 +67,8 @@ export function normalizeThemeConfig(
 }
 
 export function getActiveThemeMode(rawConfig?: UnifiedThemeConfig | Partial<PortfolioContent> | null): ThemeMode {
-  return "paper";
+  const config = normalizeThemeConfig(rawConfig);
+  return config.themeMode || "paper";
 }
 
 export function getActiveTheme(rawConfig?: UnifiedThemeConfig | Partial<PortfolioContent> | null): ThemeConfigItem {

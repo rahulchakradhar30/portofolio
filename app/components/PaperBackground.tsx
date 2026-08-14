@@ -2,9 +2,17 @@
 
 import { motion } from "framer-motion";
 import { useMotionPreferences } from "./MotionProvider";
+import { usePortfolioContent } from "./PortfolioContentProvider";
+import { getActiveThemeMode } from "@/app/lib/themeResolver";
 
 export default function PaperBackground() {
   const { scrollEffectsEnabled } = useMotionPreferences();
+  const { content } = usePortfolioContent();
+  const themeMode = getActiveThemeMode(content?.themeConfig);
+
+  if (themeMode === "spatial") {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none bg-[var(--background)]">
