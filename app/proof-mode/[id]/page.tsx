@@ -3,7 +3,7 @@ import serverFirebaseHelpers from '@/app/lib/firebaseServer';
 import ProofDetailClient from './ProofDetailClient';
 import Link from 'next/link';
 import type { ProofExperience, Project } from '@/app/lib/types';
-import { SITE_NAME, getProofExperienceJsonLd } from '@/app/lib/seoSchemas';
+import { SITE_NAME, SITE_URL, getProofExperienceJsonLd } from '@/app/lib/seoSchemas';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -12,8 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   const title = `${proof.title} | Proof Mode | ${SITE_NAME}`;
   const description = proof.shortDescription || proof.problem;
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rahulchakradhar.vercel.app';
-  const canonicalUrl = `${baseUrl}/proof-mode/${proof.id}`;
+  const canonicalUrl = `${SITE_URL}/proof-mode/${proof.id}`;
 
   return {
     title,

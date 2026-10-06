@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const rawUrl = content?.seoCanonicalUrl || process.env.NEXT_PUBLIC_SITE_URL || SITE_URL;
   const baseUrl = (rawUrl && !rawUrl.includes('portofolio-one-dun-27') && !rawUrl.includes('rahulchakradhar.com') && !rawUrl.includes('localhost'))
     ? rawUrl.replace(/\/$/, '')
-    : 'https://rahulchakradhar.vercel.app';
+    : SITE_URL;
 
   // Base public routes (Excludes /admin and /api)
   const routes = [

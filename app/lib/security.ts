@@ -7,12 +7,17 @@ export function isAllowedOrigin(request: NextRequest) {
   const requestOrigin = request.nextUrl.origin;
   if (origin === requestOrigin) return true;
 
+  const defaultAllowedOrigins = [
+    'https://rahulchakradhar.dev',
+    'https://rahulchakradhar.vercel.app',
+  ];
+
   const configured = (process.env.ALLOWED_ORIGINS || '')
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
 
-  return configured.includes(origin);
+  return defaultAllowedOrigins.includes(origin) || configured.includes(origin);
 }
 
 export function rejectDisallowedOrigin(request: NextRequest) {

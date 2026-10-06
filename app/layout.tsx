@@ -18,7 +18,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://rahulchakradhar.vercel.app"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Rahul Chakradhar | AI/ML Engineer & Full Stack Developer",
     template: `%s | ${SITE_NAME}`,

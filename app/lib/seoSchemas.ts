@@ -1,8 +1,13 @@
 import type { Project, Certification, PortfolioContent, ProofExperience } from "@/app/lib/types";
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes('portofolio-one-dun-27') && !process.env.NEXT_PUBLIC_SITE_URL.includes('rahulchakradhar.com')
+export const PRIMARY_DOMAIN = "https://rahulchakradhar.dev";
+export const BACKUP_DOMAINS = ["https://rahulchakradhar.vercel.app"];
+
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL && 
+  !process.env.NEXT_PUBLIC_SITE_URL.includes('portofolio-one-dun-27') && 
+  !process.env.NEXT_PUBLIC_SITE_URL.includes('rahulchakradhar.com')
   ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
-  : "https://rahulchakradhar.vercel.app";
+  : PRIMARY_DOMAIN;
 export const SITE_NAME = "Rahul Chakradhar Portfolio";
 
 export const NAME_VARIATIONS = [
@@ -45,7 +50,7 @@ export function getPersonEntity(content?: PortfolioContent | null) {
     "url": SITE_URL,
     "image": profileImage,
     "email": `mailto:${content?.email || "hello@rahulchakradhar.dev"}`,
-    "sameAs": [github, linkedin, instagram].filter(Boolean),
+    "sameAs": [github, linkedin, instagram, ...BACKUP_DOMAINS].filter(Boolean),
     "knowsAbout": [
       "Artificial Intelligence",
       "Machine Learning",
@@ -75,6 +80,7 @@ export function getWebSiteEntity() {
     "url": SITE_URL,
     "name": SITE_NAME,
     "alternateName": NAME_VARIATIONS.map((name) => `${name} Portfolio`),
+    "sameAs": BACKUP_DOMAINS,
     "description":
       "Official personal portfolio, AI engineering projects, research, credentials, and interactive hub of Rahul Chakradhar.",
     "publisher": { "@id": `${SITE_URL}/#person` },
@@ -113,6 +119,7 @@ export function getOrganizationEntity() {
     "sameAs": [
       "https://github.com/rahulchakradhar",
       "https://linkedin.com/in/rahulchakradhar",
+      ...BACKUP_DOMAINS,
     ],
   };
 }
