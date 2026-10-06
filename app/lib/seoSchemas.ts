@@ -44,7 +44,7 @@ export function getPersonEntity(content?: PortfolioContent | null) {
       "AI Engineer, Full-Stack Developer, and Student Researcher specializing in AI-powered systems, product engineering, scalable web architectures, and high-trust digital experiences.",
     "url": SITE_URL,
     "image": profileImage,
-    "email": content?.email ? `mailto:${content.email}` : undefined,
+    "email": `mailto:${content?.email || "hello@rahulchakradhar.dev"}`,
     "sameAs": [github, linkedin, instagram].filter(Boolean),
     "knowsAbout": [
       "Artificial Intelligence",
