@@ -14,7 +14,7 @@ export default function ContactWall() {
   const siteCopy = useMemo(() => getSiteCopy(content), [content]);
 
   const contactData = useMemo(() => {
-    const rawEmail = content?.email || "rahulchakradharperepogu@gmail.com";
+    const rawEmail = content?.email || "hello@rahulchakradhar.dev";
     return {
       heading: siteCopy.contactHeading || "Get In Touch",
       subtitle: siteCopy.contactSubtitle || "Let's collaborate on AI models, web applications, and innovative products.",

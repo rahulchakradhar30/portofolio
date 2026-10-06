@@ -9,7 +9,7 @@ import { useMotionPreferences } from "./MotionProvider";
 import { getSiteCopy } from "@/app/lib/siteCopy";
 
 const DEFAULT_CONTACT = {
-  email: "rahulchakradharperepogu@gmail.com",
+  email: "hello@rahulchakradhar.dev",
   location: "Bengaluru, Karnataka",
   instagram: "https://www.instagram.com/rahul_chakradhar_30/?hl=en",
   linkedin: "https://www.linkedin.com/in/perepogu-rahul-chakradhar-721017379/",

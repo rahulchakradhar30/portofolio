@@ -23,7 +23,7 @@ export default function Footer() {
   const linkedinRes = useMemo(() => resolveLink(content?.linkedin, "linkedin"), [content]);
   const instagramRes = useMemo(() => resolveLink(content?.instagram, "instagram"), [content]);
   const emailRes = useMemo(() => {
-    const raw = content?.email || "rahulchakradharperepogu@gmail.com";
+    const raw = content?.email || "hello@rahulchakradhar.dev";
     return resolveLink(raw.startsWith("mailto:") ? raw : `mailto:${raw}`);
   }, [content]);
 
