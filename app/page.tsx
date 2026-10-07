@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import serverFirebaseHelpers from "@/app/lib/firebaseServer";
 import type { PortfolioContent } from "@/app/lib/types";
-import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS } from "@/app/lib/seoSchemas";
+import { SITE_URL, SITE_NAME, PRIMARY_NAME, NAME_VARIATIONS, sanitizeSiteUrl } from "@/app/lib/seoSchemas";
 import IntroOverlay from "./components/IntroOverlay";
 
 export const dynamic = "force-dynamic";
@@ -40,9 +40,7 @@ export async function generateMetadata(): Promise<Metadata> {
       ];
 
   const ogImage = content?.seoOgImage || `${SITE_URL}/icon.svg`;
-  const canonicalUrl = (content?.seoCanonicalUrl && !content.seoCanonicalUrl.includes('portofolio-one-dun-27') && !content.seoCanonicalUrl.includes('rahulchakradhar.com'))
-    ? content.seoCanonicalUrl
-    : SITE_URL;
+  const canonicalUrl = sanitizeSiteUrl(content?.seoCanonicalUrl);
 
   return {
     title,

@@ -8,6 +8,25 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL &&
   !process.env.NEXT_PUBLIC_SITE_URL.includes('rahulchakradhar.com')
   ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
   : PRIMARY_DOMAIN;
+export function sanitizeSiteUrl(url?: string | null): string {
+  if (!url || typeof url !== 'string') return SITE_URL;
+  const trimmed = url.trim().replace(/\/+$/, '');
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) return SITE_URL;
+  
+  // Reject temporary, preview, or third-party invalid hostnames
+  if (
+    trimmed.includes('portofolio-one-dun-27') ||
+    trimmed.includes('portofolio-') ||
+    trimmed.includes('rahulchakradhar.com') ||
+    trimmed.includes('localhost') ||
+    trimmed.includes('127.0.0.1')
+  ) {
+    return SITE_URL;
+  }
+  
+  return trimmed;
+}
+
 export const SITE_NAME = "Rahul Chakradhar Portfolio";
 
 export const NAME_VARIATIONS = [

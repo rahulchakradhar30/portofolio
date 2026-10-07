@@ -5,6 +5,7 @@ import { logAdminAudit } from '@/app/lib/adminAudit';
 import { enforceRateLimit } from '@/app/lib/rateLimit';
 import { DEFAULT_SITE_COPY } from '@/app/lib/siteCopy';
 import { getDefaultHomepageConfig, normalizeHomepageConfig } from '@/app/lib/homepageConfig';
+import { sanitizeSiteUrl } from '@/app/lib/seoSchemas';
 
 export const dynamic = 'force-dynamic';
 
@@ -145,6 +146,7 @@ export async function GET() {
     const contentObj = content as Record<string, unknown>;
     const normalized = {
       ...contentObj,
+      seoCanonicalUrl: contentObj.seoCanonicalUrl ? sanitizeSiteUrl(contentObj.seoCanonicalUrl as string) : undefined,
       homepageConfig: normalizeHomepageConfig(contentObj.homepageConfig),
     };
 
